@@ -85,17 +85,22 @@ def label_product(video_id: str, title: str, thumbnail_url: str) -> str | None:
     try:
         import anthropic
         client = anthropic.Anthropic(api_key=key)
-        message = client.messages.create(
-            model=MODEL,
-            max_tokens=32,
-            messages=[{
+        params = {
+            "model": MODEL,
+            "max_tokens": 256,
+            "messages": [{
                 "role": "user",
                 "content": [
                     {"type": "image", "source": {"type": "url", "url": thumbnail_url}},
                     {"type": "text", "text": PROMPT.format(title=title)},
                 ],
             }],
-        )
+        }
+        # Labeling is trivial — no thinking needed. Haiku has adaptive thinking on by
+        # default, which would eat a small max_tokens and return an empty label.
+        if MODEL.startswith("claude-haiku"):
+            params["thinking"] = {"type": "disabled"}
+        message = client.messages.create(**params)
         text = next((b.text for b in message.content if b.type == "text"), "")
         label = _clean(text) or "Unknown"
     except Exception:

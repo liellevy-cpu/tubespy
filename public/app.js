@@ -131,9 +131,13 @@ function renderCard(entry) {
   card.querySelector(".duration").textContent = duration(video.length_seconds);
   card.querySelector(".youtube-link").href = safeUrl(video.youtube_url, "www.youtube.com");
   card.querySelector(".transparency-link").href = safeUrl(video.transparency_url, "adstransparency.google.com");
-  card.querySelector(".act-used").addEventListener("click", () => setState(video.video_id, "used"));
-  card.querySelector(".act-hide").addEventListener("click", () => setState(video.video_id, "not_relevant"));
-  card.querySelector(".act-restore").addEventListener("click", () => setState(video.video_id, "new"));
+  const leave = (state) => {
+    card.classList.add("leaving");                 // fade/slide the card out, then persist + re-render
+    setTimeout(() => setState(video.video_id, state), 330);
+  };
+  card.querySelector(".act-used").addEventListener("click", () => leave("used"));
+  card.querySelector(".act-hide").addEventListener("click", () => leave("not_relevant"));
+  card.querySelector(".act-restore").addEventListener("click", () => leave("new"));
   return card;
 }
 
@@ -176,10 +180,36 @@ function populateAdvertisers() {
 document.querySelectorAll(".tab").forEach((btn) => btn.addEventListener("click", () => {
   activeTab = btn.dataset.tab;
   document.querySelectorAll(".tab").forEach((b) => { b.classList.toggle("is-active", b === btn); b.setAttribute("aria-selected", b === btn ? "true" : "false"); });
+  document.querySelector(".segmented").dataset.active = activeTab;  // slide the pill indicator
   render();
 }));
-document.querySelector("#filters").addEventListener("input", render);
-document.querySelector("#filters").addEventListener("reset", () => setTimeout(render, 0));
+
+// Min-views preset chips (+ Custom) write to the hidden #f-min-views
+document.querySelectorAll("#views-chips .chip").forEach((chip) => chip.addEventListener("click", () => {
+  document.querySelectorAll("#views-chips .chip").forEach((c) => c.classList.toggle("is-active", c === chip));
+  const custom = document.querySelector("#f-min-views");
+  if (chip.dataset.views === "custom") { custom.hidden = false; custom.focus(); }
+  else { custom.hidden = true; custom.value = chip.dataset.views; }
+  render();
+}));
+document.querySelector("#f-min-views").addEventListener("input", render);
+
+// Length preset dropdowns
+document.querySelector("#f-min-len").addEventListener("change", render);
+document.querySelector("#f-max-len").addEventListener("change", render);
+
+// Uploaded-after preset chips (+ explicit date picker) write to #f-after
+document.querySelectorAll("#after-chips .chip").forEach((chip) => chip.addEventListener("click", () => {
+  document.querySelectorAll("#after-chips .chip").forEach((c) => c.classList.toggle("is-active", c === chip));
+  const dateInput = document.querySelector("#f-after");
+  if (chip.dataset.after === "any") { dateInput.value = ""; }
+  else { const d = new Date(); d.setDate(d.getDate() - Number(chip.dataset.after)); dateInput.value = d.toISOString().slice(0, 10); }
+  render();
+}));
+document.querySelector("#f-after").addEventListener("change", () => {
+  document.querySelectorAll("#after-chips .chip").forEach((c) => c.classList.remove("is-active"));
+  render();
+});
 
 async function init() {
   try {

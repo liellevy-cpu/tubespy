@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <title>YouTube Competitor Library — Coolina</title>
-  <link rel="stylesheet" href="styles.css?v=20261109-newused-1">
+  <link rel="stylesheet" href="styles.css?v=20261109-redesign-1">
 </head>
 <body>
   <header class="hero">
@@ -40,18 +43,59 @@
         </details>
       </div>
 
-      <div class="tabs" role="tablist">
+      <div class="segmented" role="tablist" data-active="new">
+        <span class="seg-indicator" aria-hidden="true"></span>
         <button class="tab is-active" data-tab="new" role="tab" aria-selected="true">New <span class="count" data-count="new"></span></button>
         <button class="tab" data-tab="used" role="tab" aria-selected="false">Used <span class="count" data-count="used"></span></button>
       </div>
 
-      <form id="filters" class="filters" aria-label="Filters">
-        <label>Min length (min)<input type="number" id="f-min-len" min="0" step="0.5" value="2"></label>
-        <label>Max length (min)<input type="number" id="f-max-len" min="0" step="0.5" value="5"></label>
-        <label>Uploaded after<input type="date" id="f-after"></label>
-        <label>Min views<input type="number" id="f-min-views" min="0" step="100000" value="1000000"></label>
-        <button type="reset" class="ghost">Reset</button>
-      </form>
+      <div id="filters" class="filters" aria-label="Filters">
+        <div class="filter-group">
+          <span class="filter-label">Min views</span>
+          <div class="chips" id="views-chips">
+            <button type="button" class="chip" data-views="10000">10K</button>
+            <button type="button" class="chip" data-views="100000">100K</button>
+            <button type="button" class="chip is-active" data-views="1000000">1M</button>
+            <button type="button" class="chip" data-views="10000000">10M</button>
+            <button type="button" class="chip" data-views="100000000">100M</button>
+            <button type="button" class="chip" data-views="custom">Custom</button>
+          </div>
+          <input type="number" id="f-min-views" class="custom-input" min="0" step="100000" value="1000000" hidden aria-label="Custom minimum views">
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Length</span>
+          <div class="selects">
+            <select id="f-min-len" class="picker" aria-label="Minimum length">
+              <option value="1">1:00</option><option value="1.5">1:30</option>
+              <option value="2" selected>2:00</option><option value="2.5">2:30</option>
+              <option value="3">3:00</option><option value="3.5">3:30</option>
+              <option value="4">4:00</option><option value="4.5">4:30</option>
+              <option value="5">5:00</option><option value="10">10:00</option>
+            </select>
+            <span class="sep">to</span>
+            <select id="f-max-len" class="picker" aria-label="Maximum length">
+              <option value="1">1:00</option><option value="1.5">1:30</option>
+              <option value="2">2:00</option><option value="2.5">2:30</option>
+              <option value="3">3:00</option><option value="3.5">3:30</option>
+              <option value="4">4:00</option><option value="4.5">4:30</option>
+              <option value="5" selected>5:00</option><option value="10">10:00</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Uploaded after</span>
+          <div class="chips" id="after-chips">
+            <button type="button" class="chip is-active" data-after="any">Any</button>
+            <button type="button" class="chip" data-after="30">Last 30 days</button>
+            <button type="button" class="chip" data-after="90">90 days</button>
+            <button type="button" class="chip" data-after="180">6 months</button>
+            <button type="button" class="chip" data-after="365">1 year</button>
+          </div>
+          <input type="date" id="f-after" class="date-input" aria-label="Uploaded after date">
+        </div>
+      </div>
 
       <div class="rank-heading-row">
         <div>
@@ -86,15 +130,21 @@
         </dl>
         <div class="links"><a class="youtube-link" target="_blank" rel="noopener noreferrer">Watch on YouTube</a><a class="transparency-link" target="_blank" rel="noopener noreferrer">Transparency source</a></div>
         <div class="actions">
-          <button type="button" class="act-used">Used</button>
-          <button type="button" class="act-hide">Not relevant</button>
-          <button type="button" class="act-restore">Move back to New</button>
+          <button type="button" class="act act-used" aria-label="Mark as used">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>Used</span>
+          </button>
+          <button type="button" class="act act-hide" aria-label="Mark as not relevant">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Not relevant</span>
+          </button>
+          <button type="button" class="act act-restore" aria-label="Move back to New">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg><span>Move to New</span>
+          </button>
         </div>
       </div>
     </article>
   </template>
 
   <footer><p>Public-source research. Rankings describe the captured snapshot; they do not prove spend, ROAS, or current growth.</p></footer>
-  <script src="app.js?v=20261109-newused-1" defer></script>
+  <script src="app.js?v=20261109-redesign-1" defer></script>
 </body>
 </html>
