@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <link rel="icon" href="data:,">
+  <title>YouTube Competitor Library — Coolina</title>
+  <link rel="stylesheet" href="styles.css?v=20260929-add-brand-1">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">Public-source research</p>
+    <h1>YouTube Competitor Library</h1>
+    <p class="lede">A ranked view of publicly available competitor videos—embedded from YouTube, never rehosted.</p>
+    <div id="source-summary" class="summary" aria-label="Source summary"></div>
+  </header>
+  <main>
+    <section class="rank-panel" aria-labelledby="rank-heading">
+      <div class="advertiser-picker">
+        <label for="advertiser-select">Advertiser</label>
+        <select id="advertiser-select"></select>
+        <details class="add-brand-panel">
+          <summary>Add a brand</summary>
+          <p>Anyone can add a brand. Existing brands cannot be edited or removed here.</p>
+          <details><summary>Where do I find the right link?</summary>
+            <ol><li>Open <a href="https://adstransparency.google.com/" target="_blank" rel="noopener noreferrer">Google Ads Transparency Center</a> and search for the brand or its website.</li>
+            <li>Choose the advertiser’s name to open its advertiser page — not an individual ad.</li>
+            <li>Copy the link from your browser’s address bar. It should look like <code>https://adstransparency.google.com/advertiser/AR12345678901234567890</code>. Search-result links and creative links won’t work.</li></ol>
+            <p>We automatically select United States, video format and YouTube, with no date restriction. You don’t need to choose these filters.</p>
+          </details>
+          <form id="add-brand-form">
+            <label for="brand-name">Brand name</label><input id="brand-name" name="name" maxlength="80" required autocomplete="organization">
+            <label for="brand-url">Google advertiser page link</label><input id="brand-url" name="url" type="url" maxlength="2048" placeholder="https://adstransparency.google.com/advertiser/AR…" required>
+            <button type="submit">Add brand &amp; collect videos</button>
+          </form>
+          <p>Submitting starts the first collection automatically. If another collection is running, yours waits in the queue. Every added brand is included in weekly refreshes. Collection can take up to 30 minutes per brand; Google or YouTube may block a run.</p>
+          <p id="brand-status" role="status" aria-live="polite"></p>
+          <ul id="brand-queue" aria-label="Collection status"></ul>
+        </details>
+      </div>
+      <div class="rank-heading-row">
+        <div>
+          <p class="eyebrow">Signal, not attribution</p>
+          <h2 id="rank-heading">Ranked creative views</h2>
+        </div>
+        <p id="snapshot-label" class="snapshot"></p>
+      </div>
+      <p id="scope-label" class="eyebrow">Top five by current YouTube views</p>
+      <p id="ranking-note" class="ranking-note" role="status"></p>
+      <div id="video-grid" class="video-grid" aria-live="polite"></div>
+    </section>
+  </main>
+  <template id="video-card-template">
+    <article class="video-card">
+      <div class="embed">
+        <button class="video-launch" type="button" aria-label="Play video">
+          <img class="thumbnail" alt="" loading="lazy">
+          <span class="play-icon" aria-hidden="true">▶</span>
+        </button>
+        <iframe title="YouTube video player" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+      <div class="card-body">
+        <p class="rank"></p>
+        <h3 class="title"></h3>
+        <p class="advertiser"></p>
+        <dl class="metrics">
+          <div><dt>Views</dt><dd class="views"></dd></div>
+          <div><dt>Uploaded</dt><dd class="upload-date"></dd></div>
+          <div><dt>Age</dt><dd class="age"></dd></div>
+          <div><dt>Lifetime pace</dt><dd class="views-day"></dd></div>
+          <div><dt>Duration</dt><dd class="duration"></dd></div>
+        </dl>
+        <div class="links"><a class="youtube-link" target="_blank" rel="noopener noreferrer">Watch on YouTube</a><a class="transparency-link" target="_blank" rel="noopener noreferrer">Transparency source</a></div>
+      </div>
+    </article>
+  </template>
+  <footer><p>Public-source research. Rankings describe the captured snapshot; they do not prove spend, ROAS, or current growth.</p></footer>
+  <script src="app.js?v=20260929-add-brand-1" defer></script>
+</body>
+</html>

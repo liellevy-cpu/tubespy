@@ -1,0 +1,32 @@
+# Environments and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+
+# Run output, raw scrape data, logs (stay on the Mini only)
+build/
+raw/
+stage/
+pilot-results/
+*.log
+tdd-red.txt
+original-app/node_modules/
+original-app/csv/*
+original-app/debug/*
+!original-app/csv/.gitkeep
+!original-app/debug/.gitkeep
+
+# Hosting / publishing state and secrets (never commit)
+.herenow/
+public/.herenow/
+*.token
+.env
+.env.*
+*.pem
+*.key
+
+# Private owner Sheet location and live registry (contains the Sheet ID)
+local_config.json
+registry.json

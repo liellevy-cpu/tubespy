@@ -1,0 +1,2310 @@
+{
+  "schema_version": 2,
+  "snapshot_at": "2026-09-09T00:00:00+00:00",
+  "source_summary": {
+    "advertisers": 15,
+    "reported_ads_approx": 7840,
+    "unique_creative_pages": 7840,
+    "recovered_unique_youtube_videos": 4004,
+    "youtube_metadata_failures": 0,
+    "unavailable_youtube_videos": 3
+  },
+  "advertisers": [
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-09-09T00:00:00+00:00",
+      "advertiser": {
+        "name": "UAB Convenity",
+        "google_advertiser_id": "AR10584868268730744833"
+      },
+      "source_summary": {
+        "reported_ads_approx": 1992,
+        "unique_creative_pages": 1992,
+        "recovered_unique_youtube_videos": 994,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "pYWDrUKSrKs",
+          "iHF6NZSx7Qk",
+          "2MTCjO4yXkw",
+          "-caYfqiAbmQ",
+          "X0xleCbmicg"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "pYWDrUKSrKs",
+          "url": "https://www.youtube.com/watch?v=pYWDrUKSrKs",
+          "title": "My airways finally opened up! Almost-Returned_4-2",
+          "author": "Dérílá ERGÖ",
+          "views": 46341706,
+          "length_seconds": 146,
+          "upload_date": "2026-02-02T04:23:04-08:00",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR01338692523924652033?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR15927539879643185153?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 219,
+          "lifetime_views_per_day": 211605.96,
+          "youtube_url": "https://www.youtube.com/watch?v=pYWDrUKSrKs",
+          "embed_url": "https://www.youtube-nocookie.com/embed/pYWDrUKSrKs",
+          "thumbnail_url": "https://i.ytimg.com/vi/pYWDrUKSrKs/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR01338692523924652033?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "iHF6NZSx7Qk",
+          "url": "https://www.youtube.com/watch?v=iHF6NZSx7Qk",
+          "title": "My airways finally opened up! Almost-Returned_4",
+          "author": "Dérílá ERGÖ",
+          "views": 45877655,
+          "length_seconds": 145,
+          "upload_date": "2026-01-15T01:23:00-08:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR14512694226896027649?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 237,
+          "lifetime_views_per_day": 193576.6,
+          "youtube_url": "https://www.youtube.com/watch?v=iHF6NZSx7Qk",
+          "embed_url": "https://www.youtube-nocookie.com/embed/iHF6NZSx7Qk",
+          "thumbnail_url": "https://i.ytimg.com/vi/iHF6NZSx7Qk/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR14512694226896027649?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "2MTCjO4yXkw",
+          "url": "https://www.youtube.com/watch?v=2MTCjO4yXkw",
+          "title": "Amazing Invention - This Pillow Will Change Everything. Engineering-Rebel_7",
+          "author": "Dérílá ERGÖ",
+          "views": 36617210,
+          "length_seconds": 172,
+          "upload_date": "2026-03-05T05:35:24-08:00",
+          "creative_count": 4,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR03058942237254615041?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR04667915120381263873?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR05192690030086193153?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR13517488388164288513?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 188,
+          "lifetime_views_per_day": 194772.39,
+          "youtube_url": "https://www.youtube.com/watch?v=2MTCjO4yXkw",
+          "embed_url": "https://www.youtube-nocookie.com/embed/2MTCjO4yXkw",
+          "thumbnail_url": "https://i.ytimg.com/vi/2MTCjO4yXkw/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR03058942237254615041?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "-caYfqiAbmQ",
+          "url": "https://www.youtube.com/watch?v=-caYfqiAbmQ",
+          "title": "Rethink how you sleep Unaware-Sleeper_Q2_1_S-ES_C-PA",
+          "author": "Dérílá ERGÖ",
+          "views": 19162720,
+          "length_seconds": 165,
+          "upload_date": "2026-05-26T00:36:16-07:00",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR12528084328694939649?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR15263300097572601857?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 106,
+          "lifetime_views_per_day": 180780.38,
+          "youtube_url": "https://www.youtube.com/watch?v=-caYfqiAbmQ",
+          "embed_url": "https://www.youtube-nocookie.com/embed/-caYfqiAbmQ",
+          "thumbnail_url": "https://i.ytimg.com/vi/-caYfqiAbmQ/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR12528084328694939649?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "X0xleCbmicg",
+          "url": "https://www.youtube.com/watch?v=X0xleCbmicg",
+          "title": "Don't Make The same Mistake As Me! Almost-Returned_6-1",
+          "author": "Matsato Official",
+          "views": 16660019,
+          "length_seconds": 181,
+          "upload_date": "2025-04-14T05:35:06-07:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR01041560716382830593?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 513,
+          "lifetime_views_per_day": 32475.67,
+          "youtube_url": "https://www.youtube.com/watch?v=X0xleCbmicg",
+          "embed_url": "https://www.youtube-nocookie.com/embed/X0xleCbmicg",
+          "thumbnail_url": "https://i.ytimg.com/vi/X0xleCbmicg/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10584868268730744833/creative/CR01041560716382830593?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-09-09T00:00:00+00:00",
+      "advertiser": {
+        "name": "Ridge",
+        "google_advertiser_id": "AR14056452383756517377"
+      },
+      "source_summary": {
+        "reported_ads_approx": 767,
+        "unique_creative_pages": 767,
+        "recovered_unique_youtube_videos": 197,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "e-2dWukKVxc",
+          "Io68GDFwk_Q",
+          "pMJAajUyXT4",
+          "xo3BZ5vKeb4",
+          "7ybX1ncm0yo"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "e-2dWukKVxc",
+          "url": "https://www.youtube.com/watch?v=e-2dWukKVxc",
+          "title": "MKBHD Power Bank - 16x9 (YT85c)",
+          "author": "The Ridge",
+          "views": 87377393,
+          "length_seconds": 67,
+          "upload_date": "2025-09-17T13:50:04-07:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR09195313195898634241?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+          ],
+          "error": null,
+          "age_days": 357,
+          "lifetime_views_per_day": 244754.6,
+          "youtube_url": "https://www.youtube.com/watch?v=e-2dWukKVxc",
+          "embed_url": "https://www.youtube-nocookie.com/embed/e-2dWukKVxc",
+          "thumbnail_url": "https://i.ytimg.com/vi/e-2dWukKVxc/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR09195313195898634241?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+        },
+        {
+          "video_id": "Io68GDFwk_Q",
+          "url": "https://www.youtube.com/watch?v=Io68GDFwk_Q",
+          "title": "MKBHD - perfect pair iphone powerbank - 9x16 (2907a)",
+          "author": "The Ridge",
+          "views": 78513388,
+          "length_seconds": 63,
+          "upload_date": "2026-05-12T15:14:43-07:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR13052236639940640769?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+          ],
+          "error": null,
+          "age_days": 120,
+          "lifetime_views_per_day": 654278.23,
+          "youtube_url": "https://www.youtube.com/watch?v=Io68GDFwk_Q",
+          "embed_url": "https://www.youtube-nocookie.com/embed/Io68GDFwk_Q",
+          "thumbnail_url": "https://i.ytimg.com/vi/Io68GDFwk_Q/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR13052236639940640769?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+        },
+        {
+          "video_id": "pMJAajUyXT4",
+          "url": "https://www.youtube.com/watch?v=pMJAajUyXT4",
+          "title": "This wallet is almost as rare as winning the lottery - Kintsugi (1858b)",
+          "author": "The Ridge",
+          "views": 61163392,
+          "length_seconds": 41,
+          "upload_date": "2025-04-02T10:14:02-07:00",
+          "creative_count": 6,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR05280601593954172929?region=US&platform=YOUTUBE&hl=en&format=VIDEO",
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR06821539721211019265?region=US&platform=YOUTUBE&hl=en&format=VIDEO",
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR09382538559862341633?region=US&platform=YOUTUBE&hl=en&format=VIDEO",
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR11613596361567502337?region=US&platform=YOUTUBE&hl=en&format=VIDEO",
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR12417279850404904961?region=US&platform=YOUTUBE&hl=en&format=VIDEO",
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR15025423548632006657?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+          ],
+          "error": null,
+          "age_days": 525,
+          "lifetime_views_per_day": 116501.7,
+          "youtube_url": "https://www.youtube.com/watch?v=pMJAajUyXT4",
+          "embed_url": "https://www.youtube-nocookie.com/embed/pMJAajUyXT4",
+          "thumbnail_url": "https://i.ytimg.com/vi/pMJAajUyXT4/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR05280601593954172929?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+        },
+        {
+          "video_id": "xo3BZ5vKeb4",
+          "url": "https://www.youtube.com/watch?v=xo3BZ5vKeb4",
+          "title": "This wallet is almost as rare as winning the lottery - Kintsugi (1858b)",
+          "author": "The Ridge",
+          "views": 54388623,
+          "length_seconds": 41,
+          "upload_date": "2025-04-02T10:13:28-07:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR17350037489074569217?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+          ],
+          "error": null,
+          "age_days": 525,
+          "lifetime_views_per_day": 103597.38,
+          "youtube_url": "https://www.youtube.com/watch?v=xo3BZ5vKeb4",
+          "embed_url": "https://www.youtube-nocookie.com/embed/xo3BZ5vKeb4",
+          "thumbnail_url": "https://i.ytimg.com/vi/xo3BZ5vKeb4/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR17350037489074569217?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+        },
+        {
+          "video_id": "7ybX1ncm0yo",
+          "url": "https://www.youtube.com/watch?v=7ybX1ncm0yo",
+          "title": "TikTok tbar - 9x16 (2898e)",
+          "author": "The Ridge",
+          "views": 36098891,
+          "length_seconds": 66,
+          "upload_date": "2026-04-03T14:03:21-07:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR08963198594693726209?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+          ],
+          "error": null,
+          "age_days": 159,
+          "lifetime_views_per_day": 227037.05,
+          "youtube_url": "https://www.youtube.com/watch?v=7ybX1ncm0yo",
+          "embed_url": "https://www.youtube-nocookie.com/embed/7ybX1ncm0yo",
+          "thumbnail_url": "https://i.ytimg.com/vi/7ybX1ncm0yo/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR14056452383756517377/creative/CR08963198594693726209?region=US&platform=YOUTUBE&hl=en&format=VIDEO"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-09-09T00:00:00+00:00",
+      "advertiser": {
+        "name": "4 Patriots",
+        "google_advertiser_id": "AR16505918102916038657"
+      },
+      "source_summary": {
+        "reported_ads_approx": 440,
+        "unique_creative_pages": 440,
+        "recovered_unique_youtube_videos": 101,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "Ivu1hICuhX8",
+          "-sQAwNLdPUs",
+          "LASRSdJ167M",
+          "D5uECi1dokA",
+          "6MBV_Qx33cA"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "Ivu1hICuhX8",
+          "url": "https://www.youtube.com/watch?v=Ivu1hICuhX8",
+          "title": "72HR B1G2 V 6180 Ashley Full Short Lander CC CS 16x9",
+          "author": "4Patriots",
+          "views": 23756894,
+          "length_seconds": 205,
+          "upload_date": "2026-02-24T09:48:52-08:00",
+          "creative_count": 8,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR01252171060581761025?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR01948153812065714177?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR06273492024406573057?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR07009252014207008769?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR09565044802739765249?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR11393292259001630721?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR12859475827636568065?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR15770457738624106497?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 197,
+          "lifetime_views_per_day": 120593.37,
+          "youtube_url": "https://www.youtube.com/watch?v=Ivu1hICuhX8",
+          "embed_url": "https://www.youtube-nocookie.com/embed/Ivu1hICuhX8",
+          "thumbnail_url": "https://i.ytimg.com/vi/Ivu1hICuhX8/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR01252171060581761025?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "-sQAwNLdPUs",
+          "url": "https://www.youtube.com/watch?v=-sQAwNLdPUs",
+          "title": "3MO 8WK V 5737 Manifesto Cans No CC CS 16x9",
+          "author": "4Patriots",
+          "views": 19298816,
+          "length_seconds": 241,
+          "upload_date": "2025-09-19T13:56:30-07:00",
+          "creative_count": 6,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR06023704354333130753?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR10611265163501764609?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR11724821677933068289?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR12074574402583265281?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR14540092338673287169?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR17828232851389153281?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 355,
+          "lifetime_views_per_day": 54362.86,
+          "youtube_url": "https://www.youtube.com/watch?v=-sQAwNLdPUs",
+          "embed_url": "https://www.youtube-nocookie.com/embed/-sQAwNLdPUs",
+          "thumbnail_url": "https://i.ytimg.com/vi/-sQAwNLdPUs/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR06023704354333130753?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "LASRSdJ167M",
+          "url": "https://www.youtube.com/watch?v=LASRSdJ167M",
+          "title": "SSSP V 6205 UGC Package Breakdown Cutdown And Cade Presidents Day Lander Evergreen CC AT 16x9",
+          "author": "4Patriots",
+          "views": 5339944,
+          "length_seconds": 280,
+          "upload_date": "2026-03-02T11:11:28-08:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR03508076656843554817?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 191,
+          "lifetime_views_per_day": 27957.82,
+          "youtube_url": "https://www.youtube.com/watch?v=LASRSdJ167M",
+          "embed_url": "https://www.youtube-nocookie.com/embed/LASRSdJ167M",
+          "thumbnail_url": "https://i.ytimg.com/vi/LASRSdJ167M/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR03508076656843554817?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "D5uECi1dokA",
+          "url": "https://www.youtube.com/watch?v=D5uECi1dokA",
+          "title": "72HR B1G2 V 6182 Ashley You Are Getting Three Kits Lander Cut CC CS 16x9",
+          "author": "4Patriots",
+          "views": 4987994,
+          "length_seconds": 183,
+          "upload_date": "2026-02-24T09:49:29-08:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR18247140459379949569?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 197,
+          "lifetime_views_per_day": 25319.77,
+          "youtube_url": "https://www.youtube.com/watch?v=D5uECi1dokA",
+          "embed_url": "https://www.youtube-nocookie.com/embed/D5uECi1dokA",
+          "thumbnail_url": "https://i.ytimg.com/vi/D5uECi1dokA/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR18247140459379949569?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "6MBV_Qx33cA",
+          "url": "https://www.youtube.com/watch?v=6MBV_Qx33cA",
+          "title": "SSSP V 6207 UGC Package Back Of Jeep And Cade Presidents Day Lander Evergreen CC AT 16x9",
+          "author": "4Patriots",
+          "views": 2493578,
+          "length_seconds": 252,
+          "upload_date": "2026-03-02T11:12:00-08:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR08157738638663221249?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 191,
+          "lifetime_views_per_day": 13055.38,
+          "youtube_url": "https://www.youtube.com/watch?v=6MBV_Qx33cA",
+          "embed_url": "https://www.youtube-nocookie.com/embed/6MBV_Qx33cA",
+          "thumbnail_url": "https://i.ytimg.com/vi/6MBV_Qx33cA/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16505918102916038657/creative/CR08157738638663221249?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-09-09T00:00:00+00:00",
+      "advertiser": {
+        "name": "Revomadic",
+        "google_advertiser_id": "AR01034023684433510401"
+      },
+      "source_summary": {
+        "reported_ads_approx": 165,
+        "unique_creative_pages": 165,
+        "recovered_unique_youtube_videos": 89,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "j2M16a2V8Oc",
+          "rPgXrZmL2GY",
+          "V9AOSwDGMdU",
+          "Dg11Vol0oUw",
+          "dzj8fbdqbNA"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "j2M16a2V8Oc",
+          "url": "https://www.youtube.com/watch?v=j2M16a2V8Oc",
+          "title": "NEWHOOKS #631 V3 V1 1 9x16",
+          "author": "Revomadic",
+          "views": 22585122,
+          "length_seconds": 161,
+          "upload_date": "2025-10-14T03:40:06-07:00",
+          "creative_count": 5,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR00228530408046723073?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR02072269201459904513?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR04912356939150655489?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR07328414744824512513?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR07538009672855322625?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 330,
+          "lifetime_views_per_day": 68439.76,
+          "youtube_url": "https://www.youtube.com/watch?v=j2M16a2V8Oc",
+          "embed_url": "https://www.youtube-nocookie.com/embed/j2M16a2V8Oc",
+          "thumbnail_url": "https://i.ytimg.com/vi/j2M16a2V8Oc/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR00228530408046723073?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "rPgXrZmL2GY",
+          "url": "https://www.youtube.com/watch?v=rPgXrZmL2GY",
+          "title": "NEWHOOKS #631 V3 V3 1 9x16",
+          "author": "Revomadic",
+          "views": 17661572,
+          "length_seconds": 163,
+          "upload_date": "2025-10-14T03:39:05-07:00",
+          "creative_count": 5,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR00228530408046723073?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR04912356939150655489?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR05653262024893792257?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR11220172959207391233?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR17662214360895848449?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 330,
+          "lifetime_views_per_day": 53519.92,
+          "youtube_url": "https://www.youtube.com/watch?v=rPgXrZmL2GY",
+          "embed_url": "https://www.youtube-nocookie.com/embed/rPgXrZmL2GY",
+          "thumbnail_url": "https://i.ytimg.com/vi/rPgXrZmL2GY/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR00228530408046723073?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "V9AOSwDGMdU",
+          "url": "https://www.youtube.com/watch?v=V9AOSwDGMdU",
+          "title": "#166 V4 YT V1",
+          "author": "Revomadic",
+          "views": 807907,
+          "length_seconds": 17,
+          "upload_date": "2025-01-24T04:57:41-08:00",
+          "creative_count": 5,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR00133483675139440641?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR02003290059591122945?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR07494527037403561985?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR14708688977775296513?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR16322932576048119809?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 593,
+          "lifetime_views_per_day": 1362.41,
+          "youtube_url": "https://www.youtube.com/watch?v=V9AOSwDGMdU",
+          "embed_url": "https://www.youtube-nocookie.com/embed/V9AOSwDGMdU",
+          "thumbnail_url": "https://i.ytimg.com/vi/V9AOSwDGMdU/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR00133483675139440641?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "Dg11Vol0oUw",
+          "url": "https://www.youtube.com/watch?v=Dg11Vol0oUw",
+          "title": "NEWHOOKS #631 V3 V4 9x16",
+          "author": "Revomadic",
+          "views": 784689,
+          "length_seconds": 161,
+          "upload_date": "2025-10-14T03:38:29-07:00",
+          "creative_count": 3,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR03124848750929903617?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR06305960714443948033?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR12840938860456181761?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 330,
+          "lifetime_views_per_day": 2377.85,
+          "youtube_url": "https://www.youtube.com/watch?v=Dg11Vol0oUw",
+          "embed_url": "https://www.youtube-nocookie.com/embed/Dg11Vol0oUw",
+          "thumbnail_url": "https://i.ytimg.com/vi/Dg11Vol0oUw/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR03124848750929903617?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "dzj8fbdqbNA",
+          "url": "https://www.youtube.com/watch?v=dzj8fbdqbNA",
+          "title": "#166 V4 YT V2",
+          "author": "Revomadic",
+          "views": 276152,
+          "length_seconds": 17,
+          "upload_date": "2025-01-24T04:58:00-08:00",
+          "creative_count": 6,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR00687483371982422017?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR06581167512803606529?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR07215367743850151937?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR08795614717470048257?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR13205543100979609601?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR17264915566594883585?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 593,
+          "lifetime_views_per_day": 465.69,
+          "youtube_url": "https://www.youtube.com/watch?v=dzj8fbdqbNA",
+          "embed_url": "https://www.youtube-nocookie.com/embed/dzj8fbdqbNA",
+          "thumbnail_url": "https://i.ytimg.com/vi/dzj8fbdqbNA/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR01034023684433510401/creative/CR00687483371982422017?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-09-09T00:00:00+00:00",
+      "advertiser": {
+        "name": "NORTEX",
+        "google_advertiser_id": "AR16514522125000769537"
+      },
+      "source_summary": {
+        "reported_ads_approx": 102,
+        "unique_creative_pages": 102,
+        "recovered_unique_youtube_videos": 66,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 3
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "xXooGJwF5DI",
+          "fQe1ugFp-To",
+          "OBPevMiLZCg",
+          "7IcBsa1HvxQ",
+          "HonDxQAoQIs"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "xXooGJwF5DI",
+          "url": "https://www.youtube.com/watch?v=xXooGJwF5DI",
+          "title": "VID38",
+          "author": "Tactical X Abs",
+          "views": 19258128,
+          "length_seconds": 195,
+          "upload_date": "2024-08-03T03:45:58-07:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR08911967769520504833?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+          ],
+          "error": null,
+          "age_days": 767,
+          "lifetime_views_per_day": 25108.38,
+          "youtube_url": "https://www.youtube.com/watch?v=xXooGJwF5DI",
+          "embed_url": "https://www.youtube-nocookie.com/embed/xXooGJwF5DI",
+          "thumbnail_url": "https://i.ytimg.com/vi/xXooGJwF5DI/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR08911967769520504833?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+        },
+        {
+          "video_id": "fQe1ugFp-To",
+          "url": "https://www.youtube.com/watch?v=fQe1ugFp-To",
+          "title": "VID04",
+          "author": "Tactical X Abs",
+          "views": 12677744,
+          "length_seconds": 138,
+          "upload_date": "2023-02-17T07:21:42-08:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR17350862672551215105?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+          ],
+          "error": null,
+          "age_days": 1300,
+          "lifetime_views_per_day": 9752.11,
+          "youtube_url": "https://www.youtube.com/watch?v=fQe1ugFp-To",
+          "embed_url": "https://www.youtube-nocookie.com/embed/fQe1ugFp-To",
+          "thumbnail_url": "https://i.ytimg.com/vi/fQe1ugFp-To/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR17350862672551215105?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+        },
+        {
+          "video_id": "OBPevMiLZCg",
+          "url": "https://www.youtube.com/watch?v=OBPevMiLZCg",
+          "title": "VID33 06",
+          "author": "Tactical X Abs",
+          "views": 12142314,
+          "length_seconds": 206,
+          "upload_date": "2024-06-26T04:32:54-07:00",
+          "creative_count": 3,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR02015497121150533633?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR13352225880634556417?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR16221018843269562369?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+          ],
+          "error": null,
+          "age_days": 805,
+          "lifetime_views_per_day": 15083.62,
+          "youtube_url": "https://www.youtube.com/watch?v=OBPevMiLZCg",
+          "embed_url": "https://www.youtube-nocookie.com/embed/OBPevMiLZCg",
+          "thumbnail_url": "https://i.ytimg.com/vi/OBPevMiLZCg/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR02015497121150533633?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+        },
+        {
+          "video_id": "7IcBsa1HvxQ",
+          "url": "https://www.youtube.com/watch?v=7IcBsa1HvxQ",
+          "title": "VID37 mus",
+          "author": "Tactical X Abs",
+          "views": 11739025,
+          "length_seconds": 168,
+          "upload_date": "2025-12-12T10:27:30-08:00",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR09671672597133131777?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR17807003111512866817?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+          ],
+          "error": null,
+          "age_days": 271,
+          "lifetime_views_per_day": 43317.44,
+          "youtube_url": "https://www.youtube.com/watch?v=7IcBsa1HvxQ",
+          "embed_url": "https://www.youtube-nocookie.com/embed/7IcBsa1HvxQ",
+          "thumbnail_url": "https://i.ytimg.com/vi/7IcBsa1HvxQ/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR09671672597133131777?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+        },
+        {
+          "video_id": "HonDxQAoQIs",
+          "url": "https://www.youtube.com/watch?v=HonDxQAoQIs",
+          "title": "VID38 01A 1",
+          "author": "Tactical X Abs",
+          "views": 5691117,
+          "length_seconds": 200,
+          "upload_date": "2025-07-14T09:54:03-07:00",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR14444071412693991425?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+          ],
+          "error": null,
+          "age_days": 422,
+          "lifetime_views_per_day": 13486.06,
+          "youtube_url": "https://www.youtube.com/watch?v=HonDxQAoQIs",
+          "embed_url": "https://www.youtube-nocookie.com/embed/HonDxQAoQIs",
+          "thumbnail_url": "https://i.ytimg.com/vi/HonDxQAoQIs/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16514522125000769537/creative/CR14444071412693991425?region=anywhere&platform=YOUTUBE&format=VIDEO&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-08T23:22:47.327309+00:00",
+      "advertiser": {
+        "name": "TQR Marketing Group",
+        "google_advertiser_id": "AR15438241099155505153"
+      },
+      "source_summary": {
+        "reported_ads_approx": 329,
+        "unique_creative_pages": 329,
+        "recovered_unique_youtube_videos": 327,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "ny2wpyIh7KI",
+          "ehm8Y6re840",
+          "ynsXP-puzN0",
+          "Ihd63J-QLKQ",
+          "gJPtwYmuUmg"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "ny2wpyIh7KI",
+          "url": "https://www.youtube.com/watch?v=ny2wpyIh7KI",
+          "title": "BB YT HHP 042126 T1 V2",
+          "author": "Daily Household Deals",
+          "views": 23669981,
+          "length_seconds": 162,
+          "upload_date": "2026-04-22T21:39:43Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR16443276528889888769?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 201,
+          "lifetime_views_per_day": 117761.1,
+          "youtube_url": "https://www.youtube.com/watch?v=ny2wpyIh7KI",
+          "embed_url": "https://www.youtube-nocookie.com/embed/ny2wpyIh7KI",
+          "thumbnail_url": "https://i.ytimg.com/vi/ny2wpyIh7KI/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR16443276528889888769?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "ehm8Y6re840",
+          "url": "https://www.youtube.com/watch?v=ehm8Y6re840",
+          "title": "BB YT HHP 041626 T3 V1",
+          "author": "Daily Household Deals",
+          "views": 20503056,
+          "length_seconds": 165,
+          "upload_date": "2026-04-21T16:25:14Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR14848516826417070081?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 202,
+          "lifetime_views_per_day": 101500.28,
+          "youtube_url": "https://www.youtube.com/watch?v=ehm8Y6re840",
+          "embed_url": "https://www.youtube-nocookie.com/embed/ehm8Y6re840",
+          "thumbnail_url": "https://i.ytimg.com/vi/ehm8Y6re840/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR14848516826417070081?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "ynsXP-puzN0",
+          "url": "https://www.youtube.com/watch?v=ynsXP-puzN0",
+          "title": "BB FB HHP 050626 T1 V2",
+          "author": "Daily Household Deals",
+          "views": 16686655,
+          "length_seconds": 167,
+          "upload_date": "2026-05-07T16:11:54Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR04807513308531785729?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 186,
+          "lifetime_views_per_day": 89713.2,
+          "youtube_url": "https://www.youtube.com/watch?v=ynsXP-puzN0",
+          "embed_url": "https://www.youtube-nocookie.com/embed/ynsXP-puzN0",
+          "thumbnail_url": "https://i.ytimg.com/vi/ynsXP-puzN0/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR04807513308531785729?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "Ihd63J-QLKQ",
+          "url": "https://www.youtube.com/watch?v=Ihd63J-QLKQ",
+          "title": "BB YT HHP 052626 T1 V1",
+          "author": "Daily Household Deals",
+          "views": 14023695,
+          "length_seconds": 185,
+          "upload_date": "2026-05-27T14:27:22Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR09337585533766860801?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 166,
+          "lifetime_views_per_day": 84480.09,
+          "youtube_url": "https://www.youtube.com/watch?v=Ihd63J-QLKQ",
+          "embed_url": "https://www.youtube-nocookie.com/embed/Ihd63J-QLKQ",
+          "thumbnail_url": "https://i.ytimg.com/vi/Ihd63J-QLKQ/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR09337585533766860801?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "gJPtwYmuUmg",
+          "url": "https://www.youtube.com/watch?v=gJPtwYmuUmg",
+          "title": "MM YT HHP 041626 T2 V1",
+          "author": "Daily Household Deals",
+          "views": 13233733,
+          "length_seconds": 135,
+          "upload_date": "2026-04-22T21:39:25Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR00384918001314430977?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 201,
+          "lifetime_views_per_day": 65839.47,
+          "youtube_url": "https://www.youtube.com/watch?v=gJPtwYmuUmg",
+          "embed_url": "https://www.youtube-nocookie.com/embed/gJPtwYmuUmg",
+          "thumbnail_url": "https://i.ytimg.com/vi/gJPtwYmuUmg/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR15438241099155505153/creative/CR00384918001314430977?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-09T03:21:16.007555+00:00",
+      "advertiser": {
+        "name": "Super Brand Tools",
+        "google_advertiser_id": "AR16835138203831762945"
+      },
+      "source_summary": {
+        "reported_ads_approx": 611,
+        "unique_creative_pages": 611,
+        "recovered_unique_youtube_videos": 340,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "2EGmPukph8E",
+          "V6OrMEfdDZ4",
+          "nLZTxtScw7U",
+          "PxdwMuTNjlg",
+          "zZpJyzTsvTo"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "2EGmPukph8E",
+          "url": "https://www.youtube.com/watch?v=2EGmPukph8E",
+          "title": "SuperGlove - 7ReasonsAD1-H4 - Indr",
+          "author": "SuperBrand Tools",
+          "views": 18653679,
+          "length_seconds": 179,
+          "upload_date": "2025-11-08T21:04:35Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR07841642969961594881?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR12091289496176295937?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 366,
+          "lifetime_views_per_day": 50966.34,
+          "youtube_url": "https://www.youtube.com/watch?v=2EGmPukph8E",
+          "embed_url": "https://www.youtube-nocookie.com/embed/2EGmPukph8E",
+          "thumbnail_url": "https://i.ytimg.com/vi/2EGmPukph8E/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR07841642969961594881?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "V6OrMEfdDZ4",
+          "url": "https://www.youtube.com/watch?v=V6OrMEfdDZ4",
+          "title": "SuperScissor - Got-Me-Ad3-H1",
+          "author": "SuperBrand Tools",
+          "views": 16387557,
+          "length_seconds": 239,
+          "upload_date": "2025-10-19T04:24:39Z",
+          "creative_count": 18,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR01105388113699536897?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR02141401957128994817?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR03989106809242648577?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR04464493005247610881?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR04964037421629964289?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR06959591789854457857?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR08169558019294625793?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR08211487895219863553?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR08868615417606701057?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR11754188851826917377?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR12287369802804101121?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR14491752078029881345?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR15252609726404362241?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR15973816786457985025?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR16311168944092217345?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR16477868101002592257?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR17653539600699752449?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR18163939495383138305?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 386,
+          "lifetime_views_per_day": 42454.81,
+          "youtube_url": "https://www.youtube.com/watch?v=V6OrMEfdDZ4",
+          "embed_url": "https://www.youtube-nocookie.com/embed/V6OrMEfdDZ4",
+          "thumbnail_url": "https://i.ytimg.com/vi/V6OrMEfdDZ4/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR01105388113699536897?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "nLZTxtScw7U",
+          "url": "https://www.youtube.com/watch?v=nLZTxtScw7U",
+          "title": "SuperScissor - Is-It-Ad1-H2",
+          "author": "SuperBrand Tools",
+          "views": 12264657,
+          "length_seconds": 198,
+          "upload_date": "2025-10-24T16:41:10Z",
+          "creative_count": 6,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR05080169489023107073?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR07997701603094167553?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR08958247055747186689?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR14665433683532447745?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR17575882193941561345?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR17595488135532249089?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 381,
+          "lifetime_views_per_day": 32190.7,
+          "youtube_url": "https://www.youtube.com/watch?v=nLZTxtScw7U",
+          "embed_url": "https://www.youtube-nocookie.com/embed/nLZTxtScw7U",
+          "thumbnail_url": "https://i.ytimg.com/vi/nLZTxtScw7U/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR05080169489023107073?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "PxdwMuTNjlg",
+          "url": "https://www.youtube.com/watch?v=PxdwMuTNjlg",
+          "title": "SuperGlove - 7-Reasons-H4",
+          "author": "SuperBrand Tools",
+          "views": 11508289,
+          "length_seconds": 163,
+          "upload_date": "2025-10-25T02:56:39Z",
+          "creative_count": 11,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR00241978027959910401?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR04209827420557017089?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR05059156172548866049?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR06391263987622739969?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR09797220882106548225?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR11519851312988553217?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR11926019704382029825?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR12047012712681570305?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR12770849254793019393?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR13332431415749378049?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR14465605966399275009?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 381,
+          "lifetime_views_per_day": 30205.48,
+          "youtube_url": "https://www.youtube.com/watch?v=PxdwMuTNjlg",
+          "embed_url": "https://www.youtube-nocookie.com/embed/PxdwMuTNjlg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PxdwMuTNjlg/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR00241978027959910401?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "zZpJyzTsvTo",
+          "url": "https://www.youtube.com/watch?v=zZpJyzTsvTo",
+          "title": "SupeeGauge - Ad1-H10-TV-Jon",
+          "author": "SuperBrand Tools",
+          "views": 9962596,
+          "length_seconds": 211,
+          "upload_date": "2025-11-17T21:37:30Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR13623494133854240769?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 357,
+          "lifetime_views_per_day": 27906.43,
+          "youtube_url": "https://www.youtube.com/watch?v=zZpJyzTsvTo",
+          "embed_url": "https://www.youtube-nocookie.com/embed/zZpJyzTsvTo",
+          "thumbnail_url": "https://i.ytimg.com/vi/zZpJyzTsvTo/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16835138203831762945/creative/CR13623494133854240769?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-09T03:22:38.766762+00:00",
+      "advertiser": {
+        "name": "Our Place",
+        "google_advertiser_id": "AR12184266106386513921"
+      },
+      "source_summary": {
+        "reported_ads_approx": 94,
+        "unique_creative_pages": 94,
+        "recovered_unique_youtube_videos": 69,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "ee5BEhhmzXQ",
+          "yFmk1DhBeN4",
+          "cmDbuWGDAhg",
+          "T68uNfcBrsA",
+          "BdI-4ZuIz3w"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "ee5BEhhmzXQ",
+          "url": "https://www.youtube.com/watch?v=ee5BEhhmzXQ",
+          "title": "ADS25 Holiday YT PS Noco Mike 16x9 US CA UK AUS v1 Video 11826",
+          "author": "Our Place",
+          "views": 28953642,
+          "length_seconds": 46,
+          "upload_date": "2025-11-27T11:12:50Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR06258723083574575105?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR08517300286933434369?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 347,
+          "lifetime_views_per_day": 83439.89,
+          "youtube_url": "https://www.youtube.com/watch?v=ee5BEhhmzXQ",
+          "embed_url": "https://www.youtube-nocookie.com/embed/ee5BEhhmzXQ",
+          "thumbnail_url": "https://i.ytimg.com/vi/ee5BEhhmzXQ/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR06258723083574575105?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "yFmk1DhBeN4",
+          "url": "https://www.youtube.com/watch?v=yFmk1DhBeN4",
+          "title": "ADS25 BFCM YouTube PS WO Pro 16x9 US CA v1 Video 11520",
+          "author": "Our Place",
+          "views": 17196144,
+          "length_seconds": 49,
+          "upload_date": "2025-10-29T18:25:37Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR12333643299414867969?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 376,
+          "lifetime_views_per_day": 45734.43,
+          "youtube_url": "https://www.youtube.com/watch?v=yFmk1DhBeN4",
+          "embed_url": "https://www.youtube-nocookie.com/embed/yFmk1DhBeN4",
+          "thumbnail_url": "https://i.ytimg.com/vi/yFmk1DhBeN4/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR12333643299414867969?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "cmDbuWGDAhg",
+          "url": "https://www.youtube.com/watch?v=cmDbuWGDAhg",
+          "title": "ADS25 Paul Foster Noco 16x9 US CA v1 Video 12285",
+          "author": "Our Place",
+          "views": 13550078,
+          "length_seconds": 43,
+          "upload_date": "2026-01-12T15:21:01Z",
+          "creative_count": 3,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR03463872922152599553?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR09425516227419176961?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR11534259064250826753?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 301,
+          "lifetime_views_per_day": 45016.87,
+          "youtube_url": "https://www.youtube.com/watch?v=cmDbuWGDAhg",
+          "embed_url": "https://www.youtube-nocookie.com/embed/cmDbuWGDAhg",
+          "thumbnail_url": "https://i.ytimg.com/vi/cmDbuWGDAhg/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR03463872922152599553?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "T68uNfcBrsA",
+          "url": "https://www.youtube.com/watch?v=T68uNfcBrsA",
+          "title": "ADS25 Holiday YT PS Noco Founders 16x9 US CA UK AUS v4 Video 11829",
+          "author": "Our Place",
+          "views": 11432444,
+          "length_seconds": 45,
+          "upload_date": "2025-11-27T11:12:17Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR02437933371192508417?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR08780760865134608385?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 347,
+          "lifetime_views_per_day": 32946.52,
+          "youtube_url": "https://www.youtube.com/watch?v=T68uNfcBrsA",
+          "embed_url": "https://www.youtube-nocookie.com/embed/T68uNfcBrsA",
+          "thumbnail_url": "https://i.ytimg.com/vi/T68uNfcBrsA/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR02437933371192508417?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "BdI-4ZuIz3w",
+          "url": "https://www.youtube.com/watch?v=BdI-4ZuIz3w",
+          "title": "ADS25 Bagale NoCo Refresh 16x9 US v1c Video 7314",
+          "author": "Our Place",
+          "views": 6956185,
+          "length_seconds": 44,
+          "upload_date": "2025-02-27T18:14:10Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR09731724967304757249?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 620,
+          "lifetime_views_per_day": 11219.65,
+          "youtube_url": "https://www.youtube.com/watch?v=BdI-4ZuIz3w",
+          "embed_url": "https://www.youtube-nocookie.com/embed/BdI-4ZuIz3w",
+          "thumbnail_url": "https://i.ytimg.com/vi/BdI-4ZuIz3w/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR12184266106386513921/creative/CR09731724967304757249?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-09T03:28:26.023357+00:00",
+      "advertiser": {
+        "name": "Chemical Guys",
+        "google_advertiser_id": "AR07805807944687157249"
+      },
+      "source_summary": {
+        "reported_ads_approx": 541,
+        "unique_creative_pages": 541,
+        "recovered_unique_youtube_videos": 154,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "Y0Y68XJD6Vw",
+          "iFUhkmcGY8I",
+          "1yV00giZ4XY",
+          "u1hj5I1aBgc",
+          "p1_FxXj-NzQ"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "Y0Y68XJD6Vw",
+          "url": "https://www.youtube.com/watch?v=Y0Y68XJD6Vw",
+          "title": "How to clean stains on interior! #shorts #interior #cleaning #howto #diy #clean #carcare #car #truck",
+          "author": "Chemical Guys",
+          "views": 10822832,
+          "length_seconds": 44,
+          "upload_date": "2025-04-23T20:00:32Z",
+          "creative_count": 9,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR00948334190615592961?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR03404100558078869505?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR06350013266286084097?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR06605303923337068545?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR08415533819993522177?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR10495314421037924353?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR10690516080436183041?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR13517414557676470273?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR14580779122214043649?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 565,
+          "lifetime_views_per_day": 19155.45,
+          "youtube_url": "https://www.youtube.com/watch?v=Y0Y68XJD6Vw",
+          "embed_url": "https://www.youtube-nocookie.com/embed/Y0Y68XJD6Vw",
+          "thumbnail_url": "https://i.ytimg.com/vi/Y0Y68XJD6Vw/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR00948334190615592961?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "iFUhkmcGY8I",
+          "url": "https://www.youtube.com/watch?v=iFUhkmcGY8I",
+          "title": "Satisfying Car Cleaning | Deep Cleaning Filthy Surface Before & After",
+          "author": "Chemical Guys",
+          "views": 9740503,
+          "length_seconds": 31,
+          "upload_date": "2022-11-01T15:30:16Z",
+          "creative_count": 4,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR05827211043650142209?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR05874757224970059777?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR07624120331166285825?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR10148110321391239169?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 1469,
+          "lifetime_views_per_day": 6630.7,
+          "youtube_url": "https://www.youtube.com/watch?v=iFUhkmcGY8I",
+          "embed_url": "https://www.youtube-nocookie.com/embed/iFUhkmcGY8I",
+          "thumbnail_url": "https://i.ytimg.com/vi/iFUhkmcGY8I/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR05827211043650142209?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "1yV00giZ4XY",
+          "url": "https://www.youtube.com/watch?v=1yV00giZ4XY",
+          "title": "How to deep clean wheels! #shorts #youtubeshorts #wheels #gmc #howto #diy #detailing #truck #carcare",
+          "author": "Chemical Guys",
+          "views": 6878226,
+          "length_seconds": 67,
+          "upload_date": "2025-06-02T13:00:03Z",
+          "creative_count": 11,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR04045062510758330369?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR04449176395955830785?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR06227576049463459841?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR08858069657987317761?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR10104247134657183745?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR12937593697838563329?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR14651506856938176513?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR15655189518003208193?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR15816659603770310657?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR17650545218220457985?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR18212022444535840769?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 525,
+          "lifetime_views_per_day": 13101.38,
+          "youtube_url": "https://www.youtube.com/watch?v=1yV00giZ4XY",
+          "embed_url": "https://www.youtube-nocookie.com/embed/1yV00giZ4XY",
+          "thumbnail_url": "https://i.ytimg.com/vi/1yV00giZ4XY/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR04045062510758330369?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "u1hj5I1aBgc",
+          "url": "https://www.youtube.com/watch?v=u1hj5I1aBgc",
+          "title": "Easily Banish Water Spots From Your Car With These Simple Tricks!",
+          "author": "Chemical Guys",
+          "views": 6113877,
+          "length_seconds": 288,
+          "upload_date": "2025-05-08T21:40:57Z",
+          "creative_count": 60,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR00115470376141586433?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR00479451854997028865?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR00652600875964956673?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR00847289200871997441?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR01113666783421661185?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR01131566248606302209?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR01517305920114130945?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR01769454765638418433?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR02059057117553229825?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR02421080838646005761?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR02433596407706288129?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR02719714622021042177?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR02995894900488142849?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR05003637217667579905?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR05270674515783843841?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR05776512528133652481?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR05825694679676485633?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR06446077897852583937?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR07001141990670729217?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR07162132371540541441?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR07548561754666565633?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR07592152743553269761?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR07774403770884030465?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR07847379079174029313?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR07895856830310514689?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR08555044554019962881?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR08612078799133081601?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR08807131062388916225?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR08876490454892281857?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR09016602192282386433?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR09270657298911461377?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR09311259789424066561?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR10212221169369612289?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR10501279469187104769?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR11447955553318338561?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR11798037160794259457?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR11935883560633761793?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR12003867077543723009?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR12151002014175723521?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR12309441356270403585?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR12432736467040600065?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR12965403224533106689?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR12972557755284979713?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR13158071102334828545?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR13234993476979916801?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR13443937622976102401?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR13621149107480428545?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR13646679836196864001?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR13831152529850761217?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR13910768166818021377?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR14091816225348780033?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR14289496871150813185?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR14405027093366702081?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR15913027322588954625?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR16108740014375960577?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR16350193145792692225?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR16928918694480838657?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR16988747623273857025?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR17163229114895695873?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR17530017500907962369?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 550,
+          "lifetime_views_per_day": 11116.14,
+          "youtube_url": "https://www.youtube.com/watch?v=u1hj5I1aBgc",
+          "embed_url": "https://www.youtube-nocookie.com/embed/u1hj5I1aBgc",
+          "thumbnail_url": "https://i.ytimg.com/vi/u1hj5I1aBgc/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR00115470376141586433?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "p1_FxXj-NzQ",
+          "url": "https://www.youtube.com/watch?v=p1_FxXj-NzQ",
+          "title": "Satisfying POV foam wash! #chemicalguys #newcar #asmr #pov #howto #education #mobiledetailing #diy",
+          "author": "Chemical Guys",
+          "views": 5952610,
+          "length_seconds": 31,
+          "upload_date": "2025-05-06T20:00:37Z",
+          "creative_count": 6,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR01305981683631128577?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR04478244253578821633?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR10303333712233758721?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR11124677694275452929?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR11973555740989194241?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR14257313865158098945?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 552,
+          "lifetime_views_per_day": 10783.71,
+          "youtube_url": "https://www.youtube.com/watch?v=p1_FxXj-NzQ",
+          "embed_url": "https://www.youtube-nocookie.com/embed/p1_FxXj-NzQ",
+          "thumbnail_url": "https://i.ytimg.com/vi/p1_FxXj-NzQ/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR07805807944687157249/creative/CR01305981683631128577?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-09T03:31:35.628057+00:00",
+      "advertiser": {
+        "name": "Hollow Socks",
+        "google_advertiser_id": "AR11506329381551210497"
+      },
+      "source_summary": {
+        "reported_ads_approx": 223,
+        "unique_creative_pages": 223,
+        "recovered_unique_youtube_videos": 146,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "EQ-jynOvFRo",
+          "RcI-Ej6O8l8",
+          "s69GnU2OBD8",
+          "h22nGWbpogc",
+          "uIAKhosw2zs"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "EQ-jynOvFRo",
+          "url": "https://www.youtube.com/watch?v=EQ-jynOvFRo",
+          "title": "HOL069 ForrestG TWT Podcast Feb25 H5 BZ EQ AW3 MS3 FI4 9x16 mp4",
+          "author": "Hollow Socks",
+          "views": 18981868,
+          "length_seconds": 26,
+          "upload_date": "2025-04-15T19:42:53Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR02973118113391837185?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 573,
+          "lifetime_views_per_day": 33127.17,
+          "youtube_url": "https://www.youtube.com/watch?v=EQ-jynOvFRo",
+          "embed_url": "https://www.youtube-nocookie.com/embed/EQ-jynOvFRo",
+          "thumbnail_url": "https://i.ytimg.com/vi/EQ-jynOvFRo/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR02973118113391837185?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "RcI-Ej6O8l8",
+          "url": "https://www.youtube.com/watch?v=RcI-Ej6O8l8",
+          "title": "10xROAS SV CompressionSocks Day57 9X16 V1",
+          "author": "Hollow Socks",
+          "views": 16979735,
+          "length_seconds": 63,
+          "upload_date": "2025-12-30T13:02:33Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR05033374059396595713?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR15934920901200445441?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 314,
+          "lifetime_views_per_day": 54075.59,
+          "youtube_url": "https://www.youtube.com/watch?v=RcI-Ej6O8l8",
+          "embed_url": "https://www.youtube-nocookie.com/embed/RcI-Ej6O8l8",
+          "thumbnail_url": "https://i.ytimg.com/vi/RcI-Ej6O8l8/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR05033374059396595713?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "s69GnU2OBD8",
+          "url": "https://www.youtube.com/watch?v=s69GnU2OBD8",
+          "title": "18 06   RPD   Hollow   Balloon Metaphor UGC   Video   v2   16x9   Joaco   Teo",
+          "author": "Hollow Socks",
+          "views": 12326765,
+          "length_seconds": 281,
+          "upload_date": "2026-06-22T15:43:10Z",
+          "creative_count": 10,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR01933416233084911617?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR03746784548243898369?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR04033144105360949249?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR07170646164952317953?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR07211058302514364417?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR08825373781359853569?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR13317513748789854209?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR13350041288469118977?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR16357460677134123009?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR18113847351939432449?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 140,
+          "lifetime_views_per_day": 88048.32,
+          "youtube_url": "https://www.youtube.com/watch?v=s69GnU2OBD8",
+          "embed_url": "https://www.youtube-nocookie.com/embed/s69GnU2OBD8",
+          "thumbnail_url": "https://i.ytimg.com/vi/s69GnU2OBD8/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR01933416233084911617?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "h22nGWbpogc",
+          "url": "https://www.youtube.com/watch?v=h22nGWbpogc",
+          "title": "HSV589 Compression EVG AnatomicalBodyHardWorkers Video male Necessity Medical V4 16x9",
+          "author": "Hollow Socks",
+          "views": 9962453,
+          "length_seconds": 172,
+          "upload_date": "2026-06-22T11:41:27Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR04713472972361302017?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR14586874084533993473?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 140,
+          "lifetime_views_per_day": 71160.38,
+          "youtube_url": "https://www.youtube.com/watch?v=h22nGWbpogc",
+          "embed_url": "https://www.youtube-nocookie.com/embed/h22nGWbpogc",
+          "thumbnail_url": "https://i.ytimg.com/vi/h22nGWbpogc/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR04713472972361302017?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "uIAKhosw2zs",
+          "url": "https://www.youtube.com/watch?v=uIAKhosw2zs",
+          "title": "Buy 3 Pairs, Get 3 FREE!",
+          "author": "Hollow Socks",
+          "views": 6809744,
+          "length_seconds": 36,
+          "upload_date": "2025-07-01T17:23:44Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR00774367605443002369?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 496,
+          "lifetime_views_per_day": 13729.32,
+          "youtube_url": "https://www.youtube.com/watch?v=uIAKhosw2zs",
+          "embed_url": "https://www.youtube-nocookie.com/embed/uIAKhosw2zs",
+          "thumbnail_url": "https://i.ytimg.com/vi/uIAKhosw2zs/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR11506329381551210497/creative/CR00774367605443002369?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-09T03:44:30.168196+00:00",
+      "advertiser": {
+        "name": "AWOL Vision",
+        "google_advertiser_id": "AR04408000716287770625"
+      },
+      "source_summary": {
+        "reported_ads_approx": 753,
+        "unique_creative_pages": 753,
+        "recovered_unique_youtube_videos": 183,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "-Z1E939k-6w",
+          "4XlDG_hkjcs",
+          "j4DboSgpB1M",
+          "6pxnen5wadw",
+          "rvwbV9RhHgg"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "-Z1E939k-6w",
+          "url": "https://www.youtube.com/watch?v=-Z1E939k-6w",
+          "title": "VisionMaster Pro2 – Immersive 120\" Big Screen Power! ⚡🖤",
+          "author": "ValerionTech",
+          "views": 6739305,
+          "length_seconds": 26,
+          "upload_date": "2025-10-30T10:05:00Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR06649253456093642753?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 375,
+          "lifetime_views_per_day": 17971.48,
+          "youtube_url": "https://www.youtube.com/watch?v=-Z1E939k-6w",
+          "embed_url": "https://www.youtube-nocookie.com/embed/-Z1E939k-6w",
+          "thumbnail_url": "https://i.ytimg.com/vi/-Z1E939k-6w/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR06649253456093642753?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "4XlDG_hkjcs",
+          "url": "https://www.youtube.com/watch?v=4XlDG_hkjcs",
+          "title": "NFL版 Lux Vision  30s",
+          "author": "AWOL Vision",
+          "views": 3760434,
+          "length_seconds": 31,
+          "upload_date": "2026-10-12T08:59:13Z",
+          "creative_count": 8,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR01320239179757518849?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR01970446375959134209?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR06309664616930607105?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR13656724459032150017?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR14103330963949879297?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR14244938715758592001?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR16141022603480399873?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR16501873523623460865?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 28,
+          "lifetime_views_per_day": 134301.21,
+          "youtube_url": "https://www.youtube.com/watch?v=4XlDG_hkjcs",
+          "embed_url": "https://www.youtube-nocookie.com/embed/4XlDG_hkjcs",
+          "thumbnail_url": "https://i.ytimg.com/vi/4XlDG_hkjcs/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR01320239179757518849?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "j4DboSgpB1M",
+          "url": "https://www.youtube.com/watch?v=j4DboSgpB1M",
+          "title": "comment ‘PROJECTOR’ for the link!I’ve tested different kinds of projectors  But this one is INSA",
+          "author": "AWOL Vision",
+          "views": 3389817,
+          "length_seconds": 33,
+          "upload_date": "2026-07-15T09:59:20Z",
+          "creative_count": 6,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR03500538302044307457?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR07798625908964720641?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR10214883799985029121?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR11805933750225731585?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR12394094130882412545?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR13379128009588473857?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 117,
+          "lifetime_views_per_day": 28972.79,
+          "youtube_url": "https://www.youtube.com/watch?v=j4DboSgpB1M",
+          "embed_url": "https://www.youtube-nocookie.com/embed/j4DboSgpB1M",
+          "thumbnail_url": "https://i.ytimg.com/vi/j4DboSgpB1M/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR03500538302044307457?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "6pxnen5wadw",
+          "url": "https://www.youtube.com/watch?v=6pxnen5wadw",
+          "title": "comment ‘PROJECTOR’ for the link!I’ve tested different kinds of projectors  But this one is INSA",
+          "author": "AWOL Vision",
+          "views": 3332356,
+          "length_seconds": 33,
+          "upload_date": "2026-06-08T08:52:07Z",
+          "creative_count": 8,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR00506259486080499713?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR02411355245981466625?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR06472684567416274945?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR08886051017733439489?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR10834546150850166785?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR14074859694464172033?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR16420109200417357825?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR17062223991038541825?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 154,
+          "lifetime_views_per_day": 21638.68,
+          "youtube_url": "https://www.youtube.com/watch?v=6pxnen5wadw",
+          "embed_url": "https://www.youtube-nocookie.com/embed/6pxnen5wadw",
+          "thumbnail_url": "https://i.ytimg.com/vi/6pxnen5wadw/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR00506259486080499713?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "rvwbV9RhHgg",
+          "url": "https://www.youtube.com/watch?v=rvwbV9RhHgg",
+          "title": "Valerion VisionMaster Pro2 Review: The Triple Laser 4K Projector That Changes Everything!",
+          "author": "Enoylity Technology",
+          "views": 2648119,
+          "length_seconds": 367,
+          "upload_date": "2025-04-16T14:45:48Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR10665287648697909249?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR15250373869509279745?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 572,
+          "lifetime_views_per_day": 4629.58,
+          "youtube_url": "https://www.youtube.com/watch?v=rvwbV9RhHgg",
+          "embed_url": "https://www.youtube-nocookie.com/embed/rvwbV9RhHgg",
+          "thumbnail_url": "https://i.ytimg.com/vi/rvwbV9RhHgg/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR04408000716287770625/creative/CR10665287648697909249?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-09T03:49:13.858918+00:00",
+      "advertiser": {
+        "name": "Blissy",
+        "google_advertiser_id": "AR03898686331638775809"
+      },
+      "source_summary": {
+        "reported_ads_approx": 260,
+        "unique_creative_pages": 260,
+        "recovered_unique_youtube_videos": 242,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "D0F79HYRZUQ",
+          "iptBa-gj8zw",
+          "Fkyn2vWQk2M",
+          "GdfpspQ-m1k",
+          "i9F208UOa6M"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "D0F79HYRZUQ",
+          "url": "https://www.youtube.com/watch?v=D0F79HYRZUQ",
+          "title": "20250813 ja4736 MOF MomWrinkles S PC 9x16 60s nd p365v1e1",
+          "author": "Blissy",
+          "views": 14951013,
+          "length_seconds": 73,
+          "upload_date": "2025-10-23T19:09:53Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR10466425165334970369?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR13630452178442256385?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 382,
+          "lifetime_views_per_day": 39138.78,
+          "youtube_url": "https://www.youtube.com/watch?v=D0F79HYRZUQ",
+          "embed_url": "https://www.youtube-nocookie.com/embed/D0F79HYRZUQ",
+          "thumbnail_url": "https://i.ytimg.com/vi/D0F79HYRZUQ/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR10466425165334970369?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "iptBa-gj8zw",
+          "url": "https://www.youtube.com/watch?v=iptBa-gj8zw",
+          "title": "20240829_ja1799_AD_ProblemwithSatinVSL_PC_16x9_300s_nd_p96v3e2",
+          "author": "Blissy",
+          "views": 10821214,
+          "length_seconds": 258,
+          "upload_date": "2024-08-29T17:23:54Z",
+          "creative_count": 3,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR03894605983858556929?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR11349097492202389505?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR17914681566575984641?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 802,
+          "lifetime_views_per_day": 13492.79,
+          "youtube_url": "https://www.youtube.com/watch?v=iptBa-gj8zw",
+          "embed_url": "https://www.youtube-nocookie.com/embed/iptBa-gj8zw",
+          "thumbnail_url": "https://i.ytimg.com/vi/iptBa-gj8zw/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR03894605983858556929?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "Fkyn2vWQk2M",
+          "url": "https://www.youtube.com/watch?v=Fkyn2vWQk2M",
+          "title": "20250508 fs293 WL HannahJonesWL PC 9x16 45s nd v2e2 HannahJones",
+          "author": "Blissy",
+          "views": 10562168,
+          "length_seconds": 38,
+          "upload_date": "2025-09-18T16:06:02Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR09097579153493852161?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR14177362808424890369?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 417,
+          "lifetime_views_per_day": 25328.94,
+          "youtube_url": "https://www.youtube.com/watch?v=Fkyn2vWQk2M",
+          "embed_url": "https://www.youtube-nocookie.com/embed/Fkyn2vWQk2M",
+          "thumbnail_url": "https://i.ytimg.com/vi/Fkyn2vWQk2M/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR09097579153493852161?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "GdfpspQ-m1k",
+          "url": "https://www.youtube.com/watch?v=GdfpspQ-m1k",
+          "title": "20250916 fs844 MOF FactoryStoreExplainer C PC 9x16 60s nd v3e4",
+          "author": "Blissy",
+          "views": 6304975,
+          "length_seconds": 58,
+          "upload_date": "2025-11-20T17:23:28Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR07296161782404481025?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 354,
+          "lifetime_views_per_day": 17810.66,
+          "youtube_url": "https://www.youtube.com/watch?v=GdfpspQ-m1k",
+          "embed_url": "https://www.youtube-nocookie.com/embed/GdfpspQ-m1k",
+          "thumbnail_url": "https://i.ytimg.com/vi/GdfpspQ-m1k/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR07296161782404481025?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "i9F208UOa6M",
+          "url": "https://www.youtube.com/watch?v=i9F208UOa6M",
+          "title": "20250820 ja4804 MOF CSandsWLScale O PC 9x16 60s nd p371v2e1",
+          "author": "Blissy",
+          "views": 6177952,
+          "length_seconds": 41,
+          "upload_date": "2025-09-18T16:05:59Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR02076560045587300353?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 417,
+          "lifetime_views_per_day": 14815.23,
+          "youtube_url": "https://www.youtube.com/watch?v=i9F208UOa6M",
+          "embed_url": "https://www.youtube-nocookie.com/embed/i9F208UOa6M",
+          "thumbnail_url": "https://i.ytimg.com/vi/i9F208UOa6M/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR03898686331638775809/creative/CR02076560045587300353?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-09T03:51:31.563356+00:00",
+      "advertiser": {
+        "name": "AUK",
+        "google_advertiser_id": "AR09542084929777565697"
+      },
+      "source_summary": {
+        "reported_ads_approx": 145,
+        "unique_creative_pages": 145,
+        "recovered_unique_youtube_videos": 57,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "ve02F0gyfjY",
+          "IdtKhrsZTaM",
+          "lSittawN2Zc",
+          "hecF-Q6drSI",
+          "vXTHig0veSw"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "ve02F0gyfjY",
+          "url": "https://www.youtube.com/watch?v=ve02F0gyfjY",
+          "title": "Auk video 3",
+          "author": "Auk",
+          "views": 21951963,
+          "length_seconds": 165,
+          "upload_date": "2025-10-15T09:12:02Z",
+          "creative_count": 6,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR05975922946244345857?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR09014270772364967937?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR12170348230504087553?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR15633027830353231873?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR15657272362393403393?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR15711827105706672129?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 390,
+          "lifetime_views_per_day": 56287.08,
+          "youtube_url": "https://www.youtube.com/watch?v=ve02F0gyfjY",
+          "embed_url": "https://www.youtube-nocookie.com/embed/ve02F0gyfjY",
+          "thumbnail_url": "https://i.ytimg.com/vi/ve02F0gyfjY/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR05975922946244345857?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "IdtKhrsZTaM",
+          "url": "https://www.youtube.com/watch?v=IdtKhrsZTaM",
+          "title": "Auk How It's Made   Auk Mini 2   16x9",
+          "author": "Auk",
+          "views": 12992902,
+          "length_seconds": 285,
+          "upload_date": "2026-05-05T14:31:15Z",
+          "creative_count": 5,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR00434210378897948673?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR05066457092966055937?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR05077877067408736257?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR05975071580647063553?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR12025946130022924289?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 188,
+          "lifetime_views_per_day": 69111.18,
+          "youtube_url": "https://www.youtube.com/watch?v=IdtKhrsZTaM",
+          "embed_url": "https://www.youtube-nocookie.com/embed/IdtKhrsZTaM",
+          "thumbnail_url": "https://i.ytimg.com/vi/IdtKhrsZTaM/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR00434210378897948673?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "lSittawN2Zc",
+          "url": "https://www.youtube.com/watch?v=lSittawN2Zc",
+          "title": "How It's Made",
+          "author": "Auk",
+          "views": 11206801,
+          "length_seconds": 356,
+          "upload_date": "2026-02-05T18:46:07Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR03477436703751274497?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR16233570386975916033?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 277,
+          "lifetime_views_per_day": 40457.77,
+          "youtube_url": "https://www.youtube.com/watch?v=lSittawN2Zc",
+          "embed_url": "https://www.youtube-nocookie.com/embed/lSittawN2Zc",
+          "thumbnail_url": "https://i.ytimg.com/vi/lSittawN2Zc/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR03477436703751274497?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "hecF-Q6drSI",
+          "url": "https://www.youtube.com/watch?v=hecF-Q6drSI",
+          "title": "Auk video 2",
+          "author": "Auk",
+          "views": 6806833,
+          "length_seconds": 134,
+          "upload_date": "2025-10-15T09:11:59Z",
+          "creative_count": 5,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR02366331825372004353?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR02720951787350654977?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR08550822223210872833?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR08563002338145468417?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR18268042106704494593?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 390,
+          "lifetime_views_per_day": 17453.42,
+          "youtube_url": "https://www.youtube.com/watch?v=hecF-Q6drSI",
+          "embed_url": "https://www.youtube-nocookie.com/embed/hecF-Q6drSI",
+          "thumbnail_url": "https://i.ytimg.com/vi/hecF-Q6drSI/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR02366331825372004353?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "vXTHig0veSw",
+          "url": "https://www.youtube.com/watch?v=vXTHig0veSw",
+          "title": "Auk video 4",
+          "author": "Auk",
+          "views": 4610433,
+          "length_seconds": 111,
+          "upload_date": "2025-10-15T09:12:06Z",
+          "creative_count": 5,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR00037470815108726785?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR05993655869777117185?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR06078549162557702145?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR09588151520633815041?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR16142081123940302849?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 390,
+          "lifetime_views_per_day": 11821.62,
+          "youtube_url": "https://www.youtube.com/watch?v=vXTHig0veSw",
+          "embed_url": "https://www.youtube-nocookie.com/embed/vXTHig0veSw",
+          "thumbnail_url": "https://i.ytimg.com/vi/vXTHig0veSw/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR09542084929777565697/creative/CR00037470815108726785?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-09T03:54:28.112887+00:00",
+      "advertiser": {
+        "name": "MUD\\WTR",
+        "google_advertiser_id": "AR16982448538338197505"
+      },
+      "source_summary": {
+        "reported_ads_approx": 167,
+        "unique_creative_pages": 167,
+        "recovered_unique_youtube_videos": 108,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "kbT-wwRdM10",
+          "w6kjdpfCUDs",
+          "HBMAtfnLWXg",
+          "bjUi0eP_gFs",
+          "oEMDV5oNW1E"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "kbT-wwRdM10",
+          "url": "https://www.youtube.com/watch?v=kbT-wwRdM10",
+          "title": "MUD\\WTR vs Mushroom Coffee",
+          "author": "MUDWTR",
+          "views": 52883174,
+          "length_seconds": 118,
+          "upload_date": "2025-09-04T15:52:08Z",
+          "creative_count": 4,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR01358717078797811713?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR04207810151727497217?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR07154482725548720129?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR13121175744124289025?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 431,
+          "lifetime_views_per_day": 122698.78,
+          "youtube_url": "https://www.youtube.com/watch?v=kbT-wwRdM10",
+          "embed_url": "https://www.youtube-nocookie.com/embed/kbT-wwRdM10",
+          "thumbnail_url": "https://i.ytimg.com/vi/kbT-wwRdM10/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR01358717078797811713?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "w6kjdpfCUDs",
+          "url": "https://www.youtube.com/watch?v=w6kjdpfCUDs",
+          "title": "What $1.33 A Cup SHOULD Give You",
+          "author": "MUDWTR",
+          "views": 34680417,
+          "length_seconds": 103,
+          "upload_date": "2025-11-03T20:21:29Z",
+          "creative_count": 4,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR00011574816603635713?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR03619579230527946753?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR07415777102634418177?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR14426278935144693761?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 371,
+          "lifetime_views_per_day": 93478.21,
+          "youtube_url": "https://www.youtube.com/watch?v=w6kjdpfCUDs",
+          "embed_url": "https://www.youtube-nocookie.com/embed/w6kjdpfCUDs",
+          "thumbnail_url": "https://i.ytimg.com/vi/w6kjdpfCUDs/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR00011574816603635713?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "HBMAtfnLWXg",
+          "url": "https://www.youtube.com/watch?v=HBMAtfnLWXg",
+          "title": "What's the difference between MUD\\WTR and other mushroom coffees?",
+          "author": "MUDWTR",
+          "views": 16670868,
+          "length_seconds": 108,
+          "upload_date": "2026-04-16T19:23:32Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR02980195283192774657?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR14103318422645374977?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 207,
+          "lifetime_views_per_day": 80535.59,
+          "youtube_url": "https://www.youtube.com/watch?v=HBMAtfnLWXg",
+          "embed_url": "https://www.youtube-nocookie.com/embed/HBMAtfnLWXg",
+          "thumbnail_url": "https://i.ytimg.com/vi/HBMAtfnLWXg/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR02980195283192774657?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "bjUi0eP_gFs",
+          "url": "https://www.youtube.com/watch?v=bjUi0eP_gFs",
+          "title": "SHA ALL vs mushroom coffee TL F 9x16",
+          "author": "MUDWTR",
+          "views": 12917097,
+          "length_seconds": 120,
+          "upload_date": "2025-02-24T17:41:11Z",
+          "creative_count": 4,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR05773862189714636801?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR05883200993235042305?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR17159264619563319297?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR17925489783056891905?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 623,
+          "lifetime_views_per_day": 20733.7,
+          "youtube_url": "https://www.youtube.com/watch?v=bjUi0eP_gFs",
+          "embed_url": "https://www.youtube-nocookie.com/embed/bjUi0eP_gFs",
+          "thumbnail_url": "https://i.ytimg.com/vi/bjUi0eP_gFs/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR05773862189714636801?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "oEMDV5oNW1E",
+          "url": "https://www.youtube.com/watch?v=oEMDV5oNW1E",
+          "title": "MUD\\WTR: a self portrait",
+          "author": "MUDWTR",
+          "views": 12174103,
+          "length_seconds": 211,
+          "upload_date": "2020-11-05T23:38:06Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR02516423658008739841?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 2195,
+          "lifetime_views_per_day": 5546.29,
+          "youtube_url": "https://www.youtube.com/watch?v=oEMDV5oNW1E",
+          "embed_url": "https://www.youtube-nocookie.com/embed/oEMDV5oNW1E",
+          "thumbnail_url": "https://i.ytimg.com/vi/oEMDV5oNW1E/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR16982448538338197505/creative/CR02516423658008739841?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "snapshot_at": "2026-11-09T04:18:09.777778+00:00",
+      "advertiser": {
+        "name": "Coolina",
+        "google_advertiser_id": "AR10302642548916617217"
+      },
+      "source_summary": {
+        "reported_ads_approx": 1251,
+        "unique_creative_pages": 1251,
+        "recovered_unique_youtube_videos": 931,
+        "youtube_metadata_failures": 0,
+        "unavailable_youtube_videos": 0
+      },
+      "ranking_limit": 5,
+      "rankings": {
+        "most_viewed": [
+          "8S8CWl3C9cU",
+          "ZpEaKigaex0",
+          "dW797UHoxt8",
+          "KUPZJFGt94U",
+          "sVzu7X4eBnA"
+        ],
+        "definitions": {
+          "most_viewed": "Current lifetime YouTube views, descending."
+        }
+      },
+      "videos": [
+        {
+          "video_id": "8S8CWl3C9cU",
+          "url": "https://www.youtube.com/watch?v=8S8CWl3C9cU",
+          "title": "The Perfect BadA$$ Kitchen Upgrade",
+          "author": "Coolina",
+          "views": 15032170,
+          "length_seconds": 132,
+          "upload_date": "2025-09-04T11:47:34Z",
+          "creative_count": 8,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR02227944955437907969?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR12075466450110775297?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR13063274130365743105?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR14448462544307748865?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR14906653022699388929?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR16151374445326368769?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR16744867139550183425?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR16966661355249598465?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 431,
+          "lifetime_views_per_day": 34877.42,
+          "youtube_url": "https://www.youtube.com/watch?v=8S8CWl3C9cU",
+          "embed_url": "https://www.youtube-nocookie.com/embed/8S8CWl3C9cU",
+          "thumbnail_url": "https://i.ytimg.com/vi/8S8CWl3C9cU/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR02227944955437907969?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "ZpEaKigaex0",
+          "url": "https://www.youtube.com/watch?v=ZpEaKigaex0",
+          "title": "The Perfect BadA$$ Kitchen Upgrade",
+          "author": "Coolina",
+          "views": 14913498,
+          "length_seconds": 216,
+          "upload_date": "2025-12-02T15:31:46Z",
+          "creative_count": 2,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR09724594840557060097?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR16069172207254765569?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 342,
+          "lifetime_views_per_day": 43606.72,
+          "youtube_url": "https://www.youtube.com/watch?v=ZpEaKigaex0",
+          "embed_url": "https://www.youtube-nocookie.com/embed/ZpEaKigaex0",
+          "thumbnail_url": "https://i.ytimg.com/vi/ZpEaKigaex0/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR09724594840557060097?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "dW797UHoxt8",
+          "url": "https://www.youtube.com/watch?v=dW797UHoxt8",
+          "title": "Buy 2 Get 2 Free | The Perfect BadA$$ Kitchen Upgrade",
+          "author": "Coolina",
+          "views": 14389433,
+          "length_seconds": 235,
+          "upload_date": "2024-11-15T14:43:13Z",
+          "creative_count": 25,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR00092042849960329217?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR00902235585073119233?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR02611915143369457665?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR03377174961423646721?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR04389884269355335681?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR04445475577255690241?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR04715068131804971009?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR04965808459984404481?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR05523128913871503361?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR05978504848654467073?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR08084106174607130625?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR08501811466632953857?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR08626197018059997185?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR09443777371799814145?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR09949748708524425217?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR10130328924857565185?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR10377112110688632833?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR11261881420978585601?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR12121791048242429953?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR13152117830985973761?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR14106259727918825473?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR14710053514655039489?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR14897015296475791361?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR16488803843652452353?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR18352169014110715905?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 724,
+          "lifetime_views_per_day": 19874.91,
+          "youtube_url": "https://www.youtube.com/watch?v=dW797UHoxt8",
+          "embed_url": "https://www.youtube-nocookie.com/embed/dW797UHoxt8",
+          "thumbnail_url": "https://i.ytimg.com/vi/dW797UHoxt8/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR00092042849960329217?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "KUPZJFGt94U",
+          "url": "https://www.youtube.com/watch?v=KUPZJFGt94U",
+          "title": "The Weirdest Most BadA$$ Gift I've Ever Received...",
+          "author": "Coolina",
+          "views": 13167402,
+          "length_seconds": 115,
+          "upload_date": "2023-10-27T20:56:00Z",
+          "creative_count": 6,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR01503227541303853057?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR01507260189177282561?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR03220399721587671041?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR03312115758896513025?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR08654230166521774081?region=US&format=VIDEO&platform=YOUTUBE&hl=en",
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR18237045748636057601?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 1109,
+          "lifetime_views_per_day": 11873.22,
+          "youtube_url": "https://www.youtube.com/watch?v=KUPZJFGt94U",
+          "embed_url": "https://www.youtube-nocookie.com/embed/KUPZJFGt94U",
+          "thumbnail_url": "https://i.ytimg.com/vi/KUPZJFGt94U/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR01503227541303853057?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        },
+        {
+          "video_id": "sVzu7X4eBnA",
+          "url": "https://www.youtube.com/watch?v=sVzu7X4eBnA",
+          "title": "Customer Review VO Youtube ad   V2",
+          "author": "Coolina",
+          "views": 12724470,
+          "length_seconds": 112,
+          "upload_date": "2022-11-01T11:58:08Z",
+          "creative_count": 1,
+          "creative_urls": [
+            "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR09141895459277635585?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+          ],
+          "error": null,
+          "age_days": 1469,
+          "lifetime_views_per_day": 8661.99,
+          "youtube_url": "https://www.youtube.com/watch?v=sVzu7X4eBnA",
+          "embed_url": "https://www.youtube-nocookie.com/embed/sVzu7X4eBnA",
+          "thumbnail_url": "https://i.ytimg.com/vi/sVzu7X4eBnA/hqdefault.jpg",
+          "transparency_url": "https://adstransparency.google.com/advertiser/AR10302642548916617217/creative/CR09141895459277635585?region=US&format=VIDEO&platform=YOUTUBE&hl=en"
+        }
+      ],
+      "provenance": {
+        "platform": "Google Ads Transparency Center + YouTube",
+        "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+        "foreplay_dependency": false
+      }
+    }
+  ],
+  "provenance": {
+    "platform": "Google Ads Transparency Center + YouTube",
+    "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+    "foreplay_dependency": false
+  }
+}

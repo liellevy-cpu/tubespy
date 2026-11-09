@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TubeSpy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="/socket.io/socket.io.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0e18;
+    --surface: #111827;
+    --surface-2: #1a2238;
+    --border: #253049;
+    --text: #e8ecf4;
+    --text-dim: #7b89a8;
+    --accent: #e53935;
+    --accent-glow: rgba(229, 57, 53, 0.18);
+    --navy: #1b2a4a;
+    --navy-light: #243556;
+    --green: #34d399;
+    --green-dim: rgba(52, 211, 153, 0.12);
+    --red: #e53935;
+    --red-dim: rgba(229, 57, 53, 0.12);
+    --yellow: #fbbf24;
+    --yellow-dim: rgba(251, 191, 36, 0.12);
+    --radius: 10px;
+    --font: 'DM Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* ─── LAYOUT ──────────────────────────── */
+  .app {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .logo h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #fff;
+  }
+
+  .logo h1 .brand-tube { color: #e53935; }
+  .logo h1 .brand-spy { color: #fff; }
+
+  .logo h1 span.tagline {
+    color: var(--text-dim);
+    font-weight: 400;
+    margin-left: 10px;
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  /* ─── TABS ────────────────────────────── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 28px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    color: var(--text-dim);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    background: var(--surface-2);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ─── CARDS ───────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ─── BUTTONS ─────────────────────────── */
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #c62828; }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .btn-ghost:hover {
+    border-color: var(--text-dim);
+    color: var(--text);
+  }
+
+  .btn-danger {
+    background: var(--red-dim);
+    color: var(--red);
+    border: 1px solid transparent;
+  }
+  .btn-danger:hover { background: rgba(229, 57, 53, 0.25); }
+
+  .btn-success {
+    background: var(--green-dim);
+    color: var(--green);
+  }
+
+  /* ─── RUN PANEL ───────────────────────── */
+  .run-hero {
+    text-align: center;
+    padding: 48px 24px;
+  }
+
+  .run-hero h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .run-hero p {
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    font-size: 15px;
+  }
+
+  .run-btn {
+    padding: 14px 40px;
+    font-size: 16px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-family: var(--font);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 0 0 0 var(--accent-glow);
+  }
+  .run-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+  .run-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ─── PROGRESS ────────────────────────── */
+  .progress-section { display: none; }
+  .progress-section.visible { display: block; }
+
+  .progress-bar-track {
+    width: 100%;
+    height: 6px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-status {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .progress-log {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    max-height: 350px;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    margin-top: 16px;
+  }
+
+  .log-line { color: var(--text-dim); }
+  .log-line.ok { color: var(--green); }
+  .log-line.error { color: var(--red); }
+  .log-line.info { color: var(--accent); }
+  .log-line.warn { color: var(--yellow); }
+
+  /* ─── STAT GRID ───────────────────────── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: var(--mono);
+  }
+
+  .stat-change {
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .stat-change.up { color: var(--green); }
+  .stat-change.down { color: var(--red); }
+
+  /* ─── TABLE ───────────────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface-2); }
+
+  th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+  }
+
+  th.sortable:hover { color: var(--accent); }
+
+  th.sortable .sort-arrow { 
+    font-size: 10px;
+    margin-left: 2px;
+    opacity: 0.3;
+  }
+  th.sortable .sort-arrow::after { content: '▼'; }
+  th.sortable.asc .sort-arrow { opacity: 1; }
+  th.sortable.asc .sort-arrow::after { content: '▲'; }
+  th.sortable.desc .sort-arrow { opacity: 1; }
+  th.sortable.desc .sort-arrow::after { content: '▼'; }
+
+  .avg-views-hot {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .avg-views-warm {
+    color: var(--yellow);
+  }
+
+  .avg-views-cold {
+    color: var(--text-dim);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-ok { background: var(--green-dim); color: var(--green); }
+  .badge-warn { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-error { background: var(--red-dim); color: var(--red); }
+
+  /* ─── ADVERTISERS PANEL ───────────────── */
+  .adv-list { list-style: none; }
+
+  .adv-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .adv-item:last-child { border-bottom: none; }
+
+  .adv-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .adv-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .adv-url {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .adv-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .add-form {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  input[type="text"], input[type="url"], select {
+    width: 100%;
+    padding: 9px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  /* ─── HISTORY PANEL ───────────────────── */
+  .run-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .run-card:hover { background: var(--surface-2); }
+  .run-card:last-child { border-bottom: none; }
+
+  .run-date {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .run-meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .run-ads-count {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* ─── COMPARISON PANEL ────────────────── */
+  .comp-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 100px 100px 140px;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .comp-row.header {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    background: var(--surface-2);
+  }
+
+  .comp-change {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .comp-change.positive { color: var(--green); }
+  .comp-change.negative { color: var(--red); }
+  .comp-change.neutral { color: var(--text-dim); }
+
+  /* ─── SCHEDULE ────────────────────────── */
+  .schedule-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--surface-2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid var(--border);
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background: var(--text-dim);
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+    background: #fff;
+  }
+
+  /* ─── MODAL ───────────────────────────── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  /* ─── SCROLLBAR ───────────────────────── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ─── CHECKBOXES ──────────────────────── */
+  .adv-check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .adv-check-item:hover { border-color: var(--text-dim); }
+  .adv-check-item.checked {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .adv-check-item input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .adv-check-name {
+    font-size: 13px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ─── RESPONSIVE ──────────────────────── */
+  @media (max-width: 700px) {
+    .add-form { grid-template-columns: 1fr; }
+    .comp-row { grid-template-columns: 1fr 80px 80px; }
+    .comp-row > :nth-child(4),
+    .comp-row > :nth-child(5) { display: none; }
+  }
+  .btn-close-modal:hover { color: var(--text); background: var(--surface-2); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="logo-icon"><img src="/logo.png" alt="TubeSpy"></div>
+      <h1><span class="brand-tube">Tube</span><span class="brand-spy">Spy</span> <span class="tagline">the world's greatest YouTube ads research tool</span></h1>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="run">▶ Run Scan</button>
+    <button class="tab" data-tab="advertisers">👥 Advertisers</button>
+    <button class="tab" data-tab="history">📋 History</button>
+    <button class="tab" data-tab="comparison">📈 Comparison</button>
+    <button class="tab" data-tab="schedule">⏰ Schedule</button>
+  </div>
+
+  <!-- ═══ RUN PANEL ═══ -->
+  <div class="panel active" id="panel-run">
+    <div class="card" id="run-idle">
+      <div class="card-header">
+        <span class="card-title">Select Advertisers to Scan</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-ghost" onclick="toggleAllAdvertisers(true)">Select All</button>
+          <button class="btn btn-sm btn-ghost" onclick="toggleAllAdvertisers(false)">Deselect All</button>
+        </div>
+      </div>
+      <div id="run-adv-checkboxes" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-bottom:24px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="color:var(--text-dim);font-size:14px">
+          <span id="selected-count">0</span> advertisers selected
+          <span style="margin-left:12px" id="time-estimate-label"></span>
+        </div>
+        <button class="run-btn" id="btn-run" onclick="startRun()">
+          ▶ Start Scan
+        </button>
+      </div>
+    </div>
+
+    <div class="progress-section" id="progress-section">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" id="progress-title">Scanning...</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="badge badge-warn" id="progress-badge">Running</span>
+            <button class="btn btn-sm btn-danger" id="btn-stop" onclick="stopRun()">■ Stop</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div class="progress-status" id="progress-status">Initializing...</div>
+          <div id="time-display" style="font-family:var(--mono);font-size:13px;color:var(--text-dim)"></div>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+        <div class="progress-log" id="progress-log"></div>
+      </div>
+    </div>
+
+    <!-- Results appear after run -->
+    <div id="run-results" style="display:none">
+      <div class="stat-grid" id="result-stats"></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Scan Results</span>
+          <button class="btn btn-sm btn-ghost" id="btn-download" onclick="downloadCSV()">⬇ Download CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table id="results-table">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="advertiser" onclick="sortResults('advertiser')">Advertiser <span class="sort-arrow"></span></th>
+                <th class="sortable" data-sort="adIndex" onclick="sortResults('adIndex')">Ad # <span class="sort-arrow"></span></th>
+                <th>YouTube URL</th>
+                <th>Ad Transparency URL</th>
+                <th class="sortable" data-sort="views" onclick="sortResults('views')">Views <span class="sort-arrow"></span></th>
+                <th class="sortable" data-sort="avgViewsPerDay" onclick="sortResults('avgViewsPerDay')">Avg Views/Day <span class="sort-arrow"></span></th>
+                <th class="sortable" data-sort="uploadDate" onclick="sortResults('uploadDate')">Upload Date <span class="sort-arrow"></span></th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="results-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ADVERTISERS PANEL ═══ -->
+  <div class="panel" id="panel-advertisers">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Add New Advertiser</span>
+      </div>
+      <div class="add-form">
+        <div class="form-group">
+          <label>Advertiser Name</label>
+          <input type="text" id="new-adv-name" placeholder="e.g. Ridge Wallet">
+        </div>
+        <div class="form-group">
+          <label>Google Ads Transparency URL</label>
+          <input type="text" id="new-adv-url" placeholder="https://adstransparency.google.com/...">
+        </div>
+        <button class="btn btn-primary" onclick="addAdvertiser()" style="margin-bottom:1px">+ Add</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Advertiser List</span>
+        <span class="badge badge-ok" id="adv-total-badge">0</span>
+      </div>
+      <ul class="adv-list" id="adv-list"></ul>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORY PANEL ═══ -->
+  <div class="panel" id="panel-history">
+    <div class="card" id="history-card">
+      <div class="card-header">
+        <span class="card-title">Past Scans</span>
+      </div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ COMPARISON PANEL ═══ -->
+  <div class="panel" id="panel-comparison">
+    <div class="card" id="comparison-card">
+      <div class="card-header">
+        <span class="card-title">Week-over-Week Comparison</span>
+      </div>
+      <div id="comparison-content">
+        <p style="color: var(--text-dim); padding: 20px; text-align: center;">
+          Need at least 2 scans to compare. Run your first scan to get started.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCHEDULE PANEL ═══ -->
+  <div class="panel" id="panel-schedule">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Auto-Schedule</span>
+      </div>
+      <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 20px;">
+        Automatically run scans on a weekly schedule. The app needs to be running for scheduled scans to execute.
+      </p>
+      <div class="schedule-row">
+        <label class="toggle-switch">
+          <input type="checkbox" id="schedule-enabled" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span style="font-size: 14px;">Enabled</span>
+        <div class="form-group" style="margin-left: 16px;">
+          <label>Day</label>
+          <select id="schedule-day">
+            <option value="0">Sunday</option>
+            <option value="1" selected>Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Time</label>
+          <select id="schedule-hour">
+            <option value="6">6:00 AM</option>
+            <option value="7">7:00 AM</option>
+            <option value="8" selected>8:00 AM</option>
+            <option value="9">9:00 AM</option>
+            <option value="10">10:00 AM</option>
+            <option value="12">12:00 PM</option>
+            <option value="14">2:00 PM</option>
+            <option value="18">6:00 PM</option>
+            <option value="20">8:00 PM</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveSchedule()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RUN DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="run-detail-modal">
+    <h3 id="modal-title">Run Details</h3>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const socket = io();
+let lastCsvFile = '';
+
+// ─── TABS ──────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+
+    if (tab.dataset.tab === 'advertisers') loadAdvertisers();
+    if (tab.dataset.tab === 'history') loadHistory();
+    if (tab.dataset.tab === 'comparison') loadComparison();
+    if (tab.dataset.tab === 'schedule') loadSchedule();
+  });
+});
+
+// ─── RUN SCAN ──────────────────────────
+let scanStartTime = null;
+
+function startRun() {
+  // Get selected advertiser indices
+  const checkboxes = document.querySelectorAll('#run-adv-checkboxes input[type="checkbox"]');
+  const selectedIndices = [];
+  checkboxes.forEach((cb, i) => {
+    if (cb.checked) selectedIndices.push(i);
+  });
+
+  if (selectedIndices.length === 0) {
+    alert('Please select at least one advertiser to scan.');
+    return;
+  }
+
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('progress-section').classList.add('visible');
+  document.getElementById('run-results').style.display = 'none';
+  document.getElementById('progress-log').innerHTML = '';
+  document.getElementById('progress-bar').style.width = '0%';
+  document.getElementById('progress-badge').textContent = 'Running';
+  document.getElementById('progress-badge').className = 'badge badge-warn';
+  document.getElementById('btn-stop').style.display = 'inline-flex';
+  document.getElementById('time-display').textContent = '';
+  scanStartTime = Date.now();
+
+  socket.emit('run:start', { selectedIndices });
+  addLog(`Scan started — ${selectedIndices.length} advertisers selected`, 'info');
+}
+
+function stopRun() {
+  if (!confirm('Stop the scan? Results collected so far will still be saved.')) return;
+  socket.emit('run:cancel');
+  addLog('⏹ Stop requested — finishing current ad...', 'warn');
+  document.getElementById('btn-stop').disabled = true;
+  document.getElementById('btn-stop').textContent = '■ Stopping...';
+}
+
+function formatDuration(totalSeconds) {
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  if (m < 60) return `${m}m ${s}s`;
+  const h = Math.floor(m / 60);
+  return `${h}h ${m % 60}m`;
+}
+
+function updateTimeDisplay(elapsed, remaining) {
+  const el = document.getElementById('time-display');
+  let text = `⏱ ${formatDuration(elapsed)}`;
+  if (remaining && remaining > 0) {
+    text += `  ·  ~${formatDuration(remaining)} remaining`;
+  }
+  el.textContent = text;
+}
+
+function addLog(text, type = '') {
+  const log = document.getElementById('progress-log');
+  const time = new Date().toLocaleTimeString();
+  const line = document.createElement('div');
+  line.className = `log-line ${type}`;
+  line.textContent = `[${time}] ${text}`;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+socket.on('run:start', (data) => {
+  addLog(`Starting scan of ${data.total} advertisers (${data.source})`, 'info');
+});
+
+socket.on('run:advertiser', (data) => {
+  const pct = Math.round(((data.index + (data.status === 'done' ? 1 : 0.5)) / data.total) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-status').textContent =
+    `${data.name} — ${data.status}${data.adCount !== undefined ? ` (${data.adCount} ads)` : ''}`;
+
+  // Update time display
+  if (data.elapsed !== undefined) {
+    updateTimeDisplay(data.elapsed, data.estimatedRemaining || null);
+  }
+
+  if (data.status === 'loading') {
+    addLog(`${data.index + 1}/${data.total} Loading: ${data.name}`, 'info');
+  } else if (data.status === 'scraping') {
+    addLog(`  Found ${data.adCount} ads, scraping...`);
+  } else if (data.status === 'done') {
+    addLog(`  ✓ Done: ${data.name} (${data.adCount} ads)`, 'ok');
+  } else if (data.status === 'error') {
+    addLog(`  ✗ Error: ${data.name} — ${data.error}`, 'error');
+  }
+});
+
+socket.on('run:ad', (data) => {
+  const viewStr = data.views ? ` — ${Number(data.views).toLocaleString()} views` : '';
+  const cls = data.status === 'OK' ? 'ok' : data.status.includes('ERROR') ? 'error' : 'warn';
+  addLog(`    Ad ${data.adIndex}/${data.adTotal}: ${data.status}${viewStr}`, cls);
+});
+
+socket.on('run:complete', (data) => {
+  lastCsvFile = data.csvFile;
+  document.getElementById('progress-bar').style.width = '100%';
+  document.getElementById('btn-stop').style.display = 'none';
+  document.getElementById('btn-stop').disabled = false;
+  document.getElementById('btn-stop').textContent = '■ Stop';
+  document.getElementById('btn-run').disabled = false;
+
+  if (data.cancelled) {
+    document.getElementById('progress-badge').textContent = 'Stopped';
+    document.getElementById('progress-badge').className = 'badge badge-warn';
+    document.getElementById('progress-status').textContent = `Scan stopped — ${data.totalAds} ads collected before cancel`;
+    addLog(`\n⏹ Scan stopped. ${data.totalAds} ads saved. CSV: ${data.csvFile}`, 'warn');
+  } else {
+    document.getElementById('progress-badge').textContent = 'Complete';
+    document.getElementById('progress-badge').className = 'badge badge-ok';
+    document.getElementById('progress-status').textContent = `Scan complete — ${data.totalAds} ads processed`;
+    addLog(`\n✓ Scan complete! ${data.totalAds} total ads. CSV: ${data.csvFile}`, 'ok');
+  }
+
+  if (data.elapsed) {
+    const el = document.getElementById('time-display');
+    el.textContent = `⏱ Total: ${formatDuration(data.elapsed)}`;
+    addLog(`  Total time: ${formatDuration(data.elapsed)}`, 'info');
+  }
+
+  // Show results
+  showResults(data);
+});
+
+socket.on('run:cancelled', (data) => {
+  addLog(`Scan cancelled at advertiser ${data.processedSoFar}/${data.total}`, 'warn');
+});
+
+socket.on('error', (msg) => {
+  addLog(`Error: ${msg}`, 'error');
+  document.getElementById('btn-run').disabled = false;
+});
+
+let currentResults = [];
+let currentSortField = null;
+let currentSortDir = 'desc';
+
+function calcAvgViewsPerDay(views, uploadDate) {
+  if (!views || !uploadDate) return null;
+  const v = parseInt(views);
+  if (!v) return null;
+  const uploaded = new Date(uploadDate);
+  if (isNaN(uploaded.getTime())) return null;
+  const now = new Date();
+  const days = Math.max(1, Math.floor((now - uploaded) / (1000 * 60 * 60 * 24)));
+  return Math.round(v / days);
+}
+
+function formatUploadDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function avgViewsClass(avg) {
+  if (!avg) return 'avg-views-cold';
+  if (avg >= 10000) return 'avg-views-hot';
+  if (avg >= 1000) return 'avg-views-warm';
+  return 'avg-views-cold';
+}
+
+function renderResultsTable() {
+  const tbodyEl = document.getElementById('results-tbody');
+  tbodyEl.innerHTML = currentResults.map(r => {
+    const avg = calcAvgViewsPerDay(r.views, r.uploadDate);
+    return `
+      <tr>
+        <td>${esc(r.advertiser)}</td>
+        <td>${r.adIndex}</td>
+        <td>${r.youtubeUrl ? `<a href="${esc(r.youtubeUrl)}" target="_blank" style="color:var(--accent)">${esc(r.youtubeUrl.slice(0, 45))}…</a>` : '—'}</td>
+        <td>${r.adDetailUrl ? `<a href="${esc(r.adDetailUrl)}" target="_blank" style="color:var(--yellow)">View Ad</a>` : '—'}</td>
+        <td style="font-family:var(--mono)">${r.views ? Number(r.views).toLocaleString() : '—'}</td>
+        <td style="font-family:var(--mono)" class="${avgViewsClass(avg)}">${avg !== null ? avg.toLocaleString() : '—'}</td>
+        <td>${formatUploadDate(r.uploadDate)}</td>
+        <td>${statusBadge(r.status)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function sortResults(field) {
+  // Toggle direction if same field, otherwise default to desc
+  if (currentSortField === field) {
+    currentSortDir = currentSortDir === 'desc' ? 'asc' : 'desc';
+  } else {
+    currentSortField = field;
+    currentSortDir = 'desc';
+  }
+
+  // Update header arrows
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.classList.remove('asc', 'desc');
+    if (th.dataset.sort === field) th.classList.add(currentSortDir);
+  });
+
+  // Sort
+  currentResults.sort((a, b) => {
+    let valA, valB;
+
+    if (field === 'views') {
+      valA = parseInt(a.views) || 0;
+      valB = parseInt(b.views) || 0;
+    } else if (field === 'avgViewsPerDay') {
+      valA = calcAvgViewsPerDay(a.views, a.uploadDate) || 0;
+      valB = calcAvgViewsPerDay(b.views, b.uploadDate) || 0;
+    } else if (field === 'adIndex') {
+      valA = a.adIndex || 0;
+      valB = b.adIndex || 0;
+    } else if (field === 'uploadDate') {
+      valA = a.uploadDate ? new Date(a.uploadDate).getTime() : 0;
+      valB = b.uploadDate ? new Date(b.uploadDate).getTime() : 0;
+    } else {
+      // String fields (advertiser)
+      valA = (a[field] || '').toLowerCase();
+      valB = (b[field] || '').toLowerCase();
+      if (currentSortDir === 'asc') return valA < valB ? -1 : valA > valB ? 1 : 0;
+      return valA > valB ? -1 : valA < valB ? 1 : 0;
+    }
+
+    return currentSortDir === 'desc' ? valB - valA : valA - valB;
+  });
+
+  renderResultsTable();
+}
+
+function showResults(data) {
+  const statsEl = document.getElementById('result-stats');
+  document.getElementById('run-results').style.display = 'block';
+
+  const advNames = Object.keys(data.summary);
+  const totalAds = data.totalAds;
+  const totalViews = Object.values(data.summary).reduce((s, a) => s + a.totalViews, 0);
+  const withVideo = Object.values(data.summary).reduce((s, a) => s + a.withVideo, 0);
+
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-label">Advertisers</div><div class="stat-value">${advNames.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Ads</div><div class="stat-value">${totalAds}</div></div>
+    <div class="stat-card"><div class="stat-label">With Video</div><div class="stat-value">${withVideo}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Views</div><div class="stat-value">${totalViews.toLocaleString()}</div></div>
+  `;
+
+  // Load full results from API
+  fetch(`/api/runs/${data.id}`).then(r => r.json()).then(run => {
+    currentResults = run.results || [];
+    currentSortField = null;
+    // Reset sort arrows
+    document.querySelectorAll('th.sortable').forEach(th => th.classList.remove('asc', 'desc'));
+    renderResultsTable();
+  });
+}
+
+function downloadCSV() {
+  if (lastCsvFile) window.open(`/csv/${lastCsvFile}`, '_blank');
+}
+
+// ─── ADVERTISERS ───────────────────────
+let advertisersList = [];
+
+async function loadAdvertisers() {
+  const res = await fetch('/api/advertisers');
+  advertisersList = await res.json();
+
+  document.getElementById('adv-total-badge').textContent = advertisersList.length;
+
+  const ul = document.getElementById('adv-list');
+  ul.innerHTML = advertisersList.map((a, i) => `
+    <li class="adv-item">
+      <div class="adv-info">
+        <div class="adv-name">${esc(a.name)}</div>
+        <div class="adv-url" title="${esc(a.url)}">${esc(a.url)}</div>
+      </div>
+      <div class="adv-actions">
+        <button class="btn btn-sm btn-danger" onclick="removeAdvertiser(${i})">Remove</button>
+      </div>
+    </li>
+  `).join('');
+
+  // Also update run panel checkboxes
+  renderRunCheckboxes();
+}
+
+function renderRunCheckboxes() {
+  const container = document.getElementById('run-adv-checkboxes');
+  container.innerHTML = advertisersList.map((a, i) => `
+    <label class="adv-check-item checked">
+      <input type="checkbox" checked data-index="${i}" onchange="updateCheckboxUI(this)">
+      <span class="adv-check-name" title="${esc(a.name)}">${esc(a.name)}</span>
+    </label>
+  `).join('');
+  updateSelectedCount();
+  updateTimeEstimateLabel();
+}
+
+function updateCheckboxUI(cb) {
+  const item = cb.closest('.adv-check-item');
+  if (cb.checked) {
+    item.classList.add('checked');
+  } else {
+    item.classList.remove('checked');
+  }
+  updateSelectedCount();
+  updateTimeEstimateLabel();
+}
+
+function toggleAllAdvertisers(state) {
+  const checkboxes = document.querySelectorAll('#run-adv-checkboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => {
+    cb.checked = state;
+    updateCheckboxUI(cb);
+  });
+}
+
+function updateSelectedCount() {
+  const checkboxes = document.querySelectorAll('#run-adv-checkboxes input[type="checkbox"]');
+  let count = 0;
+  checkboxes.forEach(cb => { if (cb.checked) count++; });
+  document.getElementById('selected-count').textContent = count;
+  document.getElementById('btn-run').disabled = count === 0;
+}
+
+function updateTimeEstimateLabel() {
+  const checkboxes = document.querySelectorAll('#run-adv-checkboxes input[type="checkbox"]');
+  let count = 0;
+  checkboxes.forEach(cb => { if (cb.checked) count++; });
+  
+  // Rough estimate: ~2-3 min per advertiser depending on ad count
+  const el = document.getElementById('time-estimate-label');
+  if (count === 0) {
+    el.textContent = '';
+  } else {
+    const minMin = Math.max(1, Math.round(count * 1.5));
+    const maxMin = Math.round(count * 4);
+    el.textContent = `· Estimated: ${minMin}–${maxMin} min`;
+  }
+}
+
+async function addAdvertiser() {
+  const name = document.getElementById('new-adv-name').value.trim();
+  const url = document.getElementById('new-adv-url').value.trim();
+  if (!name || !url) return alert('Both name and URL are required.');
+
+  try {
+    const res = await fetch('/api/advertisers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, url }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert('Failed to add advertiser: ' + (err.error || res.statusText));
+      return;
+    }
+
+    document.getElementById('new-adv-name').value = '';
+    document.getElementById('new-adv-url').value = '';
+    await loadAdvertisers();
+    
+    // Flash success
+    showToast(`✓ Added "${name}" to advertiser list`);
+  } catch (err) {
+    alert('Error adding advertiser: ' + err.message);
+  }
+}
+
+function showToast(message) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;z-index:200;opacity:0;transition:opacity 0.3s;pointer-events:none;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.opacity = '1';
+  setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+}
+
+async function removeAdvertiser(idx) {
+  if (!confirm('Remove this advertiser?')) return;
+  try {
+    const res = await fetch(`/api/advertisers/${idx}`, { method: 'DELETE' });
+    if (!res.ok) {
+      alert('Failed to remove advertiser.');
+      return;
+    }
+    await loadAdvertisers();
+    showToast('✓ Advertiser removed');
+  } catch (err) {
+    alert('Error removing advertiser: ' + err.message);
+  }
+}
+
+// ─── HISTORY ───────────────────────────
+async function loadHistory() {
+  const res = await fetch('/api/runs');
+  const runs = await res.json();
+
+  const el = document.getElementById('history-list');
+  if (!runs.length) {
+    el.innerHTML = '<p style="color:var(--text-dim);padding:20px;text-align:center">No scans yet. Run your first scan to see history here.</p>';
+    return;
+  }
+
+  el.innerHTML = runs.reverse().map(run => {
+    const d = new Date(run.date);
+    return `
+      <div class="run-card" onclick="showRunDetail('${run.id}')">
+        <div>
+          <div class="run-date">${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+          <div class="run-meta">${d.toLocaleTimeString()} · ${run.source} · <a href="/csv/${run.csvFile}" onclick="event.stopPropagation()" style="color:var(--accent)">CSV</a></div>
+        </div>
+        <div style="text-align:right">
+          <div class="run-ads-count">${run.totalAds}</div>
+          <div class="run-meta">ads</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function showRunDetail(id) {
+  const res = await fetch(`/api/runs/${id}`);
+  const run = await res.json();
+
+  document.getElementById('modal-title').textContent =
+    `Scan — ${new Date(run.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`;
+
+  const summaryRows = Object.entries(run.summary).map(([adv, s]) => `
+    <tr>
+      <td>${esc(adv)}</td>
+      <td style="font-family:var(--mono)">${s.ads}</td>
+      <td style="font-family:var(--mono)">${s.withVideo}</td>
+      <td style="font-family:var(--mono)">${s.totalViews.toLocaleString()}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Advertiser</th><th>Ads</th><th>With Video</th><th>Total Views</th></tr></thead>
+        <tbody>${summaryRows}</tbody>
+      </table>
+    </div>
+  `;
+
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('active');
+  }
+}
+
+// ─── COMPARISON ────────────────────────
+async function loadComparison() {
+  const res = await fetch('/api/comparison');
+  const data = await res.json();
+  const el = document.getElementById('comparison-content');
+
+  if (!data.available) {
+    el.innerHTML = '<p style="color:var(--text-dim);padding:20px;text-align:center">Need at least 2 scans to compare. Run your first scan to get started.</p>';
+    return;
+  }
+
+  const d1 = new Date(data.previous.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const d2 = new Date(data.latest.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  let html = `
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:16px">Comparing: ${d1} → ${d2}</p>
+    <div class="comp-row header">
+      <div>Advertiser</div>
+      <div>Prev Ads</div>
+      <div>Curr Ads</div>
+      <div>New Ads</div>
+      <div>View Growth</div>
+    </div>
+  `;
+
+  for (const c of data.comparison) {
+    const adClass = c.newAds > 0 ? 'positive' : c.newAds < 0 ? 'negative' : 'neutral';
+    const viewClass = c.totalViewGrowth > 0 ? 'positive' : 'neutral';
+
+    html += `
+      <div class="comp-row">
+        <div style="font-weight:600">${esc(c.advertiser)}</div>
+        <div class="comp-change neutral">${c.prevAdCount}</div>
+        <div class="comp-change neutral">${c.currAdCount}</div>
+        <div class="comp-change ${adClass}">${c.newAds > 0 ? '+' : ''}${c.newAds}</div>
+        <div class="comp-change ${viewClass}">${c.totalViewGrowth > 0 ? '+' + c.totalViewGrowth.toLocaleString() : '—'}</div>
+      </div>
+    `;
+  }
+
+  el.innerHTML = html;
+}
+
+// ─── SCHEDULE ──────────────────────────
+async function loadSchedule() {
+  const res = await fetch('/api/schedule');
+  const data = await res.json();
+  document.getElementById('schedule-enabled').checked = data.schedule.enabled;
+  document.getElementById('schedule-day').value = data.schedule.day;
+  document.getElementById('schedule-hour').value = data.schedule.hour;
+}
+
+async function saveSchedule() {
+  const enabled = document.getElementById('schedule-enabled').checked;
+  const day = parseInt(document.getElementById('schedule-day').value);
+  const hour = parseInt(document.getElementById('schedule-hour').value);
+
+  await fetch('/api/schedule', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled, day, hour }),
+  });
+
+  alert('Schedule saved!');
+}
+
+// ─── HELPERS ───────────────────────────
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function statusBadge(status) {
+  if (status === 'OK') return '<span class="badge badge-ok">OK</span>';
+  if (status.includes('ERROR')) return `<span class="badge badge-error">${esc(status)}</span>`;
+  return `<span class="badge badge-warn">${esc(status)}</span>`;
+}
+
+// Init
+loadAdvertisers();
+</script>
+</body>
+</html>
