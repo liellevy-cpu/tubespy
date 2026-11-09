@@ -1,5 +1,6 @@
 """Real browser + local HTTP integration; collector is deliberately failed in this regression."""
 import functools
+import os
 from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
 import json
 from pathlib import Path
@@ -32,7 +33,7 @@ def test_browser_add_form_real_http_duplicate_and_failure(tmp_path):
     thread=threading.Thread(target=web.serve_forever,daemon=True);thread.start()
     try:
         with sync_playwright() as p:
-            browser=p.chromium.launch(executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless=True)
+            browser=p.chromium.launch(executable_path=os.environ.get('CHROME_PATH','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),headless=True)
             page=browser.new_page(viewport={'width':390,'height':844})
             errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
             page.goto(f'http://127.0.0.1:{web.server_port}/');page.locator('.video-card').first.wait_for()

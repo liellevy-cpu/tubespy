@@ -4,10 +4,13 @@ const grid = document.querySelector("#video-grid");
 const template = document.querySelector("#video-card-template");
 const note = document.querySelector("#ranking-note");
 const advertiserSelect = document.querySelector("#advertiser-select");
-const scopeLabel = document.querySelector("#scope-label");
+const LS_KEY = "tubespy_item_states";
+
 let library = null;
-let activeAdvertiser = null;
-let activeRanking = "most_viewed";
+let allVideos = [];          // [{video, advertiserName}]
+let states = {};             // video_id -> "used" | "not_relevant"
+let activeTab = "new";
+let advertiserName = "all";
 
 function safeUrl(raw, allowedHost) {
   const parsed = new URL(raw);
@@ -16,30 +19,15 @@ function safeUrl(raw, allowedHost) {
   }
   return parsed.href;
 }
-
-function number(value) {
-  return new Intl.NumberFormat("en-US").format(value);
-}
-
-function date(value) {
-  return new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric" }).format(new Date(value));
-}
-
-function duration(seconds) {
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  return `${minutes}:${String(rest).padStart(2, "0")}`;
-}
+const number = (v) => new Intl.NumberFormat("en-US").format(v);
+const date = (v) => new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric" }).format(new Date(v));
+const duration = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
 function addSummary(value, label) {
   const item = document.createElement("div");
   item.className = "summary-item";
-  const strong = document.createElement("span");
-  strong.className = "summary-value";
-  strong.textContent = value;
-  const text = document.createElement("span");
-  text.className = "summary-label";
-  text.textContent = label;
+  const strong = document.createElement("span"); strong.className = "summary-value"; strong.textContent = value;
+  const text = document.createElement("span"); text.className = "summary-label"; text.textContent = label;
   item.append(strong, text);
   document.querySelector("#source-summary").append(item);
 }
@@ -47,44 +35,80 @@ function addSummary(value, label) {
 function renderSummary(data) {
   const container = document.querySelector("#source-summary");
   container.replaceChildren();
-  const source = data.source_summary;
+  const s = data.source_summary || {};
   if (data.schema_version === 2) {
-    addSummary(number(source.advertisers), "Advertisers");
-    addSummary(number(source.unique_creative_pages), "Unique creative pages");
-    addSummary(number(source.recovered_unique_youtube_videos), "Recovered videos");
-    addSummary(number(source.youtube_metadata_failures), "Metadata failures");
+    addSummary(number(s.advertisers || (data.advertisers || []).length), "Advertisers");
+    addSummary(number(s.recovered_unique_youtube_videos || allVideos.length), "Videos");
+  }
+}
+
+// ----- state (server, with localStorage fallback) -----
+function loadLocalStates() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch { return {}; }
+}
+function saveLocalStates() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(states)); } catch { /* ignore */ }
+}
+async function loadStates() {
+  states = loadLocalStates();
+  try {
+    const r = await fetch("/api/item-states", { cache: "no-store", signal: AbortSignal.timeout(10000) });
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.states) { states = data.states; saveLocalStates(); }
+    }
+  } catch { /* offline: keep localStorage copy */ }
+}
+async function setState(videoId, state) {
+  if (state === "new") delete states[videoId]; else states[videoId] = state;
+  saveLocalStates();
+  render();
+  try {
+    await fetch("/api/item-state", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ video_id: videoId, state }), signal: AbortSignal.timeout(10000),
+    });
+  } catch { /* stays in localStorage; will reconcile next load */ }
+}
+
+// ----- data -----
+function flatten(data) {
+  const advertisers = data.schema_version === 2 ? (data.advertisers || []) : [data];
+  const out = [];
+  for (const a of advertisers) {
+    for (const v of a.videos || []) out.push({ video: v, advertiserName: a.advertiser.name });
+  }
+  return out;
+}
+
+function passesFilters(video) {
+  const minLen = Number(document.querySelector("#f-min-len").value) * 60 || 0;
+  const maxLen = Number(document.querySelector("#f-max-len").value) * 60 || Infinity;
+  const minViews = Number(document.querySelector("#f-min-views").value) || 0;
+  const afterVal = document.querySelector("#f-after").value;
+  if (video.length_seconds < minLen || video.length_seconds > maxLen) return false;
+  if (video.views < minViews) return false;
+  if (afterVal && new Date(video.upload_date) < new Date(afterVal)) return false;
+  if (advertiserName !== "all") return true; // advertiser filter applied in selection below
+  return true;
+}
+
+function visibleEntries() {
+  let entries = allVideos.filter((e) => advertiserName === "all" || e.advertiserName === advertiserName);
+  if (activeTab === "used") {
+    entries = entries.filter((e) => states[e.video.video_id] === "used");
   } else {
-    addSummary(`~${number(source.reported_ads_approx)}`, "Reported ads");
-    addSummary(number(source.unique_creative_pages), "Unique creative pages");
-    addSummary(number(source.recovered_unique_youtube_videos), "Recovered videos");
-    addSummary(number(source.youtube_metadata_failures), "YouTube metadata failures");
+    entries = entries.filter((e) => !states[e.video.video_id]);        // new = no state (used/not_relevant excluded)
+    entries = entries.filter((e) => passesFilters(e.video));
   }
+  return entries.sort((a, b) =>
+    b.video.lifetime_views_per_day - a.video.lifetime_views_per_day ||
+    b.video.views - a.video.views ||
+    a.video.video_id.localeCompare(b.video.video_id));
 }
 
-function populateAdvertisers(data) {
-  const advertisers = data.schema_version === 2 ? library.advertisers : [data];
-  advertiserSelect.replaceChildren();
-  if (advertisers.length > 1) {
-    const option = document.createElement("option");
-    option.value = "all";
-    option.textContent = `All brands — ${number(advertisers.reduce((total, item) => total + item.videos.length, 0))} videos`;
-    advertiserSelect.append(option);
-  }
-  advertisers.forEach((item, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = `${item.advertiser.name} — ${number(item.videos.length)} videos`;
-    advertiserSelect.append(option);
-  });
-  activeAdvertiser = advertisers.length > 1 ? null : advertisers[0];
-  advertiserSelect.closest(".advertiser-picker").hidden = advertisers.length === 1;
-  advertiserSelect.addEventListener("change", () => {
-    activeAdvertiser = advertiserSelect.value === "all" ? null : advertisers[Number(advertiserSelect.value)];
-    renderActiveAdvertiser();
-  });
-}
-
-function renderCard(video, rank, advertiserName) {
+function renderCard(entry) {
+  const { video, advertiserName: adv } = entry;
   const card = template.content.firstElementChild.cloneNode(true);
   const iframe = card.querySelector("iframe");
   iframe.title = `${video.title} — YouTube video player`;
@@ -98,74 +122,85 @@ function renderCard(video, rank, advertiserName) {
     card.querySelector(".embed").classList.add("playing");
     launch.remove();
   }, { once: true });
-  card.querySelector(".rank").textContent = `Rank ${rank}`;
+  card.querySelector(".product").textContent = video.product || "";
   card.querySelector(".title").textContent = video.title;
-  card.querySelector(".advertiser").textContent = advertiserName;
+  card.querySelector(".advertiser").textContent = adv;
+  card.querySelector(".views-day").textContent = `${number(Math.round(video.lifetime_views_per_day))}/day`;
   card.querySelector(".views").textContent = number(video.views);
   card.querySelector(".upload-date").textContent = date(video.upload_date);
-  card.querySelector(".age").textContent = `${number(video.age_days)} days`;
-  card.querySelector(".views-day").textContent = `${number(video.lifetime_views_per_day)}/day`;
   card.querySelector(".duration").textContent = duration(video.length_seconds);
   card.querySelector(".youtube-link").href = safeUrl(video.youtube_url, "www.youtube.com");
   card.querySelector(".transparency-link").href = safeUrl(video.transparency_url, "adstransparency.google.com");
+  card.querySelector(".act-used").addEventListener("click", () => setState(video.video_id, "used"));
+  card.querySelector(".act-hide").addEventListener("click", () => setState(video.video_id, "not_relevant"));
+  card.querySelector(".act-restore").addEventListener("click", () => setState(video.video_id, "new"));
   return card;
 }
 
-function renderRanking() {
-  activeRanking = "most_viewed";
+function render() {
+  grid.dataset.tab = activeTab;
+  document.querySelector("#rank-heading").textContent = activeTab === "used" ? "Used" : "New";
+  note.textContent = activeTab === "used"
+    ? "Videos you marked Used. Ranked by lifetime views/day."
+    : "English-only, 2–5 min, 1M+ views, grouped by product. Ranked by lifetime views/day.";
+  // counts
+  const newCount = allVideos.filter((e) => !states[e.video.video_id]).length;
+  const usedCount = allVideos.filter((e) => states[e.video.video_id] === "used").length;
+  document.querySelector('[data-count="new"]').textContent = newCount ? `(${newCount})` : "";
+  document.querySelector('[data-count="used"]').textContent = usedCount ? `(${usedCount})` : "";
+  const entries = visibleEntries();
   grid.replaceChildren();
-  let entries;
-  if (activeAdvertiser === null) {
-    note.textContent = "Current lifetime YouTube views across all selected brand winners, descending.";
-    entries = library.advertisers
-      .flatMap((advertiser) => advertiser.videos.map((video) => ({ video, advertiser })))
-      .sort((a, b) => b.video.views - a.video.views || a.video.video_id.localeCompare(b.video.video_id));
-  } else {
-    note.textContent = activeAdvertiser.rankings.definitions.most_viewed;
-    const videos = new Map(activeAdvertiser.videos.map((video) => [video.video_id, video]));
-    entries = activeAdvertiser.rankings.most_viewed.map((id) => ({ video: videos.get(id), advertiser: activeAdvertiser }));
-  }
   if (!entries.length) {
-    const empty = document.createElement("p");
-    empty.className = "empty";
-    empty.textContent = "No verified YouTube videos are available in the current snapshot.";
+    const empty = document.createElement("p"); empty.className = "empty";
+    empty.textContent = activeTab === "used" ? "No videos marked Used yet." : "No videos match the current filters.";
     grid.append(empty);
     return;
   }
-  entries.forEach((entry, index) => grid.append(renderCard(entry.video, index + 1, entry.advertiser.advertiser.name)));
+  entries.forEach((e) => grid.append(renderCard(e)));
 }
 
-function renderActiveAdvertiser() {
-  if (activeAdvertiser === null) {
-    document.querySelector("#rank-heading").textContent = "All brands";
-    document.querySelector("#snapshot-label").textContent = `Snapshot ${date(library.snapshot_at)} · ${number(library.advertisers.reduce((total, item) => total + item.videos.length, 0))} videos`;
-    scopeLabel.textContent = "All selected videos ranked by current YouTube views";
-  } else {
-    document.querySelector("#rank-heading").textContent = activeAdvertiser.advertiser.name;
-    document.querySelector("#snapshot-label").textContent = `Snapshot ${date(activeAdvertiser.snapshot_at)} · top ${number(activeAdvertiser.videos.length)} videos`;
-    scopeLabel.textContent = "Top five by current YouTube views";
+function populateAdvertisers() {
+  advertiserSelect.replaceChildren();
+  const names = [...new Set(allVideos.map((e) => e.advertiserName))].sort();
+  const optAll = document.createElement("option"); optAll.value = "all"; optAll.textContent = `All brands — ${number(allVideos.length)} videos`;
+  advertiserSelect.append(optAll);
+  for (const name of names) {
+    const o = document.createElement("option"); o.value = name;
+    o.textContent = `${name} — ${number(allVideos.filter((e) => e.advertiserName === name).length)} videos`;
+    advertiserSelect.append(o);
   }
-  renderRanking();
+  advertiserSelect.closest(".advertiser-picker").hidden = names.length <= 1 && false;
+  advertiserSelect.addEventListener("change", () => { advertiserName = advertiserSelect.value; render(); });
 }
-fetch("data/library.json", { cache: "no-store" })
-  .then((response) => {
-    if (!response.ok) throw new Error(`Data request failed: ${response.status}`);
-    return response.json();
-  })
-  .then((data) => {
-    library = data;
-    renderSummary(data);
-    populateAdvertisers(data);
-    renderActiveAdvertiser();
-  })
-  .catch((error) => {
-    note.textContent = "Library data is unavailable.";
-    const empty = document.createElement("p");
-    empty.className = "empty";
-    empty.textContent = error.message;
-    grid.replaceChildren(empty);
-  });
 
+document.querySelectorAll(".tab").forEach((btn) => btn.addEventListener("click", () => {
+  activeTab = btn.dataset.tab;
+  document.querySelectorAll(".tab").forEach((b) => { b.classList.toggle("is-active", b === btn); b.setAttribute("aria-selected", b === btn ? "true" : "false"); });
+  render();
+}));
+document.querySelector("#filters").addEventListener("input", render);
+document.querySelector("#filters").addEventListener("reset", () => setTimeout(render, 0));
+
+async function init() {
+  try {
+    const response = await fetch("data/library.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Data request failed: ${response.status}`);
+    library = await response.json();
+    allVideos = flatten(library);
+    await loadStates();
+    renderSummary(library);
+    populateAdvertisers();
+    document.querySelector("#snapshot-label").textContent = library.snapshot_at ? `Snapshot ${date(library.snapshot_at)}` : "";
+    render();
+  } catch (error) {
+    note.textContent = "Library data is unavailable.";
+    const empty = document.createElement("p"); empty.className = "empty"; empty.textContent = error.message;
+    grid.replaceChildren(empty);
+  }
+}
+init();
+
+// ----- add-brand panel (unchanged endpoints: /api/brands, /api/add-brand) -----
 const brandForm = document.querySelector('#add-brand-form');
 const brandStatus = document.querySelector('#brand-status');
 const brandQueue = document.querySelector('#brand-queue');

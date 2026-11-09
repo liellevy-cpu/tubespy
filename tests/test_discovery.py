@@ -1,0 +1,73 @@
+"""Snowball discovery: not-Sunday gate, dedup, sequential one-by-one queuing."""
+from datetime import datetime
+
+from discovery import (
+    is_discovery_day, domain_of, landing_domains, snowball,
+    queue_new_advertisers, run_weekly_discovery,
+)
+
+
+def test_discovery_never_runs_on_sunday():
+    assert is_discovery_day(datetime(2026, 11, 8)) is False  # Sunday
+    assert is_discovery_day(datetime(2026, 11, 9)) is True   # Monday
+
+
+def test_domain_of_registrable():
+    assert domain_of("https://www.derila.com/offer?x=1") == "derila.com"
+    assert domain_of("shop.foo.co.uk".replace("co.uk", "com")) == "foo.com"
+    assert domain_of("not a url") is None
+
+
+def test_landing_domains_from_videos():
+    dataset = {"videos": [
+        {"landing_domain": "https://buyvacuum.com/x"},
+        {"landing_domain": "buyvacuum.com"},
+        {"landing_domain": "https://figbites.io"},
+        {},  # no landing domain -> skipped, never guessed
+    ]}
+    assert landing_domains(dataset) == ["buyvacuum.com", "figbites.io"]
+
+
+def test_snowball_dedupes_against_known_and_itself():
+    lookups = {
+        "a.com": ["AR111", "AR222", "AR111"],
+        "b.com": ["AR222", "AR333", "/advertiser/AR444"],
+    }
+    out = snowball(["a.com", "b.com"], known_advertiser_ids={"AR222"}, lookup_fn=lookups.get)
+    assert out == ["AR111", "AR333", "AR444"]  # AR222 known, dupes removed, URL parsed
+
+
+class _Store:
+    def __init__(self):
+        self.calls = []
+
+    def submit(self, payload, visitor, trusted=False):
+        if payload["name"] == "boom":
+            raise ValueError("already exists")
+        self.calls.append((payload["name"], payload["url"], visitor, trusted))
+        return {}, True
+
+
+def test_queue_new_advertisers_one_by_one_and_skips_errors():
+    store = _Store()
+    queued = queue_new_advertisers(store, ["AR111", "AR222"],
+                                   name_fn=lambda a: "boom" if a == "AR111" else a)
+    assert queued == ["AR222"]                 # AR111 raised -> skipped, stayed sequential
+    assert len(store.calls) == 1
+    assert store.calls[0][0] == "AR222"
+    assert store.calls[0][3] is True           # trusted submit
+
+
+def test_run_weekly_discovery_end_to_end():
+    store = _Store()
+    library = {"advertisers": [
+        {"advertiser": {"google_advertiser_id": "AR001"},
+         "videos": [{"landing_domain": "https://seed.com/x"}]},
+    ]}
+    lookup = {"seed.com": ["AR001", "AR999"]}  # AR001 already known
+    result = run_weekly_discovery(store, library, lookup.get, when=datetime(2026, 11, 9))
+    assert result["ran"] is True
+    assert result["queued"] == ["AR999"]
+
+    sunday = run_weekly_discovery(store, library, lookup.get, when=datetime(2026, 11, 8))
+    assert sunday["ran"] is False

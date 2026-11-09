@@ -13,6 +13,7 @@ import argparse
 import asyncio
 import csv
 import json
+import os
 import re
 import sys
 import uuid
@@ -27,7 +28,7 @@ from add_brand import Invalid, validate  # noqa: E402
 from brand_worker import RestrictedBrowser  # noqa: E402
 
 EXPORTS = ROOT / "build/tubespy-exports"
-CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+CHROME = os.environ.get("CHROME_PATH", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
 
 
 def parse_target(url: str) -> dict:
@@ -41,7 +42,7 @@ def write_csv(source: Path, path: Path) -> dict:
     creatives = collect_all.load_jsonl(source / "creative_video_results.jsonl")
     stats = {row["video_id"]: row for row in collect_all.load_jsonl(source / "youtube_stats.jsonl")}
     unavailable_file = source / "youtube_unavailable.json"
-    unavailable = {row["video_id"]: row for row in (json.loads(unavailable_file.read_text()) if unavailable_file.exists() else [])}
+    unavailable = {row["video_id"]: row for row in (json.loads(unavailable_file.read_text(encoding="utf-8")) if unavailable_file.exists() else [])}
     by_video: dict[str, list[dict]] = {}
     unresolved = []
     for row in creatives:
@@ -68,12 +69,12 @@ def write_csv(source: Path, path: Path) -> dict:
         })
     rows.sort(key=lambda r: (r["views"] is None, -(r["views"] or 0)))
     fields = list(rows[0].keys()) if rows else ["youtube_url"]
-    with path.open("w", newline="") as handle:
+    with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         writer.writerows(rows)
     withheld_file = source / "google_withheld_creatives.json"
-    withheld = set(json.loads(withheld_file.read_text())) if withheld_file.exists() else set()
+    withheld = set(json.loads(withheld_file.read_text(encoding="utf-8"))) if withheld_file.exists() else set()
     unresolved = [row for row in unresolved if row["creative_url"] not in withheld]
     return {"videos": len(rows), "ads_found": len(creatives), "ads_unresolved": len(unresolved),
             "ads_hidden_by_google": len(withheld),
@@ -90,7 +91,7 @@ async def run(target: dict, out: Path) -> dict:
         try:
             with collect_all.google_lock("tubespy:" + target["advertiser_id"]):
                 summary = await collect_all.collect_advertiser(
-                RestrictedBrowser(browser), {"name": target["advertiser_id"], "transparency_url": target["url"]}, 1)
+                    RestrictedBrowser(browser), {"name": target["advertiser_id"], "transparency_url": target["url"]}, 1)
         finally:
             await browser.close()
     source = collect_all.RAW / collect_all.slugify(target["advertiser_id"])

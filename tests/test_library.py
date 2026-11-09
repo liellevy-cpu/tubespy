@@ -191,6 +191,7 @@ def test_build_dataset_accepts_explicitly_verified_removed_video(tmp_path):
     assert dataset["source_summary"]["unavailable_youtube_videos"] == 1
 
 
+@pytest.mark.skipif(not ARTIFACTS.exists(), reason="original TQR pilot evidence exists only on the Emater Mac mini")
 def test_real_evidence_build_has_required_111_video_contract():
     dataset = build_dataset(
         ARTIFACTS,
@@ -219,7 +220,7 @@ def test_stage_allowlist_and_rendered_card_contract(tmp_path):
     dataset = build_dataset(source, SNAPSHOT, "TQR Marketing Group", "AR15438241099155505153", 400)
     write_json(public / "data" / "library.json", dataset)
     stage = build_stage(public, tmp_path / "stage")
-    files = sorted(str(p.relative_to(stage)) for p in stage.rglob("*") if p.is_file())
+    files = sorted(p.relative_to(stage).as_posix() for p in stage.rglob("*") if p.is_file())
     assert files == ["app.js", "data/library.json", "index.html", "styles.css"]
     html = (stage / "index.html").read_text(encoding="utf-8")
     assert 'id="video-card-template"' in html
@@ -268,17 +269,17 @@ def test_dashboard_exposes_advertiser_selector_for_multi_brand_library():
     html = (project / "public" / "index.html").read_text(encoding="utf-8")
     script = (project / "public" / "app.js").read_text(encoding="utf-8")
     assert 'id="advertiser-select"' in html
-    assert "library.advertisers" in script
-    assert "activeAdvertiser" in script
+    assert "allVideos" in script
+    assert "advertiserName" in script
 
 
-def test_dashboard_defaults_to_one_all_brands_view_ranked_by_views():
+def test_dashboard_defaults_to_one_all_brands_view_ranked_by_views_per_day():
     project = Path(__file__).resolve().parents[1]
     script = (project / "public" / "app.js").read_text(encoding="utf-8")
-    assert 'option.value = "all"' in script
-    assert 'option.textContent = `All brands' in script
-    assert "b.video.views - a.video.views" in script
-    assert 'document.querySelector("#rank-heading").textContent = "All brands"' in script
+    assert 'optAll.value = "all"' in script
+    assert "All brands" in script
+    assert "b.video.lifetime_views_per_day - a.video.lifetime_views_per_day" in script
+    assert 'let advertiserName = "all"' in script
 
 
 def test_retain_top_viewed_publishes_only_five_winners():
@@ -311,10 +312,10 @@ def test_retain_top_viewed_publishes_only_five_winners():
     assert len(dataset["videos"]) == 8
 
 
-def test_dashboard_only_exposes_highest_viewed_ranking():
+def test_dashboard_has_new_used_tabs_and_views_per_day_ranking():
     project = Path(__file__).resolve().parents[1]
     html = (project / "public" / "index.html").read_text(encoding="utf-8")
     assert 'data-ranking="fastest_since_upload"' not in html
     assert 'data-ranking="newest_breakouts"' not in html
-    assert 'data-ranking="fastest_growing_now"' not in html
-    assert "Top five by current YouTube views" in html
+    assert 'data-tab="new"' in html and 'data-tab="used"' in html
+    assert "views/day" in html.lower()

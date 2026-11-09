@@ -40,6 +40,7 @@ class Store:
               state TEXT NOT NULL, created_at REAL NOT NULL, attempted_at REAL,
               completed_at REAL, message TEXT NOT NULL DEFAULT '', lease_until REAL);
             CREATE TABLE IF NOT EXISTS submissions (visitor TEXT NOT NULL, at REAL NOT NULL);
+            CREATE TABLE IF NOT EXISTS item_state (video_id TEXT PRIMARY KEY, state TEXT NOT NULL, at REAL NOT NULL);
             ''')
     def connect(self):
         db=sqlite3.connect(self.path, timeout=30); db.row_factory=sqlite3.Row
@@ -70,6 +71,25 @@ class Store:
     def pause(self, identities):
         with self.connect() as db:
             db.executemany("UPDATE brands SET state='inactive',message='Paused by owner.' WHERE advertiser_id=?",[(identity,) for identity in identities])
+    def set_item_state(self, video_id, state):
+        # Per-video library state: 'used' (goes to the Used tab) or 'not_relevant' (hidden). 'new' clears it.
+        if not re.fullmatch(r'[A-Za-z0-9_-]{11}', video_id or ''): raise Invalid('Invalid video id.')
+        if state not in ('used','not_relevant','new'): raise Invalid('Unsupported item state.')
+        with self.connect() as db:
+            if state=='new':
+                db.execute('DELETE FROM item_state WHERE video_id=?',(video_id,))
+            else:
+                db.execute("INSERT INTO item_state(video_id,state,at) VALUES(?,?,?) ON CONFLICT(video_id) DO UPDATE SET state=excluded.state,at=excluded.at",(video_id,state,time.time()))
+        return {'video_id':video_id,'state':state}
+    def item_states(self):
+        with self.connect() as db:
+            return {row['video_id']:row['state'] for row in db.execute('SELECT video_id,state FROM item_state')}
+    def seed_used(self, video_ids):
+        for video_id in video_ids:
+            with self.connect() as db:
+                if not db.execute('SELECT 1 FROM item_state WHERE video_id=?',(video_id,)).fetchone():
+                    try: self.set_item_state(video_id,'used')
+                    except Invalid: pass
     def queue_weekly(self):
         with self.connect() as db:
             count=db.execute("UPDATE brands SET state='queued', message='' WHERE state IN ('complete','failed')").rowcount

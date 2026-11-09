@@ -70,7 +70,7 @@ def test_add_form_has_responsive_styles_and_coherent_release():
     html=(project/'public/index.html').read_text()
     assert '.add-brand-panel' in css and '#add-brand-form' in css
     versions=re.findall(r'(?:styles.css|app.js)\?v=([^\"]+)',html)
-    assert versions==['20260929-add-brand-1','20260929-add-brand-1']
+    assert versions==['20261109-newused-1','20261109-newused-1']
 
 
 def test_frontend_posts_only_add_route_and_disables_repeat_submit():

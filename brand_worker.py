@@ -4,7 +4,6 @@ import argparse
 import asyncio
 from copy import deepcopy
 from datetime import datetime, timezone
-import fcntl
 import json
 import os
 from pathlib import Path
@@ -76,6 +75,17 @@ def publish_stage(stage):
         else:raise RuntimeError('Live artifact differs: '+relative)
 
 
+def _lock_exclusive(handle):
+    """Cross-platform exclusive file lock (fcntl on Unix, msvcrt on Windows)."""
+    try:
+        import fcntl
+        fcntl.flock(handle, fcntl.LOCK_EX)
+    except ModuleNotFoundError:
+        import msvcrt
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
+
+
 def collect_and_publish(item, root=ROOT, run=subprocess.run, publish=publish_stage):
     root=Path(root);job=collection_job(item,root);directory=Path(job['run'])
     path=directory/'job.json';path.write_text(json.dumps(job))
@@ -83,7 +93,7 @@ def collect_and_publish(item, root=ROOT, run=subprocess.run, publish=publish_sta
         run([sys.executable,str(ROOT/'brand_worker.py'),'--collect-job',str(path)],cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,timeout=5500,check=True)
     fresh=json.loads((directory/'dataset.json').read_text())
     with (root/'build/publish.lock').open('a') as lock:
-        fcntl.flock(lock,fcntl.LOCK_EX)
+        _lock_exclusive(lock)
         snapshot=root/'public/data/library.json'
         previous=json.loads(snapshot.read_text());combined=merge_dataset(previous,fresh)
         stage=directory/'stage';stage.mkdir()
@@ -144,7 +154,7 @@ def require_resolved_creatives(source, identity):
 
 async def collect_job(job):
     import collect_all
-    from library import build_dataset, retain_top_viewed
+    from library import build_dataset, filter_and_rank, group_by_product, apply_match_gate
     from playwright.async_api import async_playwright
     collect_all.RAW=Path(job['raw_root'])
     original_discover=collect_all.collect_creative_urls
@@ -155,17 +165,22 @@ async def collect_job(job):
     collect_all.collect_creative_urls=checked_discover
     # Fresh UUID root and ID-based name forbid old caches and the historic TQR bypass.
     async with async_playwright() as p:
-        browser=await p.chromium.launch(headless=True,executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
+        browser=await p.chromium.launch(headless=True,executable_path=os.environ.get('CHROME_PATH','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'))
         try:
-          with collect_all.google_lock('library:'+job['advertiser_id']):
-            summary=await asyncio.wait_for(collect_all.collect_advertiser(RestrictedBrowser(browser),{'name':job['collector_name'],'transparency_url':job['url']},1),timeout=5400)
+            with collect_all.google_lock('library:'+job['advertiser_id']):
+                summary=await asyncio.wait_for(collect_all.collect_advertiser(RestrictedBrowser(browser),{'name':job['collector_name'],'transparency_url':job['url']},1),timeout=5400)
         finally:await browser.close()
-    require_complete(summary)
     if summary.get('advertiser_ids') != [job['advertiser_id']]:raise ValueError('Advertiser identity mismatch')
     snapshot=datetime.now(timezone.utc)
     source=Path(job['raw_root'])/collect_all.slugify(job['collector_name'])
+    # Publish only brands >=90% matched; records unmatched ads and trims the source
+    # to the matched subset so the strict builder accepts it (raises below 90%).
+    report=apply_match_gate(source)
     require_resolved_creatives(source,job['advertiser_id'])
-    dataset=retain_top_viewed(build_dataset(source,snapshot,job['name'],job['advertiser_id'],summary['creative_count']),5)
+    # Keep ALL qualifying videos (English, 2-5 min, 1M+), then AI-label + group by product.
+    dataset=group_by_product(filter_and_rank(build_dataset(source,snapshot,job['name'],job['advertiser_id'],summary['creative_count'])))
+    dataset['unmatched_ads']=report['unmatched_ads']
+    dataset['source_summary']['match_rate']=report['match_rate']
     (Path(job['run'])/'dataset.json').write_text(json.dumps(dataset,indent=2))
 
 
