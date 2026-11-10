@@ -11,6 +11,14 @@ let allVideos = [];          // [{video, advertiserName}]
 let states = {};             // video_id -> "used" | "not_relevant"
 let activeTab = "new";
 let advertiserName = "all";
+let suggestions = [];
+
+function positionIndicator() {
+  const seg = document.querySelector(".segmented");
+  const active = seg.querySelector(".tab.is-active");
+  const ind = seg.querySelector(".seg-indicator");
+  if (active && ind) { ind.style.left = `${active.offsetLeft}px`; ind.style.width = `${active.offsetWidth}px`; }
+}
 
 function safeUrl(raw, allowedHost) {
   const parsed = new URL(raw);
@@ -94,6 +102,11 @@ function passesFilters(video) {
 }
 
 function visibleEntries() {
+  if (activeTab === "suggestions") {
+    return suggestions
+      .filter((s) => !states[s.video_id])  // drop any that became Used / Not relevant
+      .map((s) => ({ video: { ...s, lifetime_views_per_day: s.views_per_day }, advertiserName: s.channel, reason: s.reason }));
+  }
   let entries = allVideos.filter((e) => advertiserName === "all" || e.advertiserName === advertiserName);
   if (activeTab === "used") {
     entries = entries.filter((e) => states[e.video.video_id] === "used");
@@ -123,6 +136,7 @@ function renderCard(entry) {
     launch.remove();
   }, { once: true });
   card.querySelector(".product").textContent = video.product || "";
+  card.querySelector(".reason").textContent = entry.reason || "";
   card.querySelector(".title").textContent = video.title;
   card.querySelector(".advertiser").textContent = adv;
   card.querySelector(".views-day").textContent = `${number(Math.round(video.lifetime_views_per_day))}/day`;
@@ -143,15 +157,23 @@ function renderCard(entry) {
 
 function render() {
   grid.dataset.tab = activeTab;
-  document.querySelector("#rank-heading").textContent = activeTab === "used" ? "Used" : "New";
-  note.textContent = activeTab === "used"
-    ? "Videos you marked Used. Ranked by lifetime views/day."
-    : "English-only, 2–5 min, 1M+ views, grouped by product. Ranked by lifetime views/day.";
+  const headings = { new: "New", used: "Used", suggestions: "Suggestions" };
+  const notes = {
+    new: "English-only, 2–5 min, 1M+ views, grouped by product. Ranked by lifetime views/day.",
+    used: "Videos you marked Used. Ranked by lifetime views/day.",
+    suggestions: "AI-picked swipes for Coolina, refreshed twice a week — each with a one-line reason.",
+  };
+  document.querySelector("#rank-heading").textContent = headings[activeTab] || "New";
+  note.textContent = notes[activeTab] || notes.new;
+  document.querySelector("#filters").style.display = activeTab === "new" ? "" : "none";
   // counts
   const newCount = allVideos.filter((e) => !states[e.video.video_id]).length;
   const usedCount = allVideos.filter((e) => states[e.video.video_id] === "used").length;
+  const sugCount = suggestions.filter((s) => !states[s.video_id]).length;
   document.querySelector('[data-count="new"]').textContent = newCount ? `(${newCount})` : "";
   document.querySelector('[data-count="used"]').textContent = usedCount ? `(${usedCount})` : "";
+  document.querySelector('[data-count="suggestions"]').textContent = sugCount ? `(${sugCount})` : "";
+  positionIndicator();
   const entries = visibleEntries();
   grid.replaceChildren();
   if (!entries.length) {
@@ -218,6 +240,7 @@ async function init() {
     library = await response.json();
     allVideos = flatten(library);
     await loadStates();
+    try { const sr = await fetch("data/suggestions.json", { cache: "no-store" }); if (sr.ok) suggestions = (await sr.json()).suggestions || []; } catch { /* none generated yet */ }
     renderSummary(library);
     populateAdvertisers();
     document.querySelector("#snapshot-label").textContent = library.snapshot_at ? `Snapshot ${date(library.snapshot_at)}` : "";
@@ -229,6 +252,7 @@ async function init() {
   }
 }
 init();
+window.addEventListener("resize", positionIndicator);
 
 // ----- add-brand panel (unchanged endpoints: /api/brands, /api/add-brand) -----
 const brandForm = document.querySelector('#add-brand-form');

@@ -3,8 +3,19 @@ from datetime import datetime
 
 from discovery import (
     is_discovery_day, domain_of, landing_domains, snowball,
-    queue_new_advertisers, run_weekly_discovery,
+    queue_new_advertisers, run_weekly_discovery, extract_landing_domain,
 )
+
+
+def test_extract_landing_domain_from_adurl_bundle():
+    # shape seen live in the content.js preview bundle
+    js = r"...google_td_ad_signals:0,adurl\x3dhttps%3A%2F%2Farborahaven.com%2Fproducts%2F16072\x27,vis..."
+    assert extract_landing_domain(js) == "arborahaven.com"
+
+
+def test_extract_landing_domain_filters_noise_and_missing():
+    assert extract_landing_domain(r"adurl\x3dhttps%3A%2F%2Fd3.cloudfront.net%2Fx") is None
+    assert extract_landing_domain("no adurl in here") is None
 
 
 def test_discovery_never_runs_on_sunday():

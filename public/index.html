@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <title>YouTube Competitor Library — Coolina</title>
-  <link rel="stylesheet" href="styles.css?v=20261109-redesign-1">
+  <link rel="stylesheet" href="styles.css?v=20261110-suggestions-1">
 </head>
 <body>
   <header class="hero">
@@ -47,6 +47,7 @@
         <span class="seg-indicator" aria-hidden="true"></span>
         <button class="tab is-active" data-tab="new" role="tab" aria-selected="true">New <span class="count" data-count="new"></span></button>
         <button class="tab" data-tab="used" role="tab" aria-selected="false">Used <span class="count" data-count="used"></span></button>
+        <button class="tab" data-tab="suggestions" role="tab" aria-selected="false">Suggestions <span class="count" data-count="suggestions"></span></button>
       </div>
 
       <div id="filters" class="filters" aria-label="Filters">
@@ -120,6 +121,7 @@
       </div>
       <div class="card-body">
         <p class="product"></p>
+        <p class="reason"></p>
         <h3 class="title"></h3>
         <p class="advertiser"></p>
         <dl class="metrics">
@@ -145,6 +147,6 @@
   </template>
 
   <footer><p>Public-source research. Rankings describe the captured snapshot; they do not prove spend, ROAS, or current growth.</p></footer>
-  <script src="app.js?v=20261109-redesign-1" defer></script>
+  <script src="app.js?v=20261110-suggestions-1" defer></script>
 </body>
 </html>

@@ -9,8 +9,7 @@ h1{font-weight:700}h2{font-weight:600}
 
 /* Segmented pill tab control with animated indicator */
 .segmented{position:relative;display:inline-flex;gap:4px;padding:5px;margin:14px 0 20px;background:#0b1626;border:1px solid var(--line);border-radius:999px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
-.segmented .seg-indicator{position:absolute;top:5px;bottom:5px;left:5px;width:calc(50% - 5px);border-radius:999px;background:linear-gradient(135deg,var(--accent),#8ff0d9);box-shadow:0 6px 18px var(--glow);transition:transform .34s cubic-bezier(.4,1.3,.5,1)}
-.segmented[data-active="used"] .seg-indicator{transform:translateX(100%)}
+.segmented .seg-indicator{position:absolute;top:5px;bottom:5px;left:5px;width:120px;border-radius:999px;background:linear-gradient(135deg,var(--accent),#8ff0d9);box-shadow:0 6px 18px var(--glow);transition:left .34s cubic-bezier(.4,1.3,.5,1),width .34s cubic-bezier(.4,1.3,.5,1)}
 .segmented .tab{position:relative;z-index:1;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:14px;padding:9px 22px;border-radius:999px;cursor:pointer;transition:color .25s;min-width:120px}
 .segmented .tab.is-active{color:#06241c}
 .segmented .tab:not(.is-active):hover{color:#fff}
@@ -42,6 +41,9 @@ h1{font-weight:700}h2{font-weight:600}
 /* Product label chip */
 .card-body .product{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);font-weight:700;margin:0 0 8px;padding:3px 10px;border:1px solid rgba(104,225,192,.3);border-radius:999px;background:rgba(104,225,192,.07)}
 .card-body .product:empty{display:none}
+.card-body .reason{font-size:12.5px;line-height:1.45;color:var(--ink);margin:0 0 10px;padding:8px 11px;border-left:2px solid var(--accent);background:rgba(104,225,192,.07);border-radius:0 9px 9px 0}
+.card-body .reason:empty{display:none}
+.card-body .reason::before{content:"★ ";color:var(--accent)}
 
 /* Used / Not relevant / Restore action buttons */
 .actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
@@ -54,7 +56,8 @@ h1{font-weight:700}h2{font-weight:600}
 .act-hide:hover{background:rgba(255,122,122,.12);color:var(--bad);border-color:rgba(255,122,122,.5)}
 .act-restore{color:var(--muted)}
 .act-restore:hover{background:rgba(255,255,255,.05);color:#fff;border-color:var(--accent)}
-.video-grid[data-tab="new"] .act-restore{display:none}
+.video-grid[data-tab="new"] .act-restore,
+.video-grid[data-tab="suggestions"] .act-restore{display:none}
 .video-grid[data-tab="used"] .act-used,
 .video-grid[data-tab="used"] .act-hide{display:none}
 
@@ -63,4 +66,4 @@ h1{font-weight:700}h2{font-weight:600}
 @keyframes gridIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 @media(prefers-reduced-motion:reduce){.segmented .seg-indicator,.video-card,.chip,.act{transition:none}.video-card.leaving,.video-grid{animation:none}}
-@media(max-width:680px){.segmented{display:flex;width:100%}.segmented .tab{flex:1;min-width:0}}
+@media(max-width:680px){.segmented{display:flex;max-width:100%;overflow-x:auto;scrollbar-width:none}.segmented::-webkit-scrollbar{display:none}.segmented .tab{flex:0 0 auto;min-width:0;padding:9px 14px}}

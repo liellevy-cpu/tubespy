@@ -16,10 +16,31 @@ from __future__ import annotations
 import json
 import re
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 
 SUNDAY = 6  # datetime.weekday(): Monday=0 .. Sunday=6
 ADVERTISER_RE = re.compile(r"/advertiser/(AR\d+)")
+
+# Each video ad's content.js preview bundle carries the click-through as an
+# `adurl=` parameter (percent-encoded). That is the landing domain. TubeSpy's
+# CSV does not store it, so discovery extracts it from the preview bundle.
+ADURL_RE = re.compile(r"adurl.{0,6}?https%3A%2F%2F([a-z0-9.-]+)", re.I)
+_LANDING_NOISE = {
+    "cloudfront.net", "youtu.be", "youtube.com", "googleusercontent.com",
+    "gstatic.com", "ampproject.org", "w3.org", "example.com", "github.com",
+    "schema.org", "doubleclick.net", "googlesyndication.com",
+}
+
+
+def extract_landing_domain(content_js_text: str) -> str | None:
+    """Registrable landing domain from an ad's content.js preview bundle, or None."""
+    match = ADURL_RE.search(content_js_text or "")
+    if not match:
+        return None
+    host = match.group(1).lower().strip(".")
+    parts = host.split(".")
+    registrable = ".".join(parts[-2:]) if len(parts) >= 2 else host
+    return None if registrable in _LANDING_NOISE else registrable
 
 
 def is_discovery_day(when: datetime) -> bool:
@@ -84,10 +105,12 @@ def queue_new_advertisers(store, advertiser_ids, name_fn=None) -> list[str]:
     return queued
 
 
-async def advertisers_for_domain(page, domain: str, region_num: int = 2840) -> list[str]:
-    """Live ATC lookup: advertisers running video ads on a landing domain (US).
-    Reuses the SearchCreatives RPC; validated on deploy against live ATC."""
-    body = "f.req=" + json.dumps({"2": 40, "3": {"12": {"1": domain}, "8": [region_num]}})
+async def advertisers_for_domain(page, domain: str) -> list[str]:
+    """Live ATC lookup: every advertiser whose ads link to this landing domain.
+    Verified live 2026-11-10 — payload shape {"3":{"12":{"1":domain,"2":true}},"7":{"1":1}}
+    (the "2":true and "7":{"1":1} are required; without them the RPC returns 0)."""
+    freq = {"2": 40, "3": {"12": {"1": domain, "2": True}}, "7": {"1": 1}}
+    body = urlencode({"f.req": json.dumps(freq)})
     response = await page.request.post(
         "https://adstransparency.google.com/anji/_/rpc/SearchService/SearchCreatives?authuser=",
         data=body, headers={"content-type": "application/x-www-form-urlencoded"}, timeout=45_000)
