@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <title>YouTube Competitor Library — Coolina</title>
-  <link rel="stylesheet" href="styles.css?v=20261110-suggestions-1">
+  <link rel="stylesheet" href="styles.css?v=20261110-grow-1">
 </head>
 <body>
   <header class="hero">
@@ -46,14 +46,21 @@
       <div class="segmented" role="tablist" data-active="new">
         <span class="seg-indicator" aria-hidden="true"></span>
         <button class="tab is-active" data-tab="new" role="tab" aria-selected="true">New <span class="count" data-count="new"></span></button>
+        <button class="tab" data-tab="all" role="tab" aria-selected="false">All <span class="count" data-count="all"></span></button>
         <button class="tab" data-tab="used" role="tab" aria-selected="false">Used <span class="count" data-count="used"></span></button>
         <button class="tab" data-tab="suggestions" role="tab" aria-selected="false">Suggestions <span class="count" data-count="suggestions"></span></button>
       </div>
 
       <div id="filters" class="filters" aria-label="Filters">
+        <div class="filter-group filter-search">
+          <span class="filter-label">Search</span>
+          <input type="search" id="f-search" class="search-input" placeholder="Title, channel, or product…" aria-label="Search title, channel, or product" autocomplete="off">
+        </div>
+
         <div class="filter-group">
           <span class="filter-label">Min views</span>
           <div class="chips" id="views-chips">
+            <button type="button" class="chip" data-views="0">Any</button>
             <button type="button" class="chip" data-views="10000">10K</button>
             <button type="button" class="chip" data-views="100000">100K</button>
             <button type="button" class="chip is-active" data-views="1000000">1M</button>
@@ -68,7 +75,7 @@
           <span class="filter-label">Length</span>
           <div class="selects">
             <select id="f-min-len" class="picker" aria-label="Minimum length">
-              <option value="1">1:00</option><option value="1.5">1:30</option>
+              <option value="0">0:00</option><option value="1">1:00</option><option value="1.5">1:30</option>
               <option value="2" selected>2:00</option><option value="2.5">2:30</option>
               <option value="3">3:00</option><option value="3.5">3:30</option>
               <option value="4">4:00</option><option value="4.5">4:30</option>
@@ -80,7 +87,7 @@
               <option value="2">2:00</option><option value="2.5">2:30</option>
               <option value="3">3:00</option><option value="3.5">3:30</option>
               <option value="4">4:00</option><option value="4.5">4:30</option>
-              <option value="5" selected>5:00</option><option value="10">10:00</option>
+              <option value="5" selected>5:00</option><option value="10">10:00</option><option value="999">No limit</option>
             </select>
           </div>
         </div>
@@ -147,6 +154,6 @@
   </template>
 
   <footer><p>Public-source research. Rankings describe the captured snapshot; they do not prove spend, ROAS, or current growth.</p></footer>
-  <script src="app.js?v=20261110-suggestions-1" defer></script>
+  <script src="app.js?v=20261110-grow-1" defer></script>
 </body>
 </html>

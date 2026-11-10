@@ -60,6 +60,18 @@ def test_generate_uses_picker_and_excludes_used_and_history():
     assert all({"video_id", "reason", "rank", "views_per_day", "embed_url"} <= set(r) for r in rows)
 
 
+def test_generate_excludes_our_own_brands():
+    dataset = {"schema_version": 2, "advertisers": [
+        {"advertiser": {"name": "Coolina"}, "videos": [vid(1)]},       # our own brand
+        {"advertiser": {"name": "Super Brand Tools"}, "videos": [vid(2)]},
+    ]}
+    picker = lambda cands: [{"video_id": c["video_id"], "reason": "r"} for c in cands]
+    rows = S.generate(dataset, item_states={}, history=set(), picker=picker)
+    channels = {r["channel"] for r in rows}
+    assert "Coolina" not in channels
+    assert "Super Brand Tools" in channels
+
+
 def test_refresh_is_twice_a_week_never_sunday():
     assert S.is_refresh_day(datetime(2026, 11, 9)) is True    # Monday
     assert S.is_refresh_day(datetime(2026, 11, 12)) is True   # Thursday

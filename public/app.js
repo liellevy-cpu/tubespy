@@ -47,7 +47,32 @@ function renderSummary(data) {
   if (data.schema_version === 2) {
     addSummary(number(s.advertisers || (data.advertisers || []).length), "Advertisers");
     addSummary(number(s.recovered_unique_youtube_videos || allVideos.length), "Videos");
+    addSummary(number(suggestions.length), "Weekly picks");
   }
+}
+
+// Per-tab filter presets. "New" is the filtered view; "All" starts with every
+// filter off so it shows the whole library until the user narrows it.
+const FILTER_DEFAULTS = {
+  new: { views: "1000000", minLen: "2", maxLen: "5", after: "any" },
+  all: { views: "0", minLen: "0", maxLen: "999", after: "any" },
+};
+
+function applyFilterState(tab) {
+  const d = FILTER_DEFAULTS[tab] || FILTER_DEFAULTS.new;
+  document.querySelectorAll("#views-chips .chip").forEach((c) => c.classList.toggle("is-active", c.dataset.views === d.views));
+  const custom = document.querySelector("#f-min-views");
+  custom.hidden = true; custom.value = d.views;
+  document.querySelector("#f-min-len").value = d.minLen;
+  document.querySelector("#f-max-len").value = d.maxLen;
+  document.querySelectorAll("#after-chips .chip").forEach((c) => c.classList.toggle("is-active", c.dataset.after === d.after));
+  document.querySelector("#f-after").value = "";
+}
+
+function matchesSearch(video, adv) {
+  const q = (document.querySelector("#f-search").value || "").trim().toLowerCase();
+  if (!q) return true;
+  return [video.title, adv, video.product].some((t) => (t || "").toLowerCase().includes(q));
 }
 
 // ----- state (server, with localStorage fallback) -----
@@ -110,9 +135,13 @@ function visibleEntries() {
   let entries = allVideos.filter((e) => advertiserName === "all" || e.advertiserName === advertiserName);
   if (activeTab === "used") {
     entries = entries.filter((e) => states[e.video.video_id] === "used");
+  } else if (activeTab === "all") {
+    // Every video in the library (any state), narrowed only by the filters/search
+    // the user sets — all filters start off.
+    entries = entries.filter((e) => passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
   } else {
     entries = entries.filter((e) => !states[e.video.video_id]);        // new = no state (used/not_relevant excluded)
-    entries = entries.filter((e) => passesFilters(e.video));
+    entries = entries.filter((e) => passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
   }
   return entries.sort((a, b) =>
     b.video.lifetime_views_per_day - a.video.lifetime_views_per_day ||
@@ -157,20 +186,22 @@ function renderCard(entry) {
 
 function render() {
   grid.dataset.tab = activeTab;
-  const headings = { new: "New", used: "Used", suggestions: "Suggestions" };
+  const headings = { new: "New", all: "All", used: "Used", suggestions: "Suggestions" };
   const notes = {
     new: "English-only, 2–5 min, 1M+ views, grouped by product. Ranked by lifetime views/day.",
+    all: "Every video in the library. Search and filter are off by default — narrow it however you like.",
     used: "Videos you marked Used. Ranked by lifetime views/day.",
     suggestions: "AI-picked swipes for Coolina, refreshed twice a week — each with a one-line reason.",
   };
   document.querySelector("#rank-heading").textContent = headings[activeTab] || "New";
   note.textContent = notes[activeTab] || notes.new;
-  document.querySelector("#filters").style.display = activeTab === "new" ? "" : "none";
+  document.querySelector("#filters").style.display = (activeTab === "new" || activeTab === "all") ? "" : "none";
   // counts
   const newCount = allVideos.filter((e) => !states[e.video.video_id]).length;
   const usedCount = allVideos.filter((e) => states[e.video.video_id] === "used").length;
   const sugCount = suggestions.filter((s) => !states[s.video_id]).length;
   document.querySelector('[data-count="new"]').textContent = newCount ? `(${newCount})` : "";
+  document.querySelector('[data-count="all"]').textContent = allVideos.length ? `(${allVideos.length})` : "";
   document.querySelector('[data-count="used"]').textContent = usedCount ? `(${usedCount})` : "";
   document.querySelector('[data-count="suggestions"]').textContent = sugCount ? `(${sugCount})` : "";
   positionIndicator();
@@ -203,8 +234,12 @@ document.querySelectorAll(".tab").forEach((btn) => btn.addEventListener("click",
   activeTab = btn.dataset.tab;
   document.querySelectorAll(".tab").forEach((b) => { b.classList.toggle("is-active", b === btn); b.setAttribute("aria-selected", b === btn ? "true" : "false"); });
   document.querySelector(".segmented").dataset.active = activeTab;  // slide the pill indicator
+  if (activeTab === "new" || activeTab === "all") applyFilterState(activeTab);  // New = filtered, All = everything
   render();
 }));
+
+// Search box (title / channel / product) — live filter on New and All
+document.querySelector("#f-search").addEventListener("input", render);
 
 // Min-views preset chips (+ Custom) write to the hidden #f-min-views
 document.querySelectorAll("#views-chips .chip").forEach((chip) => chip.addEventListener("click", () => {

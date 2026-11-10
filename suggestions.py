@@ -23,6 +23,8 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+import own_brands
+
 ROOT = Path(__file__).resolve().parent
 HISTORY_PATH = ROOT / "build" / "suggested_history.json"
 MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-haiku-5-5")
@@ -77,15 +79,24 @@ def prefilter(videos: list[dict], excluded_ids: set[str]) -> list[dict]:
     return kept
 
 
-def top_candidates(videos: list[dict], limit: int = CANDIDATE_POOL) -> list[dict]:
-    """Highest signal score, at most one video per product."""
+MAX_PER_ADVERTISER = 2  # at most 2 picks from any one advertiser
+
+
+def top_candidates(videos: list[dict], limit: int = CANDIDATE_POOL,
+                   max_per_advertiser: int = MAX_PER_ADVERTISER) -> list[dict]:
+    """Highest signal score, at most one video per product and at most
+    `max_per_advertiser` videos per advertiser."""
     ranked = sorted(videos, key=signal_score, reverse=True)
-    seen_products, out = set(), []
+    seen_products, per_advertiser, out = set(), {}, []
     for v in ranked:
         key = (v.get("product") or v["video_id"]).strip().lower()
         if key in seen_products:
             continue
+        adv = (v.get("advertiser_name") or v.get("author") or "").strip().lower()
+        if adv and per_advertiser.get(adv, 0) >= max_per_advertiser:
+            continue
         seen_products.add(key)
+        per_advertiser[adv] = per_advertiser.get(adv, 0) + 1
         out.append(v)
         if len(out) >= limit:
             break
@@ -191,7 +202,10 @@ def generate(dataset: dict, item_states: dict, history: set[str], picker=None) -
     """Return up to 10 suggestion rows (self-contained for the UI). Does not mutate
     history — the caller persists it after writing the file."""
     excluded = set(history) | {vid for vid, st in (item_states or {}).items() if st in ("used", "not_relevant")}
-    videos = {v["video_id"]: v for v in flatten(dataset)}
+    # Never suggest our own brands (Coolina et al.) back to ourselves.
+    flat = [v for v in flatten(dataset)
+            if not own_brands.is_own(v.get("advertiser_name"), v.get("landing_domain"))]
+    videos = {v["video_id"]: v for v in flat}
     pool = top_candidates(prefilter(list(videos.values()), excluded))
     picks = choose_with_claude(pool, picker)
     rows = []

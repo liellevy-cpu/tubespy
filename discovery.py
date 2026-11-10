@@ -18,6 +18,8 @@ import re
 from datetime import datetime
 from urllib.parse import urlencode, urlparse
 
+import own_brands
+
 SUNDAY = 6  # datetime.weekday(): Monday=0 .. Sunday=6
 ADVERTISER_RE = re.compile(r"/advertiser/(AR\d+)")
 
@@ -136,8 +138,11 @@ def run_weekly_discovery(store, library: dict, lookup_fn, when: datetime, name_f
     seeds: set[str] = set()
     for advertiser in library.get("advertisers", []):
         seeds.update(landing_domains(advertiser))
+    seeds = {d for d in seeds if not own_brands.is_own_domain(d)}  # don't snowball our own store
     known = {a.get("advertiser", {}).get("google_advertiser_id") for a in library.get("advertisers", [])}
     known.discard(None)
     new_ids = snowball(sorted(seeds), known, lookup_fn)
+    if name_fn:  # a shared domain can surface our own brand — never queue it
+        new_ids = [i for i in new_ids if not own_brands.is_own_brand_name(name_fn(i))]
     queued = queue_new_advertisers(store, new_ids, name_fn)
     return {"ran": True, "seed_domains": len(seeds), "discovered": len(new_ids), "queued": queued}

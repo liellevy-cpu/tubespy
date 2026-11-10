@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import parse_qs, urlparse
 
+import own_brands
+
 VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 ADVERTISER_ID_RE = re.compile(r"^AR\d+$")
 CREATIVE_ID_RE = re.compile(r"^CR\d+$")
@@ -460,6 +462,7 @@ def apply_match_gate(source_dir: Path, threshold: float = PUBLISH_MATCH_THRESHOL
 def combine_datasets(datasets: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """Combine validated advertisers while preserving each brand's rankings."""
     items = [deepcopy(item) for item in datasets]
+    items = own_brands.drop_own_advertisers(items)  # keep our own brands out of the library
     _require(bool(items), "at least one advertiser dataset is required")
     names: set[str] = set()
     snapshots: set[str] = set()
