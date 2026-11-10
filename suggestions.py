@@ -202,9 +202,11 @@ def generate(dataset: dict, item_states: dict, history: set[str], picker=None) -
     """Return up to 10 suggestion rows (self-contained for the UI). Does not mutate
     history — the caller persists it after writing the file."""
     excluded = set(history) | {vid for vid, st in (item_states or {}).items() if st in ("used", "not_relevant")}
-    # Never suggest our own brands (Coolina et al.) back to ourselves.
+    # English-only, and never our own brands (Coolina et al.). Videos carry an
+    # `english` flag now that the library also holds non-English ads (the All tab).
     flat = [v for v in flatten(dataset)
-            if not own_brands.is_own(v.get("advertiser_name"), v.get("landing_domain"))]
+            if v.get("english") is True
+            and not own_brands.is_own(v.get("advertiser_name"), v.get("landing_domain"))]
     videos = {v["video_id"]: v for v in flat}
     pool = top_candidates(prefilter(list(videos.values()), excluded))
     picks = choose_with_claude(pool, picker)

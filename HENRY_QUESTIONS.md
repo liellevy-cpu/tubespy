@@ -29,6 +29,12 @@ own. Short list:
 6. As the library grows to thousands of brands, is there a **ceiling** you want on our
    total brand count or nightly new-brand onboarding?
 
+### Shared raw data (read-only)
+9. On the Mini, Liel's **full raw scrape data already exists** from his weekly refresh.
+   Can our isolated instance **read Liel's full raw scrape data read-only**, so the "All"
+   tab can show all of his advertisers' videos **without us re-scraping them**? We'd only
+   read (never write) his files, and only to populate "All" for brands he already covers.
+
 ### Secrets & ops
 7. Where should we store our two secrets on the mini (`YOUTUBE_API_KEY`,
    `ANTHROPIC_API_KEY`) — your secrets manager, or an untracked `.env` only we read?

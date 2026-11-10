@@ -46,7 +46,7 @@ function renderSummary(data) {
   const s = data.source_summary || {};
   if (data.schema_version === 2) {
     addSummary(number(s.advertisers || (data.advertisers || []).length), "Advertisers");
-    addSummary(number(s.recovered_unique_youtube_videos || allVideos.length), "Videos");
+    addSummary(number(allVideos.length), "Videos");          // true count = what "All" shows
     addSummary(number(suggestions.length), "Weekly picks");
   }
 }
@@ -136,11 +136,12 @@ function visibleEntries() {
   if (activeTab === "used") {
     entries = entries.filter((e) => states[e.video.video_id] === "used");
   } else if (activeTab === "all") {
-    // Every video in the library (any state), narrowed only by the filters/search
-    // the user sets — all filters start off.
+    // Every video in the library (any language/length, any state), narrowed only by
+    // the filters/search the user sets — all filters start off.
     entries = entries.filter((e) => passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
   } else {
-    entries = entries.filter((e) => !states[e.video.video_id]);        // new = no state (used/not_relevant excluded)
+    // New = English swipe-worthy only, not yet triaged, matching the filters.
+    entries = entries.filter((e) => e.video.english === true && !states[e.video.video_id]);
     entries = entries.filter((e) => passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
   }
   return entries.sort((a, b) =>
@@ -197,7 +198,11 @@ function render() {
   note.textContent = notes[activeTab] || notes.new;
   document.querySelector("#filters").style.display = (activeTab === "new" || activeTab === "all") ? "" : "none";
   // counts
-  const newCount = allVideos.filter((e) => !states[e.video.video_id]).length;
+  const newCount = allVideos.filter((e) => {
+    const v = e.video;                                       // New = English swipe pool
+    return v.english === true && v.views >= 1_000_000 && v.length_seconds >= 120 &&
+      v.length_seconds <= 300 && !states[v.video_id];
+  }).length;
   const usedCount = allVideos.filter((e) => states[e.video.video_id] === "used").length;
   const sugCount = suggestions.filter((s) => !states[s.video_id]).length;
   document.querySelector('[data-count="new"]').textContent = newCount ? `(${newCount})` : "";

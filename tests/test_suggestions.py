@@ -7,7 +7,7 @@ import suggestions as S
 def vid(i, **kw):
     v = {"video_id": f"vid{i:06d}ab", "length_seconds": 180, "views": 5_000_000, "age_days": 30,
          "lifetime_views_per_day": 10_000, "creative_count": 5, "product": f"Product {i}",
-         "title": f"title {i}", "upload_date": "2026-09-07T00:00:00+00:00",
+         "title": f"title {i}", "upload_date": "2026-09-07T00:00:00+00:00", "english": True,
          "embed_url": "e", "thumbnail_url": "th", "youtube_url": "y", "transparency_url": "tr"}
     v.update(kw)
     return v
@@ -70,6 +70,13 @@ def test_generate_excludes_our_own_brands():
     channels = {r["channel"] for r in rows}
     assert "Coolina" not in channels
     assert "Super Brand Tools" in channels
+
+
+def test_generate_excludes_non_english_videos():
+    dataset = ds([vid(1, english=True), vid(2, english=False), vid(3, english=None)])
+    picker = lambda cands: [{"video_id": c["video_id"], "reason": "r"} for c in cands]
+    ids = [r["video_id"] for r in S.generate(dataset, {}, set(), picker=picker)]
+    assert ids == ["vid000001ab"]  # only the confirmed-English video is eligible
 
 
 def test_refresh_is_twice_a_week_never_sunday():
