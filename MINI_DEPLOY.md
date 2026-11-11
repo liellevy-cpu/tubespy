@@ -54,5 +54,6 @@ linearly; the binding constraint is the conservative IP budget, not the code.
   conservative concurrency, and our own store (already holds the 6 advertiser seeds).
 - **Henry sets on the mini:** the env vars above, a cron/launchd unit that calls our
   worker nightly (never Sunday, after Liel's traffic), and the two secrets
-  (`YOUTUBE_API_KEY`, `ANTHROPIC_API_KEY`) as untracked env values. Open questions for
+  (`YOUTUBE_DATA_API_KEY` — the same var the collector already reads — and
+  `ANTHROPIC_API_KEY`) as untracked env values. Open questions for
   him are in `HENRY_QUESTIONS.md`.

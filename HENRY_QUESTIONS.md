@@ -36,6 +36,7 @@ own. Short list:
    read (never write) his files, and only to populate "All" for brands he already covers.
 
 ### Secrets & ops
-7. Where should we store our two secrets on the mini (`YOUTUBE_API_KEY`,
-   `ANTHROPIC_API_KEY`) — your secrets manager, or an untracked `.env` only we read?
+7. Where should we store our two secrets on the mini (`YOUTUBE_DATA_API_KEY` — the
+   same var your collector already reads — and `ANTHROPIC_API_KEY`) — your secrets
+   manager, or an untracked `.env` only we read?
 8. Who should get our **run logs / failure alerts**, and where should they live?
