@@ -315,44 +315,48 @@ async def probe_advertiser(page, advertiser_id: str, meta_fn=None,
                 pass
 
     page.on("response", lambda r: asyncio.ensure_future(capture(r)))
-    await page.goto(url, wait_until="domcontentloaded", timeout=90_000)
-    await page.wait_for_timeout(3_000)
-    body = await page.locator("body").inner_text()
-    us_video_ads = parse_reported_ads(body)
-    adv_name = None                                   # best-effort advertiser name (for the giant filter)
-    try:
-        adv_name = await page.locator("advertiser-name, h1").first.inner_text(timeout=2_000)
-        adv_name = (adv_name or "").strip() or None
-    except Exception:
-        adv_name = None
-
-    # {creative URL: preview content.js URL}, in ATC order (newest first). No scroll:
-    # the first SearchCreatives batch (~40 creatives) is ample for the sample pool.
-    await page.wait_for_timeout(500)
-    targets: dict[str, str] = {}
-    for b in bodies:
-        targets.update(collect_all.parse_search_creatives(b))
-    pool_targets = dict(list(targets.items())[:3 * SAMPLE_SIZE])   # resolve a pool, then pick
-    newest_ids: list[str] = []
-    if pool_targets:
-        resolved = await collect_all.resolve_preview_js(page.context, pool_targets, limit=4)
-        for creative_url in pool_targets:                         # keep ATC (newest-first) order
-            for vid in resolved.get(creative_url, []):
-                if vid not in newest_ids:
-                    newest_ids.append(vid)
-
-    # recency: the newest creative's "Last shown" (ONE detail page, not the whole set)
-    days = None
-    newest = next(iter(targets), None)
-    if newest:
+    # Every ATC request here runs under the mini-wide Google lock, so one probe at a
+    # time machine-wide (and we wait for Liel's / Sam's scrapes). The YouTube Data API
+    # call (meta_fn) is a separate quota and stays OUTSIDE the lock.
+    with collect_all.google_lock("probe:" + advertiser_id):
+        await page.goto(url, wait_until="domcontentloaded", timeout=90_000)
+        await page.wait_for_timeout(3_000)
+        body = await page.locator("body").inner_text()
+        us_video_ads = parse_reported_ads(body)
+        adv_name = None                                   # best-effort advertiser name (for the giant filter)
         try:
-            detail = await collect_all.extract_one(page.context, newest, 0, asyncio.Semaphore(1))
-            days = days_since(detail.get("last_shown"), now)
-            for vid in detail.get("video_ids") or []:
-                if vid not in newest_ids:
-                    newest_ids.append(vid)
+            adv_name = await page.locator("advertiser-name, h1").first.inner_text(timeout=2_000)
+            adv_name = (adv_name or "").strip() or None
         except Exception:
-            days = None
+            adv_name = None
+
+        # {creative URL: preview content.js URL}, in ATC order (newest first). No scroll:
+        # the first SearchCreatives batch (~40 creatives) is ample for the sample pool.
+        await page.wait_for_timeout(500)
+        targets: dict[str, str] = {}
+        for b in bodies:
+            targets.update(collect_all.parse_search_creatives(b))
+        pool_targets = dict(list(targets.items())[:3 * SAMPLE_SIZE])   # resolve a pool, then pick
+        newest_ids: list[str] = []
+        if pool_targets:
+            resolved = await collect_all.resolve_preview_js(page.context, pool_targets, limit=4)
+            for creative_url in pool_targets:                         # keep ATC (newest-first) order
+                for vid in resolved.get(creative_url, []):
+                    if vid not in newest_ids:
+                        newest_ids.append(vid)
+
+        # recency: the newest creative's "Last shown" (ONE detail page, not the whole set)
+        days = None
+        newest = next(iter(targets), None)
+        if newest:
+            try:
+                detail = await collect_all.extract_one(page.context, newest, 0, asyncio.Semaphore(1))
+                days = days_since(detail.get("last_shown"), now)
+                for vid in detail.get("video_ids") or []:
+                    if vid not in newest_ids:
+                        newest_ids.append(vid)
+            except Exception:
+                days = None
 
     meta = meta_fn(newest_ids) if (meta_fn and newest_ids) else {}
     samples = pick_sample(newest_ids, meta or {})

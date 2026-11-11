@@ -140,13 +140,16 @@ def queue_new_advertisers(store, advertiser_ids, name_fn=None) -> list[str]:
 async def advertisers_for_domain(page, domain: str) -> list[str]:
     """Live ATC lookup: every advertiser whose ads link to this landing domain.
     Verified live 2026-11-10 — payload shape {"3":{"12":{"1":domain,"2":true}},"7":{"1":1}}
-    (the "2":true and "7":{"1":1} are required; without them the RPC returns 0)."""
+    (the "2":true and "7":{"1":1} are required; without them the RPC returns 0).
+    Runs under the mini-wide Google lock so it waits for every other scraper."""
+    import collect_all  # lazy: keeps discovery's pure logic import-light
     freq = {"2": 40, "3": {"12": {"1": domain, "2": True}}, "7": {"1": 1}}
     body = urlencode({"f.req": json.dumps(freq)})
-    response = await page.request.post(
-        "https://adstransparency.google.com/anji/_/rpc/SearchService/SearchCreatives?authuser=",
-        data=body, headers={"content-type": "application/x-www-form-urlencoded"}, timeout=45_000)
-    text = (await response.text()).lstrip(")]}'\n")
+    with collect_all.google_lock("discovery:" + domain):
+        response = await page.request.post(
+            "https://adstransparency.google.com/anji/_/rpc/SearchService/SearchCreatives?authuser=",
+            data=body, headers={"content-type": "application/x-www-form-urlencoded"}, timeout=45_000)
+        text = (await response.text()).lstrip(")]}'\n")
     try:
         data = json.loads(text)
     except ValueError:

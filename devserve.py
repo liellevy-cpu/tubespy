@@ -68,7 +68,8 @@ def main():
     parser.add_argument("--db", type=Path, default=ROOT / "build/dev-brands.sqlite")
     args = parser.parse_args()
     store = Store(args.db)
-    store.seed_used(["GmrgKvRelpk"])  # seed the Used tab
+    import mini_config
+    store.seed_used(mini_config.USED_SEED_VIDEO_IDS)  # seed the Used tab (from config)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), make_handler(store))
     print(f"Dev library running at http://127.0.0.1:{args.port}/", flush=True)
     server.serve_forever()

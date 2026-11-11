@@ -129,14 +129,17 @@ def make_live_fetch(context):
 
         page.on("response", lambda r: _asyncio.ensure_future(capture(r)))
         try:
-            await page.goto(item["transparency_url"], wait_until="domcontentloaded", timeout=75_000)
-            await page.wait_for_timeout(3_500)
-            texts = list(bundles)
-            for frame in page.frames:                 # fallback: rendered frame bodies
-                try:
-                    texts.append(await frame.content())
-                except Exception:
-                    continue
+            # Under the mini-wide Google lock: one Google request at a time, so the
+            # backfill waits for every scraper (ours, Liel's, Sam's) and never bursts.
+            with collect_all.google_lock("backfill:" + str(item.get("video_id"))):
+                await page.goto(item["transparency_url"], wait_until="domcontentloaded", timeout=75_000)
+                await page.wait_for_timeout(3_500)
+                texts = list(bundles)
+                for frame in page.frames:             # fallback: rendered frame bodies
+                    try:
+                        texts.append(await frame.content())
+                    except Exception:
+                        continue
             for text in texts:
                 domain = collect_all.landing_domain_from_text(text)
                 if domain:

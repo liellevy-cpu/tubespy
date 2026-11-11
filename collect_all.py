@@ -354,10 +354,16 @@ async def extract_one(context, url: str, index: int, sem: asyncio.Semaphore) -> 
 
 
 def _youtube_api_key() -> str | None:
-    """Existing free YouTube Data API key from Henry's local .env (never logged or published)."""
+    """Our own YouTube Data API key (never logged or published). With
+    TUBESPY_NO_SHARED_KEY=1 the ~/.hermes/.env fallback is disabled and a missing
+    key is a hard, clear error -- we never silently fall back to a shared / Liel key."""
     import os
     if os.environ.get("YOUTUBE_DATA_API_KEY"):
         return os.environ["YOUTUBE_DATA_API_KEY"]
+    if os.environ.get("TUBESPY_NO_SHARED_KEY", "0").strip().lower() in ("1", "true", "yes", "on"):
+        raise RuntimeError(
+            "YOUTUBE_DATA_API_KEY is not set and the shared-key fallback is disabled "
+            "(TUBESPY_NO_SHARED_KEY=1). Set our own YOUTUBE_DATA_API_KEY; never use a shared key.")
     env = Path.home() / ".hermes/.env"
     try:
         for line in env.read_text().splitlines():
@@ -487,10 +493,12 @@ def fetch_youtube(video_id: str, creatives: list[str]) -> dict[str, Any]:
 
 @contextlib.contextmanager
 def google_lock(label: str = ""):
-    """One Google Transparency scrape at a time on this machine (TubeSpy exports and the
-    weekly library worker share it). Serializing scrapes is what avoids Google's "unusual
-    traffic" blocks. Cross-platform: fcntl on Unix, msvcrt on Windows."""
-    path = ROOT / "build" / "google-scrape.lock"
+    """One Google Transparency request at a time on this machine (TubeSpy exports, the
+    weekly library worker, discovery, screening and the backfill all share it).
+    Serializing scrapes is what avoids Google's "unusual traffic" blocks. The lock path
+    is TUBESPY_GOOGLE_LOCK when set, so Henry can point it at the mini-wide shared lock
+    and our scrapes wait for Liel's and Sam's too. Cross-platform: fcntl / msvcrt."""
+    path = Path(os.environ["TUBESPY_GOOGLE_LOCK"]) if os.environ.get("TUBESPY_GOOGLE_LOCK") else ROOT / "build" / "google-scrape.lock"
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a+") as handle:
         kind = None

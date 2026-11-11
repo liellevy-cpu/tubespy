@@ -74,7 +74,8 @@ def main():
     token=args.token_file.read_text().strip()
     if len(token)<32: raise ValueError('Service token must be at least 32 characters')
     from brand_worker import collect_and_publish
-    store=Store(args.db); store.seed_used(['GmrgKvRelpk']); worker=Worker(store,collect_and_publish)
+    import mini_config
+    store=Store(args.db); store.seed_used(mini_config.USED_SEED_VIDEO_IDS); worker=Worker(store,collect_and_publish)
     http=make_server(store,token,args.port);worker.start()
     try: http.serve_forever()
     finally: worker.close();http.server_close()
