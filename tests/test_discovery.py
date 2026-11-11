@@ -18,6 +18,15 @@ def test_extract_landing_domain_filters_noise_and_missing():
     assert extract_landing_domain("no adurl in here") is None
 
 
+def test_extract_landing_domain_skips_google_click_wrapper():
+    # a click goes through google.com/aclk, then a second adurl to the real site
+    bundle = (r"adurl\x3dhttps%3A%2F%2Fwww.google.com%2Faclk%3Fsa%3D"
+              r"...more...adurl\x3dhttps%3A%2F%2Fshop.realgadget.com%2Foffer")
+    assert extract_landing_domain(bundle) == "realgadget.com"
+    # a bundle whose only adurl is the Google wrapper yields no seed (not google.com)
+    assert extract_landing_domain(r"adurl\x3dhttps%3A%2F%2Fwww.google.com%2Faclk%3Fx") is None
+
+
 def test_discovery_never_runs_on_sunday():
     assert is_discovery_day(datetime(2026, 11, 8)) is False  # Sunday
     assert is_discovery_day(datetime(2026, 11, 9)) is True   # Monday

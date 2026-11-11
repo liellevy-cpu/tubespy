@@ -27,22 +27,30 @@ ADVERTISER_RE = re.compile(r"/advertiser/(AR\d+)")
 # `adurl=` parameter (percent-encoded). That is the landing domain. TubeSpy's
 # CSV does not store it, so discovery extracts it from the preview bundle.
 ADURL_RE = re.compile(r"adurl.{0,6}?https%3A%2F%2F([a-z0-9.-]+)", re.I)
+# Never a product landing domain: Google's own click-redirect / tracking / infra
+# hosts (a click often goes google.com/aclk?...&adurl=<real site>, so the FIRST
+# adurl is the Google wrapper -- we must skip it and keep scanning), CDNs, etc.
 _LANDING_NOISE = {
     "cloudfront.net", "youtu.be", "youtube.com", "googleusercontent.com",
     "gstatic.com", "ampproject.org", "w3.org", "example.com", "github.com",
     "schema.org", "doubleclick.net", "googlesyndication.com",
+    "google.com", "googleadservices.com", "google-analytics.com", "goo.gl",
+    "g.co", "gvt1.com", "gvt2.com", "youtube-nocookie.com", "ytimg.com",
 }
 
 
 def extract_landing_domain(content_js_text: str) -> str | None:
-    """Registrable landing domain from an ad's content.js preview bundle, or None."""
-    match = ADURL_RE.search(content_js_text or "")
-    if not match:
-        return None
-    host = match.group(1).lower().strip(".")
-    parts = host.split(".")
-    registrable = ".".join(parts[-2:]) if len(parts) >= 2 else host
-    return None if registrable in _LANDING_NOISE else registrable
+    """Registrable landing domain from an ad's content.js preview bundle, or None.
+    Scans ALL adurl occurrences and returns the first that is a real product domain,
+    so a Google click-redirect wrapper (google.com/aclk...) is skipped, not mistaken
+    for the landing site."""
+    for match in ADURL_RE.finditer(content_js_text or ""):
+        host = match.group(1).lower().strip(".")
+        parts = host.split(".")
+        registrable = ".".join(parts[-2:]) if len(parts) >= 2 else host
+        if registrable and registrable not in _LANDING_NOISE:
+            return registrable
+    return None
 
 
 def is_discovery_day(when: datetime) -> bool:

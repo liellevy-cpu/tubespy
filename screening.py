@@ -319,6 +319,12 @@ async def probe_advertiser(page, advertiser_id: str, meta_fn=None,
     await page.wait_for_timeout(3_000)
     body = await page.locator("body").inner_text()
     us_video_ads = parse_reported_ads(body)
+    adv_name = None                                   # best-effort advertiser name (for the giant filter)
+    try:
+        adv_name = await page.locator("advertiser-name, h1").first.inner_text(timeout=2_000)
+        adv_name = (adv_name or "").strip() or None
+    except Exception:
+        adv_name = None
 
     # {creative URL: preview content.js URL}, in ATC order (newest first). No scroll:
     # the first SearchCreatives batch (~40 creatives) is ample for the sample pool.
@@ -350,5 +356,5 @@ async def probe_advertiser(page, advertiser_id: str, meta_fn=None,
 
     meta = meta_fn(newest_ids) if (meta_fn and newest_ids) else {}
     samples = pick_sample(newest_ids, meta or {})
-    return {"advertiser_id": advertiser_id, "us_video_ads": us_video_ads,
+    return {"advertiser_id": advertiser_id, "name": adv_name, "us_video_ads": us_video_ads,
             "days_since_active": days, "samples": samples}

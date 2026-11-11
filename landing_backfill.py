@@ -110,19 +110,38 @@ async def backfill_once(library_path, fetch_fn, when: datetime | None = None,
 
 def make_live_fetch(context):
     """Factory for the live per-ad fetch: open the creative's transparency page, read
-    its content, and extract the landing domain (reusing the collector's extractor).
-    Injected into backfill_once on the mini; never exercised by the unit tests."""
+    the ad's preview content.js (the bundle that carries the click-through adurl), and
+    extract the landing domain (reusing the collector's extractor). Falls back to frame
+    contents. Injected into backfill_once on the mini; never exercised by unit tests."""
+    import asyncio as _asyncio
     import collect_all
 
     async def fetch(item) -> str | None:
         page = await context.new_page()
+        bundles: list[str] = []
+
+        async def capture(response):
+            try:
+                if collect_all.PREVIEW_JS_RE.match(response.url):
+                    bundles.append(await response.text())
+            except Exception:
+                pass
+
+        page.on("response", lambda r: _asyncio.ensure_future(capture(r)))
         try:
             await page.goto(item["transparency_url"], wait_until="domcontentloaded", timeout=75_000)
-            await page.wait_for_timeout(2_500)
-            text = await page.content()
-            frames = [text]
-            frames.extend(f.url for f in page.frames)
-            return collect_all.landing_domain_from_text("\n".join(frames))
+            await page.wait_for_timeout(3_500)
+            texts = list(bundles)
+            for frame in page.frames:                 # fallback: rendered frame bodies
+                try:
+                    texts.append(await frame.content())
+                except Exception:
+                    continue
+            for text in texts:
+                domain = collect_all.landing_domain_from_text(text)
+                if domain:
+                    return domain
+            return None
         finally:
             await page.close()
 
