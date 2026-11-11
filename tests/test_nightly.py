@@ -2,7 +2,7 @@
 (stop the whole night), publish-target guard (never Liel's live page), and reading
 Liel's shared raw READ-ONLY for the All tab."""
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -57,21 +57,61 @@ def test_assert_safe_publish_target_refuses_live():
 
 # ---------- shared raw, read-only ----------
 
-def test_read_shared_advertisers_is_read_only(tmp_path):
+AID = "AR10000000000000000001"
+CREATIVE = (f"https://adstransparency.google.com/advertiser/{AID}/creative/"
+            "CR10000000000000000001?region=US&format=VIDEO&platform=YOUTUBE&hl=en")
+SNAP = datetime(2026, 11, 11, tzinfo=timezone.utc)
+
+
+def _write_liel_raw(adv_dir):
+    """A minimal but valid raw advertiser folder (ad list + video stats), like Liel's."""
+    adv_dir.mkdir(parents=True)
+    (adv_dir / "summary.json").write_text(json.dumps(
+        {"name": "Liel Brand", "advertiser_ids": [AID], "creative_count": 1}), encoding="utf-8")
+    (adv_dir / "creative_video_results.jsonl").write_text(json.dumps(
+        {"index": 0, "creative_url": CREATIVE, "video_ids": ["abcdefghijk"],
+         "variation_count": 1, "last_shown": None, "landing_domain": "realsite.com", "error": None}) + "\n",
+        encoding="utf-8")
+    (adv_dir / "youtube_stats.jsonl").write_text(json.dumps(
+        {"video_id": "abcdefghijk", "url": "https://www.youtube.com/watch?v=abcdefghijk",
+         "title": "Demo", "author": "Chan", "views": 1000, "length_seconds": 180,
+         "upload_date": "2026-09-01T00:00:00+00:00", "creative_count": 1,
+         "creative_urls": [CREATIVE], "error": None}) + "\n", encoding="utf-8")
+
+
+def test_read_shared_advertisers_builds_from_raw_read_only(tmp_path):
     shared = tmp_path / "liel_raw"
-    shared.mkdir()
-    (shared / "library.json").write_text(json.dumps({"schema_version": 2, "advertisers": [
-        {"advertiser": {"google_advertiser_id": "AR900", "name": "Liel Brand"}, "videos": [{"video_id": "v1"}]},
-    ]}), encoding="utf-8")
+    _write_liel_raw(shared / "liel-brand")
     before = {p: p.stat().st_mtime_ns for p in shared.rglob("*")}
 
-    advs = N.read_shared_advertisers(shared)
-    assert [a["advertiser"]["google_advertiser_id"] for a in advs] == ["AR900"]
-    # nothing created or modified under the shared dir
+    advs = N.read_shared_advertisers(shared, SNAP)
+    assert len(advs) == 1
+    adv = advs[0]
+    assert adv["advertiser"]["google_advertiser_id"] == AID
+    assert adv["schema_version"] == 1 and len(adv["videos"]) == 1
+    assert adv["videos"][0]["landing_domain"] == "realsite.com"      # built from the raw ad list
+
+    # nothing created or modified under the shared dir (READ-ONLY)
     after = {p: p.stat().st_mtime_ns for p in shared.rglob("*")}
     assert before == after
     assert N.read_shared_advertisers(None) == []
     assert N.read_shared_advertisers(tmp_path / "missing") == []
+
+
+def test_merge_advertiser_inserts_then_replaces_by_id():
+    lib = {"schema_version": 2, "source_summary": {}, "advertisers": [
+        {"advertiser": {"google_advertiser_id": "AR1"}, "videos": [{"video_id": "a"}]},
+    ]}
+    fresh = {"schema_version": 1, "advertiser": {"google_advertiser_id": "AR2"}, "videos": [{"video_id": "b"}, {"video_id": "c"}]}
+    one = N.merge_advertiser(lib, fresh)
+    assert [a["advertiser"]["google_advertiser_id"] for a in one["advertisers"]] == ["AR1", "AR2"]
+    assert one["source_summary"]["displayed_videos"] == 3
+    # re-scraping AR2 replaces it (no duplicate), with the newer videos
+    newer = {"schema_version": 1, "advertiser": {"google_advertiser_id": "AR2"}, "videos": [{"video_id": "d"}]}
+    two = N.merge_advertiser(one, newer)
+    ar2 = [a for a in two["advertisers"] if a["advertiser"]["google_advertiser_id"] == "AR2"][0]
+    assert [v["video_id"] for v in ar2["videos"]] == ["d"]
+    assert len([a for a in two["advertisers"] if a["advertiser"]["google_advertiser_id"] == "AR2"]) == 1
 
 
 def test_merge_all_tab_unions_without_mutating_shared():

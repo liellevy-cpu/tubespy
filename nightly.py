@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 from pathlib import Path
 
+import library
 import mini_config
 
 
@@ -85,35 +86,135 @@ def assert_safe_publish_target(slug: str | None, path: Path | None = None) -> No
         raise ValueError(f"refusing to publish under a live-library path '{path}'")
 
 
-# ---------- shared raw, READ-ONLY (E) ----------
+# ---------- shared raw, READ-ONLY (E / #4) ----------
 
-def read_shared_advertisers(shared_raw_dir) -> list[dict]:
-    """Read Liel's already-built advertiser datasets from his shared raw dir, READ-ONLY,
-    so the All tab can show his advertisers without us re-scraping. We only read: this
-    opens files for reading and never creates or writes anything under shared_raw_dir.
-    Returns a list of schema_version-1 advertiser dataset dicts (possibly empty)."""
+_CREATIVE_RE = re.compile(r"/advertiser/(AR\d+)/creative/CR\d+")
+
+
+def _read_jsonl(path: Path) -> list[dict]:
+    rows = []
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                try:
+                    rows.append(json.loads(line))
+                except ValueError:
+                    continue
+    except OSError:
+        pass
+    return rows
+
+
+def build_advertiser_from_raw(adv_raw_dir: Path, snapshot: datetime) -> dict | None:
+    """Build ONE advertiser's videos from Liel's raw scrape files (ad list + video
+    stats), READ-ONLY -- Henry's option (a). Reuses library's own metric/ranking logic;
+    leniently skips videos without clean stats instead of failing. Never writes under
+    adv_raw_dir. Returns a schema-1 advertiser dataset, or None if there's nothing usable."""
+    adv_raw_dir = Path(adv_raw_dir)
+    results = _read_jsonl(adv_raw_dir / "creative_video_results.jsonl")
+    stats_rows = _read_jsonl(adv_raw_dir / "youtube_stats.jsonl")
+    if not results and not stats_rows:
+        return None
+
+    # advertiser identity: summary.json if present, else inferred from a creative URL
+    name = advertiser_id = None
+    try:
+        summary = json.loads((adv_raw_dir / "summary.json").read_text(encoding="utf-8"))
+        name = summary.get("name")
+        ids = summary.get("advertiser_ids") or []
+        advertiser_id = ids[0] if ids else None
+        reported = summary.get("creative_count")
+    except (OSError, ValueError):
+        reported = None
+    if not advertiser_id:
+        for row in results:
+            m = _CREATIVE_RE.search(row.get("creative_url") or "")
+            if m:
+                advertiser_id = m.group(1)
+                break
+    if not advertiser_id:
+        return None
+    name = name or advertiser_id
+
+    unavailable = set()
+    try:
+        unavailable = {r.get("video_id") for r in json.loads((adv_raw_dir / "youtube_unavailable.json").read_text(encoding="utf-8"))}
+    except (OSError, ValueError):
+        pass
+
+    landing_by_video: dict[str, str] = {}
+    for row in results:
+        domain = row.get("landing_domain")
+        for vid in row.get("video_ids") or []:
+            if domain and vid not in landing_by_video:
+                landing_by_video[vid] = domain
+
+    clean = [r for r in stats_rows if isinstance(r, dict) and r.get("error") is None and r.get("video_id") not in unavailable]
+    try:
+        records = library.dedupe_records(clean, advertiser_id)
+        videos = [library.derive_metrics(r, snapshot) for r in records]
+    except library.ValidationError:
+        return None
+    if not videos:
+        return None
+    for v in videos:
+        v["landing_domain"] = landing_by_video.get(v["video_id"])
+    videos.sort(key=lambda r: (-r["views"], r["video_id"]))
+    return {
+        "schema_version": 1, "snapshot_at": snapshot.isoformat(),
+        "advertiser": {"name": name, "google_advertiser_id": advertiser_id},
+        "source_summary": {"reported_ads_approx": max(1, reported or len(videos)),
+                           "unique_creative_pages": len(results) or len(videos),
+                           "recovered_unique_youtube_videos": len(videos),
+                           "youtube_metadata_failures": 0, "unavailable_youtube_videos": len(unavailable)},
+        "ranking_limit": 24, "rankings": library.rank_records(videos), "videos": videos,
+        "provenance": {"platform": "Google Ads Transparency Center + YouTube (shared read-only)",
+                       "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+                       "foreplay_dependency": False},
+    }
+
+
+def read_shared_advertisers(shared_raw_dir, snapshot: datetime | None = None) -> list[dict]:
+    """Build Liel's advertisers from his raw scrape files, READ-ONLY, so the All tab can
+    show them without us re-scraping. Each advertiser is a directory holding
+    youtube_stats.jsonl / creative_video_results.jsonl. We only READ under
+    shared_raw_dir and never create or modify anything there."""
     if not shared_raw_dir:
         return []
     root = Path(shared_raw_dir)
     if not root.exists():
         return []
-    out: list[dict] = []
-    seen: set[str] = set()
-    # Accept either combined library.json files (schema 2) or per-advertiser dataset
-    # files (schema 1). Sorted for determinism. Read-only: only .read_text is used.
-    for name in ("**/library.json", "**/dataset.json"):
-        for f in sorted(root.glob(name)):
-            try:
-                data = json.loads(f.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
-                continue
-            entries = data.get("advertisers") if isinstance(data, dict) and data.get("schema_version") == 2 else [data]
-            for adv in entries or []:
-                aid = (adv.get("advertiser") or {}).get("google_advertiser_id")
-                if aid and aid not in seen and adv.get("videos") is not None:
-                    seen.add(aid)
-                    out.append(adv)
+    snapshot = snapshot or datetime.now(timezone.utc)
+    dirs = {p.parent for p in root.rglob("youtube_stats.jsonl")} | {p.parent for p in root.rglob("creative_video_results.jsonl")}
+    out, seen = [], set()
+    for d in sorted(dirs):
+        adv = build_advertiser_from_raw(d, snapshot)
+        if adv:
+            aid = adv["advertiser"]["google_advertiser_id"]
+            if aid not in seen:
+                seen.add(aid)
+                out.append(adv)
     return out
+
+
+# ---------- per-brand incremental merge into the library (#1) ----------
+
+def merge_advertiser(library_doc: dict, advertiser_dataset: dict) -> dict:
+    """Insert/replace ONE advertiser's schema-1 dataset in the schema-2 library, by
+    advertiser ID, and refresh the summary counts. Pure; returns a new dict. Used after
+    each successful scrape so a brand's videos land in library.json immediately."""
+    aid = (advertiser_dataset.get("advertiser") or {}).get("google_advertiser_id")
+    result = dict(library_doc)
+    advertisers = [a for a in library_doc.get("advertisers", [])
+                   if (a.get("advertiser") or {}).get("google_advertiser_id") != aid]
+    advertisers.append(advertiser_dataset)
+    result["advertisers"] = advertisers
+    summary = dict(result.get("source_summary") or {})
+    summary["advertisers"] = len(advertisers)
+    summary["displayed_videos"] = sum(len(a.get("videos") or []) for a in advertisers)
+    result["source_summary"] = summary
+    return result
 
 
 def merge_all_tab(our_library: dict, shared_advertisers: list[dict]) -> dict:

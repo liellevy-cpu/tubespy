@@ -125,6 +125,35 @@ def ids_from_preview_js(text: str) -> list[str]:
     return sorted({m.group(1) for pattern in FRAME_PATTERNS for m in pattern.finditer(text or "")})
 
 
+class RateLimitExceeded(RuntimeError):
+    """Raised when Google 429 ('too many requests') hits reach the night's threshold,
+    so the nightly runner can stop everything before the mini IP gets blocked."""
+
+
+_rate_limit_hits = 0
+
+
+def reset_rate_limit() -> None:
+    global _rate_limit_hits
+    _rate_limit_hits = 0
+
+
+def rate_limit_hits() -> int:
+    return _rate_limit_hits
+
+
+def note_rate_limit(label: str = "") -> None:
+    """Count one Google 429 (including per-ad retries). When the count reaches
+    TUBESPY_MAX_429 (>0), raise RateLimitExceeded to stop the night. Threshold 0
+    disables the hard stop but still counts."""
+    global _rate_limit_hits
+    _rate_limit_hits += 1
+    import os
+    threshold = int(os.environ.get("TUBESPY_MAX_429", "0") or "0")
+    if threshold > 0 and _rate_limit_hits >= threshold:
+        raise RateLimitExceeded(f"too many requests x{_rate_limit_hits} (429){(' @ ' + label) if label else ''}")
+
+
 async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4,
                              landing_out: dict[str, str] | None = None) -> dict[str, list[str]]:
     """Fetch each creative's own preview script; it names the YouTube poster/video ID.
@@ -149,6 +178,7 @@ async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4,
                                 landing_out[url] = domain
                         return
                     if response.status == 429:
+                        note_rate_limit("preview_js")      # may raise RateLimitExceeded
                         await asyncio.sleep(10 * (attempt + 1))
                         continue
                     return
@@ -344,8 +374,12 @@ async def extract_one(context, url: str, index: int, sem: asyncio.Semaphore) -> 
                     "landing_domain": landing,
                     "error": None,
                 }
+            except RateLimitExceeded:
+                raise                                  # night threshold reached -> stop everything
             except Exception as exc:
                 last_error = f"{type(exc).__name__}: {exc}"
+                if "429" in last_error or "too many requests" in last_error.lower():
+                    note_rate_limit("creative_detail")  # count the retry; may raise RateLimitExceeded
                 await asyncio.sleep((20 * (attempt + 1)) if "429" in last_error else (2 + attempt * 2))
             finally:
                 if page is not None:

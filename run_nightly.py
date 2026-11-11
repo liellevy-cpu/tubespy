@@ -84,8 +84,10 @@ async def _run_async(now_local: datetime, deadline: float, dry_run: bool) -> dic
     import collect_all
     from add_brand import Store
     collect_all.RAW = mini_config.EXPORTS_DIR            # keep every raw scrape in OUR exports
+    collect_all.reset_rate_limit()                      # fresh 429 counter for the night
 
     store = Store(mini_config.STORE_PATH)
+    lib_path = mini_config.OUR_ROOT / "public" / "data" / "library.json"
     report = {"scraped": [], "blocked": False, "backfill": None, "discovery": None,
               "suggestions": None, "published": None, "errors": []}
 
@@ -113,20 +115,28 @@ async def _run_async(now_local: datetime, deadline: float, dry_run: bool) -> dic
                 if not (name and url):
                     continue
                 log.info("scrape: %s", name)
-                with collect_all.google_lock("scrape:" + collect_all.slugify(name)):
-                    summary = await collect_all.collect_advertiser(
-                        RestrictedBrowser(browser), {"name": name, "transparency_url": url}, mini_config.SCRAPE_CONCURRENCY)
+                try:
+                    with collect_all.google_lock("scrape:" + collect_all.slugify(name)):
+                        summary = await collect_all.collect_advertiser(
+                            RestrictedBrowser(browser), {"name": name, "transparency_url": url}, mini_config.SCRAPE_CONCURRENCY)
+                except collect_all.RateLimitExceeded as exc:
+                    report["blocked"] = True
+                    raise nightly.NightBlocked(f"429 threshold reached while scraping {name}: {exc}")
                 if nightly.is_block_signal(summary):
                     report["blocked"] = True
                     raise nightly.NightBlocked(f"Google block while scraping {name}: {summary.get('reason') or summary.get('status')}")
-                report["scraped"].append({"name": name, "status": summary.get("status")})
+                # Build this brand's videos into library.json now and mark it scraped,
+                # so the planner doesn't re-scrape it every night (#1).
+                integrated = _integrate_brand(brand, now_local, lib_path, store)
+                report["scraped"].append({"name": name, "status": summary.get("status"),
+                                          "videos": integrated.get("videos"), "integrated": integrated.get("ok")})
         finally:
             await browser.close()
 
-    # 3) BACKFILL (tiny slice) + DISCOVERY (snowball/screen; queues for a future night)
+    # 3) BACKFILL (tiny slice) + DISCOVERY (once a week on a fixed non-Sunday weekday)
     import landing_backfill
-    lib_path = mini_config.OUR_ROOT / "public" / "data" / "library.json"
     prio = _priority_ids(store)
+    run_discovery = now_local.weekday() == mini_config.DISCOVERY_WEEKDAY
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, executable_path=os.environ.get("CHROME_PATH"))
         context = await browser.new_context(locale="en-US")
@@ -135,12 +145,14 @@ async def _run_async(now_local: datetime, deadline: float, dry_run: bool) -> dic
                 fetch = landing_backfill.make_live_fetch(context)       # self-locks each fetch
                 report["backfill"] = await landing_backfill.backfill_once(lib_path, fetch, when=now_local, priority_video_ids=prio)
                 log.info("backfill: %s", report["backfill"])
-            if _time.monotonic() < deadline and lib_path.exists():
+            if run_discovery and _time.monotonic() < deadline and lib_path.exists():
                 report["discovery"] = await _discover_and_screen(context, store, lib_path, prio, now_local)
                 log.info("discovery: %s", report["discovery"])
-        except nightly.NightBlocked:
+            else:
+                report["discovery"] = {"skipped": "not the weekly discovery weekday"} if not run_discovery else {"skipped": "budget/library"}
+        except (nightly.NightBlocked, collect_all.RateLimitExceeded) as exc:
             report["blocked"] = True
-            raise
+            raise nightly.NightBlocked(str(exc))
         finally:
             await context.close(); await browser.close()
 
@@ -151,10 +163,45 @@ async def _run_async(now_local: datetime, deadline: float, dry_run: bool) -> dic
         report["suggestions"] = suggestions.run_refresh(lib_path, store.item_states(), sugg_path, when=now_local)
         log.info("suggestions: %s", report["suggestions"])
 
-    # 5) PUBLISH (to OUR preview; never Liel's live page)
-    report["published"] = _publish(lib_path)
+    # 5) PUBLISH (full site to OUR preview; never Liel's live page)
+    report["published"] = _publish(lib_path, now_local)
     log.info("published: %s", report["published"])
     return report
+
+
+def _integrate_brand(brand: dict, now_local: datetime, lib_path: Path, store) -> dict:
+    """After a successful scrape: build this brand's videos from its fresh raw export
+    into library.json (insert/replace by advertiser ID) and record completed_at in our
+    store, so the planner treats it as refreshed and does not re-scrape it every night."""
+    import collect_all
+    import time as _t
+    slug = collect_all.slugify(brand.get("name") or "")
+    dataset = nightly.build_advertiser_from_raw(mini_config.EXPORTS_DIR / slug, now_local)
+    if not dataset:
+        log.warning("integrate: no usable videos built for %s", brand.get("name"))
+        return {"ok": False, "videos": 0}
+    aid = dataset["advertiser"]["google_advertiser_id"]
+
+    if lib_path.exists():
+        library_doc = json.loads(lib_path.read_text(encoding="utf-8"))
+    else:
+        library_doc = {"schema_version": 2, "snapshot_at": now_local.isoformat(),
+                       "source_summary": {}, "advertisers": [],
+                       "provenance": {"platform": "Google Ads Transparency Center + YouTube",
+                                      "media_policy": "Native YouTube embeds only; videos are not downloaded or rehosted.",
+                                      "foreplay_dependency": False}}
+    merged = nightly.merge_advertiser(library_doc, dataset)
+    lib_path.parent.mkdir(parents=True, exist_ok=True)
+    lib_path.write_text(json.dumps(merged, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    store_id = brand.get("advertiser_id") or aid
+    try:
+        with store.connect() as db:
+            db.execute("UPDATE brands SET state='complete', completed_at=?, message=? WHERE advertiser_id=?",
+                       (_t.time(), "Scraped and built into the library.", store_id))
+    except Exception as exc:
+        log.warning("integrate: could not record completed_at for %s: %s", store_id, exc)
+    return {"ok": True, "videos": len(dataset["videos"]), "advertiser_id": aid}
 
 
 def _priority_ids(store) -> set:
@@ -188,6 +235,11 @@ async def _discover_and_screen(context, store, lib_path, prio, now_local) -> dic
     discovered = discovery.snowball_sources(seeds, known, lookup.get)
     hot = discovery.priority_domains(library, prio)
     candidates = [{"advertiser_id": i, "name": i, "source_domain": d, "priority": d in hot} for i, d in discovered]
+    # cap how many advertisers we actually probe per night (each probe is a live
+    # Google request); priority (Used/Suggested) candidates first.
+    candidates.sort(key=lambda c: 0 if c["priority"] else 1)
+    found_total = len(candidates)
+    candidates = candidates[:mini_config.DISCOVERY_MAX_CHECKED]
 
     probes = {}
     for c in candidates:
@@ -204,21 +256,29 @@ async def _discover_and_screen(context, store, lib_path, prio, now_local) -> dic
     screened = screening.screen_candidates(candidates, lambda a: probes.get(a, {}), screening.classify_with_haiku)
     queued = discovery.queue_new_advertisers(store, [p["advertiser_id"] for p in screened["passed"]],
                                              name_fn=lambda a: next((p.get("name") for p in screened["passed"] if p["advertiser_id"] == a), a))
-    return {"seeds": len(seeds), "found": len(candidates), "passed": len(screened["passed"]),
-            "queued": queued, "skipped": len(screened["skipped"])}
+    return {"seeds": len(seeds), "found": found_total, "checked": len(candidates),
+            "passed": len(screened["passed"]), "queued": queued, "skipped": len(screened["skipped"])}
 
 
-def _publish(lib_path: Path) -> dict:
-    """Build the All-tab library (+ Liel's shared raw, READ-ONLY) and write it to OUR
-    preview target. Refuses, as a hard backstop, to publish to Liel's live slug/path."""
+def _publish(lib_path: Path, now_local: datetime) -> dict:
+    """Build the COMPLETE static site folder (index.html, app.js, styles.css + data)
+    into OUR preview target, with the All-tab library (our brands + Liel's shared raw,
+    READ-ONLY). Henry uploads this folder to a separate preview link. Refuses, as a hard
+    backstop, to publish to Liel's live slug/path. Never writes under the shared raw."""
+    import library as lib_mod
     nightly.assert_safe_publish_target(mini_config.PUBLISH_SLUG, mini_config.PUBLISH_DIR)
-    library = json.loads(lib_path.read_text(encoding="utf-8")) if lib_path.exists() else {"schema_version": 2, "advertisers": []}
-    shared = nightly.read_shared_advertisers(mini_config.SHARED_RAW_DIR)   # read-only; may be []
-    merged = nightly.merge_all_tab(library, shared)
-    out = mini_config.PUBLISH_DIR / "data" / "library.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(merged, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    return {"target": str(mini_config.PUBLISH_DIR), "slug": mini_config.PUBLISH_SLUG,
+    our = json.loads(lib_path.read_text(encoding="utf-8")) if lib_path.exists() else {"schema_version": 2, "advertisers": []}
+    shared = nightly.read_shared_advertisers(mini_config.SHARED_RAW_DIR, now_local)   # read-only; may be []
+    merged = nightly.merge_all_tab(our, shared)
+
+    public_dir = mini_config.OUR_ROOT / "public"
+    # Stage the full allowlisted site (html/js/css + data/library.json) into the target,
+    # then overwrite data/library.json with the merged (shared-included) All-tab data so
+    # our own public/ copy is never polluted with Liel's advertisers.
+    stage = lib_mod.build_stage(public_dir, mini_config.PUBLISH_DIR)
+    (stage / "data" / "library.json").write_text(json.dumps(merged, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    files = sorted(p.name for p in stage.glob("*") if p.is_file())
+    return {"target": str(stage), "slug": mini_config.PUBLISH_SLUG, "files": files,
             "advertisers": len(merged["advertisers"]),
             "shared_included": merged.get("source_summary", {}).get("shared_advertisers_included", 0)}
 
@@ -240,6 +300,9 @@ def main() -> int:
     if mini_config.NO_SHARED_KEY and not os.environ.get("YOUTUBE_DATA_API_KEY"):
         log.error("YOUTUBE_DATA_API_KEY is not set and shared-key fallback is disabled; aborting.")
         return 1
+
+    # Make the scraper's 429 counter stop the night after MAX_RATE_LIMIT_HITS hits.
+    os.environ["TUBESPY_MAX_429"] = str(mini_config.MAX_RATE_LIMIT_HITS)
 
     deadline = _time.monotonic() + mini_config.NIGHTLY_BUDGET_SECONDS
     try:

@@ -67,6 +67,14 @@ SCRAPE_CONCURRENCY = 1                 # one advertiser at a time
 # Max first-time (new) brand scrapes per night (D/I): 5 now; raise to 20 later.
 MAX_NEW_BRANDS_PER_RUN = int(os.environ.get("TUBESPY_MAX_NEW_PER_RUN", "5"))
 PER_CREATIVE_SECONDS = float(os.environ.get("TUBESPY_PER_CREATIVE_SECONDS", "1.3"))
+# Stop the whole night after this many Google "too many requests" (429) hits,
+# counting even the ones the scraper retries per ad.
+MAX_RATE_LIMIT_HITS = int(os.environ.get("TUBESPY_MAX_429", "2"))
+
+# --- Discovery cadence: once a week on a fixed non-Sunday weekday, and only a
+# handful of advertisers checked per night (each probe is a live Google request). ---
+DISCOVERY_WEEKDAY = int(os.environ.get("TUBESPY_DISCOVERY_WEEKDAY", "2"))   # 0=Mon..6=Sun; 2=Wed
+DISCOVERY_MAX_CHECKED = int(os.environ.get("TUBESPY_DISCOVERY_MAX", "10"))  # advertisers probed/night
 
 # --- Tiers: how often each class of brand is refreshed (days) ---
 TIER_CADENCE_DAYS = {"weekly": 7, "monthly": 30}
