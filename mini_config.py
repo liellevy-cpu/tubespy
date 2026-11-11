@@ -35,3 +35,11 @@ PER_CREATIVE_SECONDS = float(os.environ.get("TUBESPY_PER_CREATIVE_SECONDS", "1.3
 TIER_CADENCE_DAYS = {"weekly": 7, "monthly": 30}
 # A brand counts as "active" (weekly tier) if it ran ads within this window.
 ACTIVE_WINDOW_DAYS = 30
+
+# --- Landing-domain backfill (slow, gradual; fills the click-through domain of
+# existing videos that pre-date scrape-time capture, so discovery gains seeds).
+# Deliberately tiny and well-paced: a secondary job that must never burst Google
+# nor eat the scrape budget. A few per night, spaced seconds apart, is the point.
+BACKFILL_MAX_PER_RUN = int(os.environ.get("TUBESPY_BACKFILL_MAX_PER_RUN", "40"))
+BACKFILL_ITEM_SECONDS = float(os.environ.get("TUBESPY_BACKFILL_ITEM_SECONDS", "6.0"))  # spacing per fetch
+BACKFILL_BUDGET_SECONDS = int(os.environ.get("TUBESPY_BACKFILL_BUDGET_SECONDS", str(20 * 60)))  # <= nightly slice

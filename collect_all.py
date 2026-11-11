@@ -125,8 +125,11 @@ def ids_from_preview_js(text: str) -> list[str]:
     return sorted({m.group(1) for pattern in FRAME_PATTERNS for m in pattern.finditer(text or "")})
 
 
-async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4) -> dict[str, list[str]]:
-    """Fetch each creative's own preview script; it names the YouTube poster/video ID."""
+async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4,
+                             landing_out: dict[str, str] | None = None) -> dict[str, list[str]]:
+    """Fetch each creative's own preview script; it names the YouTube poster/video ID.
+    When landing_out is given, also record {creative URL: landing domain} from the same
+    preview bundle (the ad's click-through adurl) -- no extra fetch."""
     sem = asyncio.Semaphore(limit)
     out: dict[str, list[str]] = {}
 
@@ -136,9 +139,14 @@ async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4) -
                 try:
                     response = await context.request.get(js, timeout=45_000)
                     if response.status == 200:
-                        ids = ids_from_preview_js(await response.text())
+                        text = await response.text()
+                        ids = ids_from_preview_js(text)
                         if ids:
                             out[url] = ids
+                        if landing_out is not None:
+                            domain = landing_domain_from_text(text)
+                            if domain:
+                                landing_out[url] = domain
                         return
                     if response.status == 429:
                         await asyncio.sleep(10 * (attempt + 1))
@@ -149,6 +157,13 @@ async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4) -
 
     await asyncio.gather(*(one(url, js) for url, js in targets.items()))
     return out
+
+
+def landing_domain_from_text(text: str) -> str | None:
+    """The ad's registrable click-through (landing) domain from a preview/content
+    bundle's adurl, reusing discovery's single extractor so the rule can't drift."""
+    from discovery import extract_landing_domain
+    return extract_landing_domain(text or "")
 
 
 async def _frame_tree_ids(frame) -> set[str]:
@@ -319,12 +334,14 @@ async def extract_one(context, url: str, index: int, sem: asyncio.Semaphore) -> 
                 if not ids:
                     raise RuntimeError("No YouTube video evidence resolved from creative detail page")
                 last_shown_match = re.search(r"Last shown\s+([^\n]+)", body, re.I)
+                landing = landing_domain_from_text("\n".join(v for v in values if v))
                 return {
                     "index": index,
                     "creative_url": url,
                     "video_ids": ids,
                     "variation_count": max(1, len(ids)),
                     "last_shown": last_shown_match.group(1).strip() if last_shown_match else None,
+                    "landing_domain": landing,
                     "error": None,
                 }
             except Exception as exc:
@@ -574,9 +591,10 @@ async def collect_advertiser(browser, item: dict[str, Any], concurrency: int) ->
                           "last_shown": None, "error": None}
     previews = {url: js for url, js in ((discovery or {}).get("preview_js") or {}).items() if url in url_set and url not in prior}
     if previews:
-        for url, ids in (await resolve_preview_js(context, previews)).items():
+        landing_by_url: dict[str, str] = {}
+        for url, ids in (await resolve_preview_js(context, previews, landing_out=landing_by_url)).items():
             prior[url] = {"index": 0, "creative_url": url, "video_ids": ids, "variation_count": len(ids),
-                          "last_shown": None, "error": None}
+                          "last_shown": None, "landing_domain": landing_by_url.get(url), "error": None}
     if grid or previews:
         print(json.dumps({"advertiser": name, "fast_resolved": f"{sum(1 for u in urls if u in prior)}/{len(urls)}"}), flush=True)
     pending = [(index, url) for index, url in enumerate(urls) if url not in prior]

@@ -1,6 +1,7 @@
 """Advertiser-level pre-scrape screening: giant-brand filter, cheap size/recency
-gate, Haiku language/fit gate, priority ordering, and a reason for every skip.
-The orchestrator is pure; probe + classify are stubbed."""
+gate, Haiku English-count gate (>=2 of the sample), fit used only for queue priority
+(never a skip), and a reason for every skip. Orchestrator is pure; probe + classify
+are stubbed."""
 from datetime import datetime, timezone
 
 import screening as S
@@ -33,6 +34,16 @@ def test_days_since_parses_last_shown():
     assert S.days_since("whenever", now) is None
 
 
+def test_pick_sample_mixes_newest_and_most_viewed():
+    newest = ["n1", "n2", "n3", "n4", "n5", "n6", "n7"]
+    meta = {v: {"title": v, "views": i} for i, v in enumerate(newest)}  # n7 most viewed
+    out = S.pick_sample(newest, meta, size=4, newest_n=2)
+    ids = [s["video_id"] for s in out]
+    assert ids[:2] == ["n1", "n2"]          # the two newest, in order
+    assert "n7" in ids and "n6" in ids      # then the most-viewed fill the rest
+    assert len(ids) == 4
+
+
 # ---------- orchestrator ----------
 
 def _probe(**by_id):
@@ -50,70 +61,77 @@ def _classify(verdict_by_name):
     return classify
 
 
-GOOD = {"english": True, "language": "English", "product_type": "Car gadget",
-        "fit": True, "reason": "DR car gadget, on-audience"}
-BADFIT = {"english": True, "language": "English", "product_type": "Mobile app",
-          "fit": False, "reason": "app, off-audience"}
-NONEN = {"english": False, "language": "Thai", "product_type": "?", "fit": True, "reason": "x"}
+def _v(english_count, fit=True, **kw):
+    return {"english_count": english_count, "languages": ["English"],
+            "product_type": "Gadget", "fit": fit, "reason": "r", **kw}
 
 
-def test_screen_passes_only_size_recency_english_and_fit():
-    candidates = [{"advertiser_id": "AR1", "name": "Good Gear"}]
-    probe = _probe(AR1={"us_video_ads": 40, "days_since_active": 5, "samples": [{"video_id": "v"}]})
-    out = S.screen_candidates(candidates, probe, _classify({"Good Gear": GOOD}))
-    assert out["queued_order"] == ["AR1"]
-    assert out["passed"][0]["product_type"] == "Car gadget"
+OK = {"us_video_ads": 30, "days_since_active": 3, "samples": [{"video_id": "v"}]}
+
+
+def test_screen_passes_multilingual_with_min_two_english():
+    candidates = [{"advertiser_id": "AR1", "name": "Mixed Co"}]
+    probe = _probe(AR1=OK)
+    out = S.screen_candidates(candidates, probe,
+                              _classify({"Mixed Co": _v(2, fit=True, languages=["Spanish", "English"])}))
+    assert out["queued_order"] == ["AR1"]        # 2 English of the sample -> passes
+    assert out["passed"][0]["english_count"] == 2
     assert out["skipped"] == []
 
 
-def test_screen_skips_with_reasons_and_is_cheap_first():
+def test_fit_is_priority_not_a_skip():
+    candidates = [{"advertiser_id": "ARbad", "name": "Off Niche"}]
+    probe = _probe(ARbad=OK)
+    out = S.screen_candidates(candidates, probe, _classify({"Off Niche": _v(6, fit=False)}))
+    assert out["queued_order"] == ["ARbad"]      # bad fit but English -> still queued
+    assert out["passed"][0]["fit"] is False
+
+
+def test_screen_skips_only_english_and_cheap_gates():
     candidates = [
         {"advertiser_id": "ARown", "name": "Coolina Store"},     # own brand
         {"advertiser_id": "ARgiant", "name": "Nike Inc"},         # giant
         {"advertiser_id": "ARsmall", "name": "Tiny Co"},          # under 20 ads
         {"advertiser_id": "ARstale", "name": "Old Co"},           # inactive
-        {"advertiser_id": "ARnonen", "name": "Thai Co"},          # not English
-        {"advertiser_id": "ARbad", "name": "App Co"},             # bad fit
-        {"advertiser_id": "ARgood", "name": "Good Gear"},         # passes
+        {"advertiser_id": "ARfew", "name": "Mostly Thai Co"},     # only 1 English of sample
+        {"advertiser_id": "ARbadfit", "name": "App Co"},          # English, bad fit -> PASSES
+        {"advertiser_id": "ARgood", "name": "Good Gear"},         # English, good fit -> passes
     ]
     probe = _probe(
         ARsmall={"us_video_ads": 8, "days_since_active": 2, "samples": []},
         ARstale={"us_video_ads": 50, "days_since_active": 120, "samples": []},
-        ARnonen={"us_video_ads": 30, "days_since_active": 3, "samples": [{"video_id": "v"}]},
-        ARbad={"us_video_ads": 30, "days_since_active": 3, "samples": [{"video_id": "v"}]},
-        ARgood={"us_video_ads": 30, "days_since_active": 3, "samples": [{"video_id": "v"}]},
+        ARfew=OK, ARbadfit=OK, ARgood=OK,
     )
-    classify = _classify({"Thai Co": NONEN, "App Co": BADFIT, "Good Gear": GOOD})
+    classify = _classify({"Mostly Thai Co": _v(1, languages=["Thai", "English"]),
+                          "App Co": _v(5, fit=False), "Good Gear": _v(9, fit=True)})
     out = S.screen_candidates(candidates, probe, classify)
 
-    assert out["queued_order"] == ["ARgood"]
+    assert out["queued_order"] == ["ARgood", "ARbadfit"]     # good fit queued ahead of bad fit
     reasons = {r["advertiser_id"]: r["reason"] for r in out["skipped"]}
     assert reasons == {"ARown": "own-brand", "ARgiant": "giant-brand",
                        "ARsmall": "under-min-ads", "ARstale": "inactive",
-                       "ARnonen": "non-english", "ARbad": "bad-fit"}
-    # own + giant were rejected for free -- never probed
-    assert "ARown" not in probe.calls and "ARgiant" not in probe.calls
+                       "ARfew": "too-few-english"}
+    assert "ARown" not in probe.calls and "ARgiant" not in probe.calls   # free rejects, no probe
     assert out["considered"] == 7
 
 
-def test_screen_orders_priority_candidates_first():
+def test_queue_order_is_source_priority_then_fit():
     candidates = [
-        {"advertiser_id": "ARnorm", "name": "Norm Co", "priority": False},
-        {"advertiser_id": "ARhot", "name": "Hot Co", "priority": True},
+        {"advertiser_id": "ARa", "name": "A", "priority": False},   # good fit, not sourced
+        {"advertiser_id": "ARb", "name": "B", "priority": True},    # bad fit, sourced
+        {"advertiser_id": "ARc", "name": "C", "priority": True},    # good fit, sourced
     ]
-    probe = _probe(
-        ARnorm={"us_video_ads": 30, "days_since_active": 3, "samples": [{"video_id": "v"}]},
-        ARhot={"us_video_ads": 30, "days_since_active": 3, "samples": [{"video_id": "v"}]},
-    )
-    out = S.screen_candidates(candidates, probe, _classify({"Norm Co": GOOD, "Hot Co": GOOD}))
-    assert out["queued_order"] == ["ARhot", "ARnorm"]      # priority screened/queued first
-    assert probe.calls[0] == "ARhot"
+    probe = _probe(ARa=OK, ARb=OK, ARc=OK)
+    out = S.screen_candidates(candidates, probe,
+                              _classify({"A": _v(5, fit=True), "B": _v(5, fit=False), "C": _v(5, fit=True)}))
+    assert out["queued_order"] == ["ARc", "ARb", "ARa"]   # sourced first (fit breaks ties), then rest
+    assert probe.calls[0] in ("ARb", "ARc")               # sourced candidates screened first
 
 
 def test_classify_with_haiku_uses_injected_picker_offline():
     seen = {}
     def picker(name, samples):
         seen["name"] = name
-        return GOOD
-    assert S.classify_with_haiku("Good Gear", [{"video_id": "v"}], picker=picker) == GOOD
+        return _v(7)
+    assert S.classify_with_haiku("Good Gear", [{"video_id": "v"}], picker=picker)["english_count"] == 7
     assert seen["name"] == "Good Gear"

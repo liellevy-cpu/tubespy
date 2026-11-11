@@ -217,13 +217,18 @@ def _read_jsonl(path: Path) -> list[Any]:
 
 
 def _validate_creative_result(value: Any, advertiser_id: str) -> dict[str, Any]:
-    _require(isinstance(value, dict) and set(value) == CREATIVE_RESULT_FIELDS, "creative result schema mismatch")
+    # 'landing_domain' is an OPTIONAL extra field (the ad's click-through domain,
+    # captured from the preview bundle adurl); older raw rows omit it entirely.
+    _require(isinstance(value, dict)
+             and CREATIVE_RESULT_FIELDS <= set(value) <= (CREATIVE_RESULT_FIELDS | {"landing_domain"}),
+             "creative result schema mismatch")
     _require(type(value["index"]) is int and value["index"] >= 0, "invalid creative result index")
     validate_transparency_url(value["creative_url"], advertiser_id)
     _require(isinstance(value["video_ids"], list), "video_ids must be a list")
     _require(all(isinstance(item, str) and VIDEO_ID_RE.fullmatch(item) for item in value["video_ids"]), "invalid recovered video ID")
     _require(type(value["variation_count"]) is int and value["variation_count"] >= 0, "invalid variation_count")
     _require(value["last_shown"] is None or isinstance(value["last_shown"], str), "invalid last_shown")
+    _require(value.get("landing_domain") is None or isinstance(value["landing_domain"], str), "invalid landing_domain")
     _require(value["error"] is None, "creative extraction error is blocking")
     return value
 
@@ -272,7 +277,19 @@ def build_dataset(
     _require(not (stat_ids & unavailable_ids), "available and unavailable YouTube IDs overlap")
     _require(recovered_ids == stat_ids | unavailable_ids, "recovered video IDs do not reconcile with YouTube metadata")
 
+    # Each ad's landing (click-through) domain, from the creative that recovered the
+    # video. First non-null wins; discovery snowballs from these, so every scrape now
+    # records them. Older scrapes have none -> None, to be filled by the slow backfill.
+    landing_by_video: dict[str, str] = {}
+    for row in results:
+        domain = row.get("landing_domain")
+        if domain:
+            for video_id in row["video_ids"]:
+                landing_by_video.setdefault(video_id, domain)
+
     videos = [derive_metrics(row, snapshot_at) for row in records]
+    for video in videos:
+        video["landing_domain"] = landing_by_video.get(video["video_id"])
     videos.sort(key=lambda row: (-row["views"], row["video_id"]))
     rankings = rank_records(videos)
     return {

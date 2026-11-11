@@ -38,9 +38,11 @@ ENV_CANDIDATES = (
     Path.home() / "youtube-stats" / ".env",
 )
 
-MIN_US_VIDEO_ADS = 20     # requirement 1: a real, running US video-ad advertiser
-MAX_IDLE_DAYS = 30        # requirement 1: active in the last 30 days
-SAMPLE_SIZE = 5           # requirement 2: 5 sample titles + thumbnails to Haiku
+MIN_US_VIDEO_ADS = 20       # requirement 1: a real, running US video-ad advertiser
+MAX_IDLE_DAYS = 30          # requirement 1: active in the last 30 days
+SAMPLE_SIZE = 10            # requirement 2: sample 10 ads (newest + most-viewed mix)
+MIN_ENGLISH_SAMPLES = 2     # language skip ONLY when fewer than this many samples are English
+NEWEST_IN_SAMPLE = 5        # of the SAMPLE_SIZE, this many are the newest; the rest most-viewed
 
 # Mega-brands we never want in a Coolina competitor swipe library: household
 # names with their own brand pull -- the opposite of the hungry direct-response
@@ -101,10 +103,14 @@ def is_giant_brand(name: str | None) -> bool:
 # ---------- the cheap Haiku classifier (requirement 2) ----------
 
 def classify_with_haiku(name: str, samples: list[dict], picker=None) -> dict:
-    """One cheap call: up to SAMPLE_SIZE thumbnails + titles -> the advertiser's
-    dominant language, product type, and Coolina fit. picker(name, samples)->dict
-    lets tests stay offline. Returns
-    {language, english: bool, product_type, fit: bool, reason}."""
+    """One cheap call: up to SAMPLE_SIZE thumbnails + titles -> how many of the shown
+    ads are English, the languages seen, the product type, and Coolina fit. picker(
+    name, samples)->dict lets tests stay offline. Returns {languages, english_count,
+    english: bool (english_count >= MIN_ENGLISH_SAMPLES), product_type, fit, reason}.
+
+    Language is judged by COUNTING English ads among the sample, never by a single
+    'dominant language' verdict, so a multilingual advertiser with a real English
+    share still passes. Fit is advisory only (queue priority), never a skip signal."""
     if picker is not None:
         return picker(name, samples)
     key = _api_key()
@@ -112,7 +118,8 @@ def classify_with_haiku(name: str, samples: list[dict], picker=None) -> dict:
         raise RuntimeError("ANTHROPIC_API_KEY not set; cannot screen advertisers")
     content: list[dict] = []
     titles: list[str] = []
-    for i, s in enumerate(samples[:SAMPLE_SIZE], 1):
+    shown = samples[:SAMPLE_SIZE]
+    for i, s in enumerate(shown, 1):
         vid = s.get("video_id")
         thumb = s.get("thumbnail_url") or (f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg" if vid else None)
         if thumb:
@@ -121,15 +128,17 @@ def classify_with_haiku(name: str, samples: list[dict], picker=None) -> dict:
     instruction = (
         "You screen competitor advertisers for Coolina's YouTube competitor swipe "
         "library. " + FIT_GUIDE + f"\n\nAdvertiser name: {name}\n"
-        f"Below are up to {SAMPLE_SIZE} of this advertiser's video ads (each thumbnail "
-        "followed by its title):\n" + "\n".join(titles) +
+        f"Below are {len(shown)} of this advertiser's video ads (each thumbnail followed "
+        "by its title):\n" + "\n".join(titles) +
         "\n\nJudge the advertiser AS A WHOLE. Reply with ONLY a JSON object:\n"
-        '{"language": "<dominant ad language>", "english": <true|false>, '
+        '{"languages": ["<languages you see>"], '
+        f'"english_count": <how many of the {len(shown)} shown ads are in English>, '
         '"product_type": "<short product category>", "fit": <true|false>, '
         '"reason": "<one short line>"}\n'
-        "english=true only if the ads are predominantly English. fit=true only if this "
-        "advertiser is a GOOD or STRONG fit per the guide; fit=false for BAD fits, "
-        "unrelated products, and giant brands."
+        "Count an ad as English if its on-screen text / voiceover / title is English. "
+        "fit=true only if this advertiser is a GOOD or STRONG fit per the guide (used for "
+        "queue priority only); fit=false for BAD or unrelated products -- but still report "
+        "english_count honestly, because fit never excludes an advertiser."
     )
     content.append({"type": "text", "text": instruction})
     params = {"model": MODEL, "max_tokens": 512, "messages": [{"role": "user", "content": content}]}
@@ -140,9 +149,17 @@ def classify_with_haiku(name: str, samples: list[dict], picker=None) -> dict:
     text = next((b.text for b in client.messages.create(**params).content if b.type == "text"), "")
     m = re.search(r"\{.*\}", text, re.S)
     data = json.loads(m.group(0)) if m else {}
+    try:
+        english_count = int(data.get("english_count"))
+    except (TypeError, ValueError):
+        english_count = 0
+    languages = data.get("languages")
+    if isinstance(languages, str):
+        languages = [languages]
     return {
-        "language": data.get("language"),
-        "english": bool(data.get("english")),
+        "languages": languages or [],
+        "english_count": english_count,
+        "english": english_count >= MIN_ENGLISH_SAMPLES,
         "product_type": data.get("product_type"),
         "fit": bool(data.get("fit")),
         "reason": str(data.get("reason") or "").strip(),
@@ -152,21 +169,27 @@ def classify_with_haiku(name: str, samples: list[dict], picker=None) -> dict:
 # ---------- the pure orchestrator ----------
 
 def _ordered(candidates: list[dict]) -> list[dict]:
-    """Priority candidates first; stable within each group (keeps discovery order)."""
+    """Screen priority candidates (Used / Suggested source) first; stable within each
+    group so discovery order is preserved."""
     return sorted(candidates, key=lambda c: 0 if c.get("priority") else 1)
 
 
 def screen_candidates(candidates: list[dict], probe_fn, classify_fn,
                       min_ads: int = MIN_US_VIDEO_ADS,
-                      max_idle_days: int = MAX_IDLE_DAYS) -> dict:
+                      max_idle_days: int = MAX_IDLE_DAYS,
+                      min_english: int = MIN_ENGLISH_SAMPLES) -> dict:
     """Screen candidate advertisers BEFORE any scrape. Pure: probe_fn(advertiser_id)
-    -> {us_video_ads, days_since_active, samples:[{video_id,title,thumbnail_url}]}
-    and classify_fn(name, samples) -> {english,language,product_type,fit,reason} are
-    injected (live or stubbed). Returns {passed, skipped, considered, queued_order}.
+    -> {us_video_ads, days_since_active, samples:[{video_id,title,thumbnail_url}]} and
+    classify_fn(name, samples) -> {english_count, languages, product_type, fit, reason}
+    are injected (live or stubbed). Returns {passed, skipped, considered, queued_order}.
 
     candidate dict: {advertiser_id, name, priority: bool, source_domain}.
-    Every skip is logged with a reason, cheapest checks first so we never probe or
-    call Haiku for an advertiser a free rule already rejects."""
+
+    SKIP reasons (English-only, per the owner's rule -- product type is NEVER a skip):
+    own-brand, giant-brand, under-min-ads, inactive, too-few-english. Coolina fit is
+    advisory: it only orders the queue (good fit first), it never excludes. Cheapest
+    checks run first, so we never probe or call Haiku for a free reject. The QUEUE order
+    is Used/Suggested source first, then good fit first."""
     passed: list[dict] = []
     skipped: list[dict] = []
 
@@ -201,18 +224,22 @@ def screen_candidates(candidates: list[dict], probe_fn, classify_fn,
             verdict = classify_fn(name, samples) or {}
         except Exception as exc:
             skip(cand, "screen-error", detail=f"{type(exc).__name__}: {exc}"); continue
-        if not verdict.get("english"):
-            skip(cand, "non-english", language=verdict.get("language")); continue
-        if not verdict.get("fit"):
-            skip(cand, "bad-fit", product_type=verdict.get("product_type"),
-                 detail=verdict.get("reason")); continue
+        english_count = verdict.get("english_count")
+        if not isinstance(english_count, int) or english_count < min_english:
+            skip(cand, "too-few-english", english_count=english_count,
+                 languages=verdict.get("languages")); continue
+        # fit never skips -- it is kept only to order the queue (good fit first)
         passed.append({
             "advertiser_id": cand["advertiser_id"], "name": cand.get("name"),
             "priority": bool(cand.get("priority")), "source_domain": cand.get("source_domain"),
             "us_video_ads": ads, "days_since_active": idle,
-            "language": verdict.get("language"), "product_type": verdict.get("product_type"),
+            "english_count": english_count, "languages": verdict.get("languages"),
+            "product_type": verdict.get("product_type"), "fit": bool(verdict.get("fit")),
             "fit_reason": verdict.get("reason"), "samples": samples,
         })
+
+    # queue order: Used/Suggested source first, then good Coolina fit first (advisory)
+    passed.sort(key=lambda p: (0 if p["priority"] else 1, 0 if p["fit"] else 1))
     return {"passed": passed, "skipped": skipped, "considered": len(candidates),
             "queued_order": [p["advertiser_id"] for p in passed]}
 
@@ -249,12 +276,32 @@ def days_since(last_shown_text: str | None, now: datetime | None = None) -> int 
     return None
 
 
-async def probe_advertiser(page, advertiser_id: str, titles_fn=None,
+def pick_sample(newest_ids: list[str], meta: dict,
+                size: int = SAMPLE_SIZE, newest_n: int = NEWEST_IN_SAMPLE) -> list[dict]:
+    """Build the <=size screening sample as a MIX of the newest ads and the most-viewed
+    ads, so a multilingual advertiser's English share is represented either way. meta:
+    {video_id: {'title':..., 'views':...}}. newest_ids are in ATC order (newest first)."""
+    chosen: list[str] = []
+    for v in newest_ids[:newest_n]:            # the newest few
+        if v not in chosen:
+            chosen.append(v)
+    by_views = sorted(newest_ids, key=lambda v: -(meta.get(v, {}).get("views") or 0))
+    for v in by_views:                         # fill the rest with the most-viewed
+        if len(chosen) >= size:
+            break
+        if v not in chosen:
+            chosen.append(v)
+    return [{"video_id": v, "title": meta.get(v, {}).get("title"),
+             "thumbnail_url": f"https://i.ytimg.com/vi/{v}/hqdefault.jpg"} for v in chosen[:size]]
+
+
+async def probe_advertiser(page, advertiser_id: str, meta_fn=None,
                            now: datetime | None = None) -> dict:
-    """ONE light ATC visit (no full recovery): the US video-ad count, recency from
-    the newest creative, and up to SAMPLE_SIZE sample video IDs. titles_fn(ids)->
-    {id: title} fills sample titles (e.g. a YouTube videos.list helper); thumbnails
-    are derived from the IDs. Reuses collect_all's proven primitives."""
+    """ONE light ATC visit (no full recovery): the US video-ad count, recency from the
+    newest creative, and a SAMPLE_SIZE mix of newest + most-viewed video IDs. meta_fn(
+    ids) -> {id: {'title':..., 'views':...}} supplies titles and view counts (e.g. a
+    YouTube videos.list helper, 1 unit / 50 IDs); thumbnails are derived from the IDs.
+    Reuses collect_all's proven primitives."""
     import collect_all
     url = (f"https://adstransparency.google.com/advertiser/{advertiser_id}"
            "?region=US&format=VIDEO&platform=YOUTUBE&hl=en")
@@ -274,19 +321,19 @@ async def probe_advertiser(page, advertiser_id: str, titles_fn=None,
     us_video_ads = parse_reported_ads(body)
 
     # {creative URL: preview content.js URL}, in ATC order (newest first). No scroll:
-    # the first SearchCreatives batch (~40 creatives) is ample for a 5-ad sample.
+    # the first SearchCreatives batch (~40 creatives) is ample for the sample pool.
     await page.wait_for_timeout(500)
     targets: dict[str, str] = {}
     for b in bodies:
         targets.update(collect_all.parse_search_creatives(b))
-    sampled = dict(list(targets.items())[:SAMPLE_SIZE])
-    sample_ids: list[str] = []
-    if sampled:
-        resolved = await collect_all.resolve_preview_js(page.context, sampled, limit=4)
-        for creative_url in sampled:
+    pool_targets = dict(list(targets.items())[:3 * SAMPLE_SIZE])   # resolve a pool, then pick
+    newest_ids: list[str] = []
+    if pool_targets:
+        resolved = await collect_all.resolve_preview_js(page.context, pool_targets, limit=4)
+        for creative_url in pool_targets:                         # keep ATC (newest-first) order
             for vid in resolved.get(creative_url, []):
-                if vid not in sample_ids:
-                    sample_ids.append(vid)
+                if vid not in newest_ids:
+                    newest_ids.append(vid)
 
     # recency: the newest creative's "Last shown" (ONE detail page, not the whole set)
     days = None
@@ -296,14 +343,12 @@ async def probe_advertiser(page, advertiser_id: str, titles_fn=None,
             detail = await collect_all.extract_one(page.context, newest, 0, asyncio.Semaphore(1))
             days = days_since(detail.get("last_shown"), now)
             for vid in detail.get("video_ids") or []:
-                if vid not in sample_ids:
-                    sample_ids.append(vid)
+                if vid not in newest_ids:
+                    newest_ids.append(vid)
         except Exception:
             days = None
 
-    sample_ids = sample_ids[:SAMPLE_SIZE]
-    titles = titles_fn(sample_ids) if (titles_fn and sample_ids) else {}
-    samples = [{"video_id": v, "title": (titles or {}).get(v),
-                "thumbnail_url": f"https://i.ytimg.com/vi/{v}/hqdefault.jpg"} for v in sample_ids]
+    meta = meta_fn(newest_ids) if (meta_fn and newest_ids) else {}
+    samples = pick_sample(newest_ids, meta or {})
     return {"advertiser_id": advertiser_id, "us_video_ads": us_video_ads,
             "days_since_active": days, "samples": samples}
