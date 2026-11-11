@@ -76,11 +76,12 @@ def landing_domains(dataset: dict) -> list[str]:
     return sorted(domains)
 
 
-def snowball(seed_domains, known_advertiser_ids, lookup_fn) -> list[str]:
-    """For each seed domain, lookup_fn(domain) -> iterable of AR advertiser IDs.
-    Return new advertiser IDs (preserving first-seen order) not already known."""
+def snowball_sources(seed_domains, known_advertiser_ids, lookup_fn) -> list[tuple[str, str]]:
+    """Like snowball, but keep each new advertiser's FIRST-seen source domain, so
+    downstream screening can prioritise advertisers found via a Used / Suggested
+    video. Returns ordered (advertiser_id, source_domain) pairs."""
     known = set(known_advertiser_ids)
-    discovered: list[str] = []
+    discovered: list[tuple[str, str]] = []
     seen: set[str] = set()
     for domain in seed_domains:
         for advertiser_id in lookup_fn(domain) or []:
@@ -88,8 +89,29 @@ def snowball(seed_domains, known_advertiser_ids, lookup_fn) -> list[str]:
             advertiser_id = m.group(1) if m else advertiser_id
             if advertiser_id.startswith("AR") and advertiser_id not in known and advertiser_id not in seen:
                 seen.add(advertiser_id)
-                discovered.append(advertiser_id)
+                discovered.append((advertiser_id, domain))
     return discovered
+
+
+def snowball(seed_domains, known_advertiser_ids, lookup_fn) -> list[str]:
+    """For each seed domain, lookup_fn(domain) -> iterable of AR advertiser IDs.
+    Return new advertiser IDs (preserving first-seen order) not already known."""
+    return [a for a, _ in snowball_sources(seed_domains, known_advertiser_ids, lookup_fn)]
+
+
+def priority_domains(library: dict, priority_video_ids) -> set[str]:
+    """Landing domains of library videos the user marked Used or that were Suggested.
+    Advertisers discovered from these domains are screened first."""
+    wanted = set(priority_video_ids or ())
+    domains: set[str] = set()
+    for advertiser in library.get("advertisers", []):
+        for video in advertiser.get("videos", []):
+            if video.get("video_id") in wanted:
+                raw = video.get("landing_domain")
+                d = domain_of(raw) if isinstance(raw, str) else None
+                if d and not own_brands.is_own_domain(d):
+                    domains.add(d)
+    return domains
 
 
 def queue_new_advertisers(store, advertiser_ids, name_fn=None) -> list[str]:
@@ -129,10 +151,14 @@ async def advertisers_for_domain(page, domain: str) -> list[str]:
     return ids
 
 
-def run_weekly_discovery(store, library: dict, lookup_fn, when: datetime, name_fn=None) -> dict:
-    """Gate on the weekly (non-Sunday) schedule, snowball from the library's
-    landing domains, and queue new advertisers one by one. Pure/sync; the caller
-    supplies lookup_fn (live ATC lookup or a stub)."""
+def run_weekly_discovery(store, library: dict, lookup_fn, when: datetime, name_fn=None,
+                         screen_fn=None, priority_video_ids=None) -> dict:
+    """Gate on the weekly (non-Sunday) schedule, snowball from the library's landing
+    domains, SCREEN the candidates (when screen_fn is given), and queue only the
+    survivors one by one. Pure/sync; the caller supplies lookup_fn (live ATC lookup
+    or a stub) and, in production, screen_fn (screening.screen_candidates bound to a
+    live ATC probe + Haiku classifier). With screen_fn=None the step is a pass-through
+    (every discovered advertiser is queued), preserving the original behaviour."""
     if not is_discovery_day(when):
         return {"ran": False, "reason": "Sunday is skipped", "queued": []}
     seeds: set[str] = set()
@@ -141,8 +167,26 @@ def run_weekly_discovery(store, library: dict, lookup_fn, when: datetime, name_f
     seeds = {d for d in seeds if not own_brands.is_own_domain(d)}  # don't snowball our own store
     known = {a.get("advertiser", {}).get("google_advertiser_id") for a in library.get("advertisers", [])}
     known.discard(None)
-    new_ids = snowball(sorted(seeds), known, lookup_fn)
-    if name_fn:  # a shared domain can surface our own brand — never queue it
-        new_ids = [i for i in new_ids if not own_brands.is_own_brand_name(name_fn(i))]
-    queued = queue_new_advertisers(store, new_ids, name_fn)
-    return {"ran": True, "seed_domains": len(seeds), "discovered": len(new_ids), "queued": queued}
+    discovered = snowball_sources(sorted(seeds), known, lookup_fn)
+    if name_fn:  # a shared domain can surface our own brand — never even screen it
+        discovered = [(i, d) for i, d in discovered if not own_brands.is_own_brand_name(name_fn(i))]
+
+    hot = priority_domains(library, priority_video_ids)
+    candidates = [{"advertiser_id": i, "name": (name_fn(i) if name_fn else None) or i,
+                   "source_domain": d, "priority": d in hot} for i, d in discovered]
+
+    result = {"ran": True, "seed_domains": len(seeds), "discovered": len(candidates),
+              "priority_candidates": sum(1 for c in candidates if c["priority"])}
+    if screen_fn is None:
+        result["queued"] = queue_new_advertisers(store, [c["advertiser_id"] for c in candidates], name_fn)
+        return result
+
+    screened = screen_fn(candidates)  # -> {passed, skipped, considered, queued_order}
+    survivors = [p["advertiser_id"] for p in screened["passed"]]
+    survivor_names = {p["advertiser_id"]: p.get("name") for p in screened["passed"]}
+    queued = queue_new_advertisers(store, survivors,
+                                   name_fn=lambda a: survivor_names.get(a) or (name_fn(a) if name_fn else a))
+    result.update({"queued": queued, "screened": len(candidates),
+                   "passed": len(screened["passed"]), "skipped": screened["skipped"],
+                   "passed_detail": screened["passed"]})
+    return result

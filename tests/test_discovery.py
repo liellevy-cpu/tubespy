@@ -2,8 +2,8 @@
 from datetime import datetime
 
 from discovery import (
-    is_discovery_day, domain_of, landing_domains, snowball,
-    queue_new_advertisers, run_weekly_discovery, extract_landing_domain,
+    is_discovery_day, domain_of, landing_domains, snowball, snowball_sources,
+    priority_domains, queue_new_advertisers, run_weekly_discovery, extract_landing_domain,
 )
 
 
@@ -82,3 +82,44 @@ def test_run_weekly_discovery_end_to_end():
 
     sunday = run_weekly_discovery(store, library, lookup.get, when=datetime(2026, 11, 8))
     assert sunday["ran"] is False
+
+
+def test_snowball_sources_keeps_first_seen_domain():
+    lookups = {"a.com": ["AR111", "AR222"], "b.com": ["AR222", "AR333"]}
+    out = snowball_sources(["a.com", "b.com"], known_advertiser_ids=set(), lookup_fn=lookups.get)
+    assert out == [("AR111", "a.com"), ("AR222", "a.com"), ("AR333", "b.com")]
+
+
+def test_priority_domains_from_used_and_suggested_videos():
+    library = {"advertisers": [{"videos": [
+        {"video_id": "used1", "landing_domain": "https://hotdeal.com/x"},
+        {"video_id": "sugg1", "landing_domain": "gadgetz.com"},
+        {"video_id": "cold1", "landing_domain": "boring.com"},
+        {"video_id": "own1", "landing_domain": "coolinastore.com"},  # our own -> never a seed
+    ]}]}
+    assert priority_domains(library, {"used1", "sugg1", "own1"}) == {"hotdeal.com", "gadgetz.com"}
+
+
+def test_run_weekly_discovery_screens_before_queue():
+    store = _Store()
+    library = {"advertisers": [
+        {"advertiser": {"google_advertiser_id": "AR001"},
+         "videos": [{"video_id": "u", "landing_domain": "https://seed.com/x"}]},
+    ]}
+    lookup = {"seed.com": ["AR_good", "AR_bad"]}
+
+    def screen_fn(candidates):
+        # the hot domain (from Used video 'u') must be flagged priority
+        assert all(c["priority"] for c in candidates)
+        passed = [c for c in candidates if c["advertiser_id"] == "AR_good"]
+        skipped = [{"advertiser_id": "AR_bad", "reason": "bad-fit"}]
+        return {"passed": [{"advertiser_id": "AR_good", "name": "AR_good"}],
+                "skipped": skipped, "considered": len(candidates),
+                "queued_order": ["AR_good"]}
+
+    result = run_weekly_discovery(store, library, lookup.get, when=datetime(2026, 11, 9),
+                                  screen_fn=screen_fn, priority_video_ids={"u"})
+    assert result["queued"] == ["AR_good"]       # only the screened survivor is queued
+    assert result["passed"] == 1
+    assert result["skipped"] == [{"advertiser_id": "AR_bad", "reason": "bad-fit"}]
+    assert [c[0] for c in store.calls] == ["AR_good"]
