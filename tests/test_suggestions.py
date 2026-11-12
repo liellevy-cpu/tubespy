@@ -1,5 +1,8 @@
 """Suggestions: pre-filter, signal score, product dedup, Haiku pick (stubbed), schedule."""
+import json
 from datetime import datetime
+
+import pytest
 
 import suggestions as S
 
@@ -84,3 +87,55 @@ def test_refresh_is_twice_a_week_never_sunday():
     assert S.is_refresh_day(datetime(2026, 11, 12)) is True   # Thursday
     assert S.is_refresh_day(datetime(2026, 11, 10)) is False  # Tuesday
     assert S.is_refresh_day(datetime(2026, 11, 8)) is False   # Sunday
+
+
+# ---------- robust parsing (the crash Henry hit) ----------
+
+def test_first_json_array_reads_only_the_first_list_amid_two_lists_and_prose():
+    # The reply Henry saw: prose, then the real picks array, then a SECOND list and
+    # more text. The old greedy "[.*]" regex spanned from the first "[" to the last
+    # "]" across BOTH lists -> invalid JSON -> json.loads crashed the whole night.
+    reply = (
+        'Here are my picks for Coolina:\n'
+        '[{"video_id": "vid000001ab", "reason": "great knife ad"}, '
+        '{"video_id": "vid000002ab", "reason": "strong DR gadget"}]\n\n'
+        'For reference the raw scores were [9.1, 8.4, 7.7] and that is all.'
+    )
+    picks = S._first_json_array(reply)
+    assert picks == [
+        {"video_id": "vid000001ab", "reason": "great knife ad"},
+        {"video_id": "vid000002ab", "reason": "strong DR gadget"},
+    ]
+
+
+def test_first_json_array_returns_none_when_no_list():
+    assert S._first_json_array("no array at all, sorry") is None
+    assert S._first_json_array('broken [not, valid json') is None
+
+
+def test_picks_from_response_prefers_the_structured_tool_call():
+    class Block:
+        def __init__(self, **kw): self.__dict__.update(kw)
+    # a tool_use block carries the picks as structured input -> used directly
+    resp = type("R", (), {"content": [
+        Block(type="text", text="ignored prose [1,2,3]"),
+        Block(type="tool_use", input={"picks": [{"video_id": "x", "reason": "r"}]}),
+    ]})
+    assert S._picks_from_response(resp) == [{"video_id": "x", "reason": "r"}]
+
+
+def test_run_refresh_keeps_previous_file_when_parsing_fails(tmp_path):
+    # Simulate an unparseable reply: the picker raises the parse error that the live
+    # path raises. The night must NOT crash and must keep the previous suggestions.json.
+    lib = tmp_path / "library.json"
+    lib.write_text(json.dumps(ds([vid(1)])), encoding="utf-8")
+    out = tmp_path / "suggestions.json"
+    previous = '{"generated_at": "yesterday", "suggestions": [{"video_id": "old"}]}\n'
+    out.write_text(previous, encoding="utf-8")
+
+    def boom(_cands):
+        raise S.SuggestionsParseError("two lists, no clean parse")
+
+    result = S.run_refresh(lib, {}, out, when=datetime(2026, 11, 9), picker=boom)
+    assert result == {"refreshed": False, "reason": "parse-failed", "kept_previous": True}
+    assert out.read_text(encoding="utf-8") == previous   # previous file untouched

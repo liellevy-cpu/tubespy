@@ -17,17 +17,25 @@ picker is injectable so tests stay offline).
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
-import re
 from datetime import datetime, timezone
 from pathlib import Path
 
 import own_brands
 
+log = logging.getLogger("suggestions")
+
 ROOT = Path(__file__).resolve().parent
 HISTORY_PATH = ROOT / "build" / "suggested_history.json"
 MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-haiku-5-5")
+
+
+class SuggestionsParseError(Exception):
+    """The Claude reply could not be parsed into a picks array. Raised so the caller
+    can skip Suggestions for the night and keep the previous suggestions.json, instead
+    of crashing the whole run."""
 
 MIN_SECONDS, MAX_SECONDS, MIN_VIEWS, MAX_AGE_DAYS = 120, 300, 1_000_000, 365
 CANDIDATE_POOL, PICK = 30, 10
@@ -126,9 +134,67 @@ def _candidate_line(i: int, v: dict) -> str:
             f"title={(v.get('title') or '')[:70]}")
 
 
+# Structured output: force the model through this tool so it CANNOT return prose or a
+# second list. The schema is the contract; the picks arrive as the tool-call `input`.
+PICK_TOOL = {
+    "name": "submit_picks",
+    "description": "Submit the ranked competitor-ad swipes picked for Coolina, best first.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "picks": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "video_id": {"type": "string", "description": "id of a candidate video"},
+                        "reason": {"type": "string", "description": "one short line"},
+                    },
+                    "required": ["video_id", "reason"],
+                },
+            },
+        },
+        "required": ["picks"],
+    },
+}
+
+
+def _first_json_array(text: str) -> list | None:
+    """The FIRST valid JSON array in `text`, or None. Reads one complete value with
+    json.JSONDecoder.raw_decode from each '[' in turn (so extra lists or prose after
+    it are ignored), instead of a greedy '[.*]' regex that would span from the first
+    '[' to the LAST ']' across two arrays and fail to parse."""
+    decoder = json.JSONDecoder()
+    start = text.find("[")
+    while start != -1:
+        try:
+            value, _ = decoder.raw_decode(text, start)
+        except ValueError:
+            start = text.find("[", start + 1)
+            continue
+        if isinstance(value, list):
+            return value
+        start = text.find("[", start + 1)
+    return None
+
+
+def _picks_from_response(response) -> list | None:
+    """Pull the picks list out of a Claude reply: the forced tool call's `input` first
+    (structured output), else the first valid JSON array in any text block (fallback for
+    a model/proxy that ignored tool_choice). None when neither yields a list."""
+    for block in response.content:
+        if getattr(block, "type", None) == "tool_use" and isinstance(block.input, dict):
+            picks = block.input.get("picks")
+            if isinstance(picks, list):
+                return picks
+    text = next((b.text for b in response.content if getattr(b, "type", None) == "text"), "")
+    return _first_json_array(text)
+
+
 def choose_with_claude(candidates: list[dict], picker=None, count: int = PICK) -> list[dict]:
     """Return [{video_id, reason}] (best first). picker(candidates)->list lets tests
-    stay offline; default calls Claude Haiku once with all candidates."""
+    stay offline; default calls Claude Haiku once with all candidates, forcing a
+    structured tool call. Raises SuggestionsParseError if the reply can't be parsed."""
     if picker is not None:
         return picker(candidates)[:count]
     key = _api_key()
@@ -140,19 +206,21 @@ def choose_with_claude(candidates: list[dict], picker=None, count: int = PICK) -
         "You curate a competitor swipe library for Coolina. " + FIT_GUIDE +
         f"\n\nFrom the {len(candidates)} competitor YouTube video ads below, pick and rank the "
         f"best {count} swipes for Coolina (best first). Prefer the GOOD/STRONG fits; drop BAD fits "
-        "even if their numbers are high. Reply with ONLY a JSON array of exactly "
-        f"{count} objects {{\"video_id\": \"...\", \"reason\": \"one short line\"}} — no prose.\n\n"
+        "even if their numbers are high. Call submit_picks with the best "
+        f"{count} (video_id + one short reason each).\n\n"
         + "\n".join(_candidate_line(i + 1, v) for i, v in enumerate(candidates))
     )
     import anthropic
     client = anthropic.Anthropic(api_key=key)
     params = {"model": MODEL, "max_tokens": 1024,
-              "messages": [{"role": "user", "content": prompt}]}
+              "messages": [{"role": "user", "content": prompt}],
+              "tools": [PICK_TOOL],
+              "tool_choice": {"type": "tool", "name": "submit_picks"}}
     if MODEL.startswith("claude-haiku"):
         params["thinking"] = {"type": "disabled"}
-    text = next((b.text for b in client.messages.create(**params).content if b.type == "text"), "")
-    m = re.search(r"\[.*\]", text, re.S)
-    picks = json.loads(m.group(0)) if m else []
+    picks = _picks_from_response(client.messages.create(**params))
+    if picks is None:
+        raise SuggestionsParseError("Claude reply had no parseable picks array")
     valid = {v["video_id"] for v in candidates}
     return [{"video_id": p["video_id"], "reason": str(p.get("reason", "")).strip()}
             for p in picks if isinstance(p, dict) and p.get("video_id") in valid][:count]
@@ -189,7 +257,13 @@ def run_refresh(library_path, item_states, out_path, when=None, picker=None) -> 
         return {"refreshed": False, "reason": "not a refresh day"}
     dataset = json.loads(Path(library_path).read_text(encoding="utf-8"))
     history = load_history()
-    rows = generate(dataset, item_states, history, picker)
+    try:
+        rows = generate(dataset, item_states, history, picker)
+    except SuggestionsParseError as exc:
+        # Don't crash the night over Suggestions: keep the previous suggestions.json
+        # (leave out_path untouched) and let the rest of the run publish.
+        log.warning("suggestions: skipping refresh, keeping previous file (%s)", exc)
+        return {"refreshed": False, "reason": "parse-failed", "kept_previous": True}
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     Path(out_path).write_text(
         json.dumps({"generated_at": when.isoformat(), "suggestions": rows}, indent=2, ensure_ascii=False) + "\n",
