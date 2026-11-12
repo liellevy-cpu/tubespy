@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import parse_qs, urlparse
 
+import own_brands
+
 VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 ADVERTISER_ID_RE = re.compile(r"^AR\d+$")
 CREATIVE_ID_RE = re.compile(r"^CR\d+$")
@@ -215,13 +217,18 @@ def _read_jsonl(path: Path) -> list[Any]:
 
 
 def _validate_creative_result(value: Any, advertiser_id: str) -> dict[str, Any]:
-    _require(isinstance(value, dict) and set(value) == CREATIVE_RESULT_FIELDS, "creative result schema mismatch")
+    # 'landing_domain' is an OPTIONAL extra field (the ad's click-through domain,
+    # captured from the preview bundle adurl); older raw rows omit it entirely.
+    _require(isinstance(value, dict)
+             and CREATIVE_RESULT_FIELDS <= set(value) <= (CREATIVE_RESULT_FIELDS | {"landing_domain"}),
+             "creative result schema mismatch")
     _require(type(value["index"]) is int and value["index"] >= 0, "invalid creative result index")
     validate_transparency_url(value["creative_url"], advertiser_id)
     _require(isinstance(value["video_ids"], list), "video_ids must be a list")
     _require(all(isinstance(item, str) and VIDEO_ID_RE.fullmatch(item) for item in value["video_ids"]), "invalid recovered video ID")
     _require(type(value["variation_count"]) is int and value["variation_count"] >= 0, "invalid variation_count")
     _require(value["last_shown"] is None or isinstance(value["last_shown"], str), "invalid last_shown")
+    _require(value.get("landing_domain") is None or isinstance(value["landing_domain"], str), "invalid landing_domain")
     _require(value["error"] is None, "creative extraction error is blocking")
     return value
 
@@ -270,7 +277,19 @@ def build_dataset(
     _require(not (stat_ids & unavailable_ids), "available and unavailable YouTube IDs overlap")
     _require(recovered_ids == stat_ids | unavailable_ids, "recovered video IDs do not reconcile with YouTube metadata")
 
+    # Each ad's landing (click-through) domain, from the creative that recovered the
+    # video. First non-null wins; discovery snowballs from these, so every scrape now
+    # records them. Older scrapes have none -> None, to be filled by the slow backfill.
+    landing_by_video: dict[str, str] = {}
+    for row in results:
+        domain = row.get("landing_domain")
+        if domain:
+            for video_id in row["video_ids"]:
+                landing_by_video.setdefault(video_id, domain)
+
     videos = [derive_metrics(row, snapshot_at) for row in records]
+    for video in videos:
+        video["landing_domain"] = landing_by_video.get(video["video_id"])
     videos.sort(key=lambda row: (-row["views"], row["video_id"]))
     rankings = rank_records(videos)
     return {
@@ -309,9 +328,158 @@ def retain_top_viewed(dataset: dict[str, Any], limit: int = 5) -> dict[str, Any]
     return result
 
 
+LIBRARY_MIN_SECONDS = 120
+LIBRARY_MAX_SECONDS = 300
+LIBRARY_MIN_VIEWS = 1_000_000
+
+
+def filter_and_rank(
+    dataset: dict[str, Any],
+    language_fn=None,
+    min_seconds: int = LIBRARY_MIN_SECONDS,
+    max_seconds: int = LIBRARY_MAX_SECONDS,
+    min_views: int = LIBRARY_MIN_VIEWS,
+) -> dict[str, Any]:
+    """Library rules (no brand exclusion): keep ALL videos that are 2-5 min,
+    at least 1M views, and confirmed English (spoken language from the video
+    itself, never the title). Rank by lifetime views/day. Variant grouping by
+    product label is layered on later (after the AI product step).
+
+    `language_fn(video_id) -> True/False/None`; anything not True is excluded.
+    Defaults to language.confirm_english; tests inject a stub to stay offline.
+    """
+    if language_fn is None:
+        from language import confirm_english as language_fn
+    result = deepcopy(dataset)
+    videos = result.get("videos", [])
+    sized = [v for v in videos if min_seconds <= v["length_seconds"] <= max_seconds and v["views"] >= min_views]
+    kept: list[dict[str, Any]] = []
+    excluded_non_english = 0
+    for video in sized:
+        if language_fn(video["video_id"]) is True:
+            kept.append(video)
+        else:
+            excluded_non_english += 1
+    kept.sort(key=lambda row: (-row["lifetime_views_per_day"], -row["views"], row["video_id"]))
+    result["videos"] = kept
+    result["ranking_limit"] = len(kept)
+    if kept:
+        result["rankings"] = rank_records(kept, limit=len(kept))
+    else:
+        result["rankings"] = {
+            "most_viewed": [], "fastest_since_upload": [], "newest_breakouts": [],
+            "fastest_growing_now": {"available": False, "reason": "No qualifying videos.", "items": []},
+            "definitions": {},
+        }
+    summary = result.setdefault("source_summary", {})
+    summary["library_videos"] = len(kept)
+    summary["excluded_by_length_or_views"] = len(videos) - len(sized)
+    summary["excluded_non_english"] = excluded_non_english
+    return result
+
+
+_PROMO_RE = re.compile(
+    r"\[.*?\]|\b\d{1,3}%\s*off\b|bogo|buy\s*\d\s*get\s*\d\s*free|factory direct|"
+    r"flash sale|free today|\b50%\b", re.I)
+
+
+def _fallback_product_label(title: str) -> str:
+    """Title-derived label used when the AI labeler is unavailable."""
+    cleaned = _PROMO_RE.sub(" ", title or "")
+    cleaned = re.sub(r"[^\w\s/&-]", " ", cleaned)
+    words = [w for w in cleaned.split() if w]
+    latin = [w for w in words if re.search(r"[A-Za-z]", w)]
+    if len(latin) >= 2:
+        return " ".join(words[:5]).title()[:60]
+    return "Unknown"
+
+
+def group_by_product(dataset: dict[str, Any], label_fn=None) -> dict[str, Any]:
+    """Assign a product label to each video and group variants of the same product.
+    Adds video["product"] and a dataset["products"] grouping ordered by the group's
+    best views/day. `label_fn(video_id, title, thumbnail_url) -> str | None`; None
+    falls back to a title-derived label. Defaults to product_label.label_product;
+    tests inject a stub to stay offline and avoid API calls."""
+    if label_fn is None:
+        from product_label import label_product as label_fn
+    result = deepcopy(dataset)
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for video in result.get("videos", []):
+        label = label_fn(video["video_id"], video.get("title", ""), video.get("thumbnail_url", ""))
+        if not label:
+            label = _fallback_product_label(video.get("title", ""))
+        video["product"] = label
+        groups.setdefault(label, []).append(video)
+    products = [
+        {
+            "product": label,
+            "variants": len(videos),
+            "video_ids": [v["video_id"] for v in videos],
+            "top_views_per_day": max(v["lifetime_views_per_day"] for v in videos),
+            "total_views": sum(v["views"] for v in videos),
+        }
+        for label, videos in groups.items()
+    ]
+    products.sort(key=lambda g: (-g["top_views_per_day"], g["product"]))
+    result["products"] = products
+    return result
+
+
+PUBLISH_MATCH_THRESHOLD = 0.90
+
+
+def match_report(results: list[dict[str, Any]], withheld: set[str]) -> dict[str, Any]:
+    """How many ads matched to a YouTube video. Withheld ads (Google won't show
+    them) are excluded from the denominator; everything else without a video is
+    'unmatched' and surfaced, never guessed."""
+    total = len(results)
+    matched = [r for r in results if r.get("video_ids")]
+    unmatched = [r for r in results if not r.get("video_ids") and r.get("creative_url") not in withheld]
+    denom = total - len(withheld)
+    rate = (len(matched) / denom) if denom > 0 else 0.0
+    return {
+        "total": total,
+        "withheld": len(withheld),
+        "matched": len(matched),
+        "unmatched": len(unmatched),
+        "match_rate": round(rate, 4),
+        "unmatched_ads": sorted(r["creative_url"] for r in unmatched),
+    }
+
+
+def meets_publish_threshold(match_rate: float, threshold: float = PUBLISH_MATCH_THRESHOLD) -> bool:
+    return match_rate >= threshold
+
+
+def apply_match_gate(source_dir: Path, threshold: float = PUBLISH_MATCH_THRESHOLD) -> dict[str, Any]:
+    """Publish gate: only when >= threshold of non-withheld ads matched to a video.
+    Rewrites the source to the matched subset (reindexed) so the strict builder
+    accepts it, writes unmatched_ads.json, and returns the report. Raises
+    ValidationError below threshold, so the brand stays unpublished."""
+    source_dir = Path(source_dir)
+    creative_urls = _read_json(source_dir / "creative_urls.json")
+    results = _read_jsonl(source_dir / "creative_video_results.jsonl")
+    withheld_path = source_dir / "google_withheld_creatives.json"
+    withheld = set(_read_json(withheld_path)) if withheld_path.exists() else set()
+    report = match_report(results, withheld)
+    if not meets_publish_threshold(report["match_rate"], threshold):
+        raise ValidationError(
+            f"match rate {report['match_rate']:.0%} below {threshold:.0%}; brand not published")
+    matched = [dict(r, index=i) for i, r in enumerate(r for r in results if r.get("video_ids"))]
+    matched_urls = sorted(r["creative_url"] for r in matched)
+    write_dataset_json = source_dir / "creative_urls.json"
+    write_dataset_json.write_text(json.dumps(matched_urls, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (source_dir / "creative_video_results.jsonl").write_text(
+        "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in matched), encoding="utf-8")
+    (source_dir / "unmatched_ads.json").write_text(
+        json.dumps(report["unmatched_ads"], indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return report
+
+
 def combine_datasets(datasets: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """Combine validated advertisers while preserving each brand's rankings."""
     items = [deepcopy(item) for item in datasets]
+    items = own_brands.drop_own_advertisers(items)  # keep our own brands out of the library
     _require(bool(items), "at least one advertiser dataset is required")
     names: set[str] = set()
     snapshots: set[str] = set()

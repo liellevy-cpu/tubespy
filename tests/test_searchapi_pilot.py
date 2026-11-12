@@ -291,11 +291,16 @@ def test_conflicting_nested_identity_rejected(extra):
 
 
 def test_concurrent_checkpoint_run_refused(tmp_path):
-    import fcntl
     p = pilot()
     checkpoint = tmp_path / "state.json"
     with checkpoint.with_suffix(".lock").open("w") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        try:
+            import fcntl
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except ModuleNotFoundError:  # Windows
+            import msvcrt
+            lock.write(" "); lock.flush(); lock.seek(0)
+            msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
         with pytest.raises(p.PilotError, match="checkpoint_busy"):
             p.run_pilot([A], checkpoint, {"SEARCHAPI_API_KEY": "s", "YOUTUBE_DATA_API_KEY": "y"},
                         3, 1, 1, transport=Transport([]))

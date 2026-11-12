@@ -8,8 +8,8 @@ import asyncio
 import collections
 import concurrent.futures
 import contextlib
-import fcntl
 import json
+import os
 import re
 import time
 import urllib.request
@@ -22,7 +22,7 @@ from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parent
 RAW = ROOT / "raw"
-TQR_SOURCE = Path("/Users/maxopenclaw/.hermes/cache/browser-use/workspace/20260909_002841_c8084e0b")
+TQR_SOURCE = Path(os.environ.get("TQR_SOURCE", "/nonexistent/tqr-pilot"))  # original pilot data lives only on the Emater Mac mini
 VIDEO_RE = re.compile(r"(?:youtube(?:-nocookie)?\.com/(?:embed/|watch\?(?:[^#]*&)?v=)|youtu\.be/)([A-Za-z0-9_-]{11})", re.I)
 ENCODED_VIDEO_RE = re.compile(r"%2Fembed%2F([A-Za-z0-9_-]{11})", re.I)
 # Since ~Oct 2026 Google renders video creatives in a SafeFrame "discover_video_ads"
@@ -67,7 +67,7 @@ def normalize_source_url(url: str) -> str:
 def read_existing_creatives(path: Path) -> list[str]:
     if not path.exists():
         return []
-    value = json.loads(path.read_text())
+    value = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(value, list):
         raw = value
     elif isinstance(value, dict) and isinstance(value.get("creative_urls"), list):
@@ -83,7 +83,7 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
     rows = []
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         if line.strip():
             rows.append(json.loads(line))
     return rows
@@ -92,7 +92,7 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 def write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp = path.with_suffix(path.suffix + ".tmp")
-    temp.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n")
+    temp.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     temp.replace(path)
 
 
@@ -125,8 +125,40 @@ def ids_from_preview_js(text: str) -> list[str]:
     return sorted({m.group(1) for pattern in FRAME_PATTERNS for m in pattern.finditer(text or "")})
 
 
-async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4) -> dict[str, list[str]]:
-    """Fetch each creative's own preview script; it names the YouTube poster/video ID."""
+class RateLimitExceeded(RuntimeError):
+    """Raised when Google 429 ('too many requests') hits reach the night's threshold,
+    so the nightly runner can stop everything before the mini IP gets blocked."""
+
+
+_rate_limit_hits = 0
+
+
+def reset_rate_limit() -> None:
+    global _rate_limit_hits
+    _rate_limit_hits = 0
+
+
+def rate_limit_hits() -> int:
+    return _rate_limit_hits
+
+
+def note_rate_limit(label: str = "") -> None:
+    """Count one Google 429 (including per-ad retries). When the count reaches
+    TUBESPY_MAX_429 (>0), raise RateLimitExceeded to stop the night. Threshold 0
+    disables the hard stop but still counts."""
+    global _rate_limit_hits
+    _rate_limit_hits += 1
+    import os
+    threshold = int(os.environ.get("TUBESPY_MAX_429", "0") or "0")
+    if threshold > 0 and _rate_limit_hits >= threshold:
+        raise RateLimitExceeded(f"too many requests x{_rate_limit_hits} (429){(' @ ' + label) if label else ''}")
+
+
+async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4,
+                             landing_out: dict[str, str] | None = None) -> dict[str, list[str]]:
+    """Fetch each creative's own preview script; it names the YouTube poster/video ID.
+    When landing_out is given, also record {creative URL: landing domain} from the same
+    preview bundle (the ad's click-through adurl) -- no extra fetch."""
     sem = asyncio.Semaphore(limit)
     out: dict[str, list[str]] = {}
 
@@ -136,11 +168,17 @@ async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4) -
                 try:
                     response = await context.request.get(js, timeout=45_000)
                     if response.status == 200:
-                        ids = ids_from_preview_js(await response.text())
+                        text = await response.text()
+                        ids = ids_from_preview_js(text)
                         if ids:
                             out[url] = ids
+                        if landing_out is not None:
+                            domain = landing_domain_from_text(text)
+                            if domain:
+                                landing_out[url] = domain
                         return
                     if response.status == 429:
+                        note_rate_limit("preview_js")      # may raise RateLimitExceeded
                         await asyncio.sleep(10 * (attempt + 1))
                         continue
                     return
@@ -149,6 +187,13 @@ async def resolve_preview_js(context, targets: dict[str, str], limit: int = 4) -
 
     await asyncio.gather(*(one(url, js) for url, js in targets.items()))
     return out
+
+
+def landing_domain_from_text(text: str) -> str | None:
+    """The ad's registrable click-through (landing) domain from a preview/content
+    bundle's adurl, reusing discovery's single extractor so the rule can't drift."""
+    from discovery import extract_landing_domain
+    return extract_landing_domain(text or "")
 
 
 async def _frame_tree_ids(frame) -> set[str]:
@@ -294,10 +339,11 @@ async def extract_one(context, url: str, index: int, sem: asyncio.Semaphore) -> 
         await asyncio.sleep(1.25)
         last_error = None
         for attempt in range(3):
-            page = await context.new_page()
+            page = None
             observed: list[str] = []
-            page.on("request", lambda request: observed.append(request.url))
             try:
+                page = await context.new_page()  # tab-open can fail under load; retry, don't crash the run
+                page.on("request", lambda request: observed.append(request.url))
                 response = await page.goto(url, wait_until="domcontentloaded", timeout=75_000)
                 if response is None or response.status >= 400:
                     raise RuntimeError(f"creative HTTP status {getattr(response, 'status', None)}")
@@ -318,27 +364,40 @@ async def extract_one(context, url: str, index: int, sem: asyncio.Semaphore) -> 
                 if not ids:
                     raise RuntimeError("No YouTube video evidence resolved from creative detail page")
                 last_shown_match = re.search(r"Last shown\s+([^\n]+)", body, re.I)
+                landing = landing_domain_from_text("\n".join(v for v in values if v))
                 return {
                     "index": index,
                     "creative_url": url,
                     "video_ids": ids,
                     "variation_count": max(1, len(ids)),
                     "last_shown": last_shown_match.group(1).strip() if last_shown_match else None,
+                    "landing_domain": landing,
                     "error": None,
                 }
+            except RateLimitExceeded:
+                raise                                  # night threshold reached -> stop everything
             except Exception as exc:
                 last_error = f"{type(exc).__name__}: {exc}"
+                if "429" in last_error or "too many requests" in last_error.lower():
+                    note_rate_limit("creative_detail")  # count the retry; may raise RateLimitExceeded
                 await asyncio.sleep((20 * (attempt + 1)) if "429" in last_error else (2 + attempt * 2))
             finally:
-                await page.close()
+                if page is not None:
+                    await page.close()
         return {"index": index, "creative_url": url, "video_ids": [], "variation_count": 0, "last_shown": None, "error": last_error}
 
 
 def _youtube_api_key() -> str | None:
-    """Existing free YouTube Data API key from Henry's local .env (never logged or published)."""
+    """Our own YouTube Data API key (never logged or published). With
+    TUBESPY_NO_SHARED_KEY=1 the ~/.hermes/.env fallback is disabled and a missing
+    key is a hard, clear error -- we never silently fall back to a shared / Liel key."""
     import os
     if os.environ.get("YOUTUBE_DATA_API_KEY"):
         return os.environ["YOUTUBE_DATA_API_KEY"]
+    if os.environ.get("TUBESPY_NO_SHARED_KEY", "0").strip().lower() in ("1", "true", "yes", "on"):
+        raise RuntimeError(
+            "YOUTUBE_DATA_API_KEY is not set and the shared-key fallback is disabled "
+            "(TUBESPY_NO_SHARED_KEY=1). Set our own YOUTUBE_DATA_API_KEY; never use a shared key.")
     env = Path.home() / ".hermes/.env"
     try:
         for line in env.read_text().splitlines():
@@ -468,18 +527,73 @@ def fetch_youtube(video_id: str, creatives: list[str]) -> dict[str, Any]:
 
 @contextlib.contextmanager
 def google_lock(label: str = ""):
-    """One Google Transparency scrape at a time on this machine (TubeSpy exports and the
-    weekly library worker share it). Waits instead of running in parallel, which is what
-    triggers Google's "unusual traffic" blocks."""
-    path = ROOT / "build" / "google-scrape.lock"
+    """One Google Transparency request at a time on this machine (TubeSpy exports, the
+    weekly library worker, discovery, screening and the backfill all share it).
+    Serializing scrapes is what avoids Google's "unusual traffic" blocks. The lock path
+    is TUBESPY_GOOGLE_LOCK when set, so Henry can point it at the mini-wide shared lock
+    and our scrapes wait for Liel's and Sam's too. Cross-platform: fcntl / msvcrt."""
+    path = Path(os.environ["TUBESPY_GOOGLE_LOCK"]) if os.environ.get("TUBESPY_GOOGLE_LOCK") else ROOT / "build" / "google-scrape.lock"
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a+") as handle:
-        fcntl.flock(handle, fcntl.LOCK_EX)
+        kind = None
         try:
-            handle.seek(0); handle.truncate(); handle.write(f"{label} {datetime.now(timezone.utc).isoformat()}\n"); handle.flush()
+            import fcntl
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            kind = "fcntl"
+        except ModuleNotFoundError:
+            import msvcrt
+            handle.seek(0)
+            try:
+                msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
+                kind = "msvcrt"
+            except OSError:
+                kind = "none"
+        try:
+            handle.seek(0); handle.truncate()
+            handle.write(f"{label} {datetime.now(timezone.utc).isoformat()}\n"); handle.flush()
             yield
         finally:
-            fcntl.flock(handle, fcntl.LOCK_UN)
+            if kind == "fcntl":
+                import fcntl; fcntl.flock(handle, fcntl.LOCK_UN)
+            elif kind == "msvcrt":
+                import msvcrt
+                try:
+                    handle.seek(0); msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+                except OSError:
+                    pass
+
+
+def _api_stats_update(out: Path, prior: dict[str, Any], api_key: str | None) -> None:
+    """Fetch view counts (YouTube Data API) for already-resolved videos and write
+    youtube_stats.jsonl as we go, so a run stopped mid-way still has views on disk.
+    API-only and idempotent; the slower watch-page fallback stays in the final pass."""
+    if not api_key:
+        return
+    stats_path = out / "youtube_stats.jsonl"
+    unavailable_path = out / "youtube_unavailable.json"
+    previous_stats = {row["video_id"]: row for row in load_jsonl(stats_path) if row.get("error") is None}
+    unavailable_rows = json.loads(unavailable_path.read_text(encoding="utf-8")) if unavailable_path.exists() else []
+    unavailable_ids = {row["video_id"] for row in unavailable_rows}
+    by_video: dict[str, list[str]] = collections.defaultdict(list)
+    for row in prior.values():
+        for video_id in row.get("video_ids", []):
+            by_video[video_id].append(row["creative_url"])
+    missing = [(video_id, urls) for video_id, urls in sorted(by_video.items())
+               if video_id not in previous_stats and video_id not in unavailable_ids]
+    if not missing:
+        return
+    new_unavailable = []
+    for video_id, row in fetch_youtube_api(missing, api_key).items():
+        if row.get("unavailable"):
+            new_unavailable.append(row["unavailable"])
+        else:
+            previous_stats[video_id] = row
+    if new_unavailable:
+        unavailable_rows = unavailable_rows + new_unavailable
+        write_json(unavailable_path, unavailable_rows)
+        unavailable_ids |= {row["video_id"] for row in new_unavailable}
+    stats = [previous_stats[v] for v in sorted(by_video) if v in previous_stats and v not in unavailable_ids]
+    stats_path.write_text("".join(json.dumps(value, ensure_ascii=False) + "\n" for value in stats), encoding="utf-8")
 
 
 async def collect_advertiser(browser, item: dict[str, Any], concurrency: int) -> dict[str, Any]:
@@ -487,7 +601,7 @@ async def collect_advertiser(browser, item: dict[str, Any], concurrency: int) ->
     slug = slugify(name)
     out = RAW / slug
     out.mkdir(parents=True, exist_ok=True)
-    if name == "TQR Marketing Group":
+    if name == "TQR Marketing Group" and TQR_SOURCE.exists():
         return {"name": name, "slug": slug, "status": "preserved_pilot", "source_dir": str(TQR_SOURCE)}
 
     context = await browser.new_context(locale="en-US")
@@ -519,14 +633,16 @@ async def collect_advertiser(browser, item: dict[str, Any], concurrency: int) ->
                           "last_shown": None, "error": None}
     previews = {url: js for url, js in ((discovery or {}).get("preview_js") or {}).items() if url in url_set and url not in prior}
     if previews:
-        for url, ids in (await resolve_preview_js(context, previews)).items():
+        landing_by_url: dict[str, str] = {}
+        for url, ids in (await resolve_preview_js(context, previews, landing_out=landing_by_url)).items():
             prior[url] = {"index": 0, "creative_url": url, "video_ids": ids, "variation_count": len(ids),
-                          "last_shown": None, "error": None}
+                          "last_shown": None, "landing_domain": landing_by_url.get(url), "error": None}
     if grid or previews:
         print(json.dumps({"advertiser": name, "fast_resolved": f"{sum(1 for u in urls if u in prior)}/{len(urls)}"}), flush=True)
     pending = [(index, url) for index, url in enumerate(urls) if url not in prior]
     sem = asyncio.Semaphore(concurrency)
     tasks = [asyncio.create_task(extract_one(context, url, index, sem)) for index, url in pending]
+    api_key = _youtube_api_key()
     for completed, task in enumerate(asyncio.as_completed(tasks), 1):
         row = await task
         prior[row["creative_url"]] = row
@@ -535,7 +651,8 @@ async def collect_advertiser(browser, item: dict[str, Any], concurrency: int) ->
             for index, url in enumerate(urls):
                 if url in prior:
                     value = dict(prior[url]); value["index"] = index; ordered.append(value)
-            results_path.write_text("".join(json.dumps(value, ensure_ascii=False) + "\n" for value in ordered))
+            results_path.write_text("".join(json.dumps(value, ensure_ascii=False) + "\n" for value in ordered), encoding="utf-8")
+            _api_stats_update(out, prior, api_key)  # fetch views in batches as we go
             print(json.dumps({"advertiser": name, "creative_progress": f"{len(prior)}/{len(urls)}"}), flush=True)
     await context.close()
     if not tasks:
@@ -546,7 +663,7 @@ async def collect_advertiser(browser, item: dict[str, Any], concurrency: int) ->
     withheld = sorted(row["creative_url"] for row in rows if row.get("withheld"))
     if withheld:
         rows = [{k: v for k, v in row.items() if k != "withheld"} for row in rows]
-        results_path.write_text("".join(json.dumps(value, ensure_ascii=False) + "\n" for value in rows))
+        results_path.write_text("".join(json.dumps(value, ensure_ascii=False) + "\n" for value in rows), encoding="utf-8")
         write_json(out / "google_withheld_creatives.json", withheld)
     failures = [row for row in rows if row.get("error")]
     by_video: dict[str, list[str]] = collections.defaultdict(list)
@@ -554,7 +671,7 @@ async def collect_advertiser(browser, item: dict[str, Any], concurrency: int) ->
         for video_id in row.get("video_ids", []):
             by_video[video_id].append(row["creative_url"])
     unavailable_path = out / "youtube_unavailable.json"
-    unavailable_rows = json.loads(unavailable_path.read_text()) if unavailable_path.exists() else []
+    unavailable_rows = json.loads(unavailable_path.read_text(encoding="utf-8")) if unavailable_path.exists() else []
     unavailable_ids = {row["video_id"] for row in unavailable_rows}
     stats_path = out / "youtube_stats.jsonl"
     previous_stats = {row["video_id"]: row for row in load_jsonl(stats_path) if row.get("error") is None}
@@ -584,7 +701,7 @@ async def collect_advertiser(browser, item: dict[str, Any], concurrency: int) ->
         unavailable_ids |= {row["video_id"] for row in newly_unavailable}
         write_json(unavailable_path, unavailable_rows)
     stats = [previous_stats[video_id] for video_id in sorted(by_video) if video_id in previous_stats and video_id not in unavailable_ids]
-    stats_path.write_text("".join(json.dumps(value, ensure_ascii=False) + "\n" for value in stats))
+    stats_path.write_text("".join(json.dumps(value, ensure_ascii=False) + "\n" for value in stats), encoding="utf-8")
     metadata_failures = [row for row in stats if row.get("error")]
     advertiser_ids = sorted({CREATIVE_RE.search(url).group(1) for url in urls})
     summary = {
@@ -613,7 +730,7 @@ async def run(args) -> int:
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(
             headless=True,
-            executable_path="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            executable_path=os.environ.get("CHROME_PATH", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
         )
         results = []
         for item in items:

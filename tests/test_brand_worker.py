@@ -76,10 +76,16 @@ def test_owner_sheet_sync_seeds_all_existing_and_pauses_inactive(tmp_path):
     from add_brand import Store
     dataset=json.loads(Path('public/data/library.json').read_text())
     s=Store(tmp_path/'q')
-    csv_text='Advertiser,Google Ads Transparency URL,Active\nRidge,https://adstransparency.google.com/advertiser/AR14056452383756517377,FALSE\n'
+    # Pick an existing advertiser (comma-free name, so the CSV row stays simple) and mark
+    # it inactive on the sheet -- derived from the data, not a hard-coded brand that a
+    # data change could drop.
+    adv=next(a['advertiser'] for a in dataset['advertisers'] if ',' not in (a['advertiser'].get('name') or ''))
+    name, aid = adv['name'], adv['google_advertiser_id']
+    csv_text=(f'Advertiser,Google Ads Transparency URL,Active\n'
+              f'{name},https://adstransparency.google.com/advertiser/{aid},FALSE\n')
     m.sync_owner_registry(s,dataset,csv_text)
     assert len(s.list())==len(dataset['advertisers'])
-    assert next(r for r in s.list() if r['name']=='Ridge')['state']=='inactive'
+    assert next(r for r in s.list() if r['advertiser_id']==aid)['state']=='inactive'
     assert s.queue_weekly()==len(dataset['advertisers'])-1
 
 

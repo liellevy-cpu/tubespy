@@ -33,6 +33,17 @@ def make_server(store, token, port=8793):
         def dispatch(self):
             if not hmac.compare_digest(self.headers.get('Authorization',''), 'Bearer '+token):
                 return self.reply(401,{'error':'Unauthorized'})
+            if self.path=='/item-states' and self.command=='GET':
+                return self.reply(200,{'states':store.item_states()})
+            if self.path=='/item-state' and self.command=='POST':
+                try:
+                    size=int(self.headers.get('Content-Length','0'))
+                    if not 0<size<=512: return self.reply(413,{'error':'Invalid request size'})
+                    self.connection.settimeout(10)
+                    body=json.loads(self.rfile.read(size))
+                    return self.reply(200,store.set_item_state(body.get('video_id'),body.get('state')))
+                except (Invalid,ValueError,UnicodeError): return self.reply(400,{'error':'Provide a video_id and state (used/not_relevant/new).'})
+                except Exception: return self.reply(503,{'error':'Could not update item.'})
             if self.path != '/brands': return self.reply(404,{'error':'Not found'})
             if self.command=='GET': return self.reply(200,{'brands':store.list()})
             if self.command!='POST': return self.reply(405,{'error':'Only add and list are supported'})
@@ -63,7 +74,8 @@ def main():
     token=args.token_file.read_text().strip()
     if len(token)<32: raise ValueError('Service token must be at least 32 characters')
     from brand_worker import collect_and_publish
-    store=Store(args.db); worker=Worker(store,collect_and_publish)
+    import mini_config
+    store=Store(args.db); store.seed_used(mini_config.USED_SEED_VIDEO_IDS); worker=Worker(store,collect_and_publish)
     http=make_server(store,token,args.port);worker.start()
     try: http.serve_forever()
     finally: worker.close();http.server_close()

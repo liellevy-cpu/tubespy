@@ -239,7 +239,6 @@ def save_checkpoint(path, state):
 
 
 def run_pilot(advertisers, checkpoint, env, max_requests, max_pages, max_creatives, transport=None):
-    import fcntl
     import os
     from pathlib import Path
     if any(not env.get(k) for k in ("SEARCHAPI_API_KEY", "YOUTUBE_DATA_API_KEY")):
@@ -249,8 +248,13 @@ def run_pilot(advertisers, checkpoint, env, max_requests, max_pages, max_creativ
     fd = os.open(checkpoint.with_suffix(".lock"), os.O_CREAT | os.O_RDWR, 0o600)
     with os.fdopen(fd, "w") as lock:
         try:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
+            try:
+                import fcntl
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except ModuleNotFoundError:  # Windows: non-blocking exclusive lock via msvcrt
+                import msvcrt
+                msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+        except (BlockingIOError, OSError):
             raise PilotError("checkpoint_busy") from None
         return _run_pilot(advertisers, checkpoint, env, max_requests, max_pages, max_creatives, transport)
 

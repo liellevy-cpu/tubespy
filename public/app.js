@@ -4,10 +4,21 @@ const grid = document.querySelector("#video-grid");
 const template = document.querySelector("#video-card-template");
 const note = document.querySelector("#ranking-note");
 const advertiserSelect = document.querySelector("#advertiser-select");
-const scopeLabel = document.querySelector("#scope-label");
+const LS_KEY = "tubespy_item_states";
+
 let library = null;
-let activeAdvertiser = null;
-let activeRanking = "most_viewed";
+let allVideos = [];          // [{video, advertiserName}]
+let states = {};             // video_id -> "used" | "not_relevant"
+let activeTab = "new";
+let advertiserName = "all";
+let suggestions = [];
+
+function positionIndicator() {
+  const seg = document.querySelector(".segmented");
+  const active = seg.querySelector(".tab.is-active");
+  const ind = seg.querySelector(".seg-indicator");
+  if (active && ind) { ind.style.left = `${active.offsetLeft}px`; ind.style.width = `${active.offsetWidth}px`; }
+}
 
 function safeUrl(raw, allowedHost) {
   const parsed = new URL(raw);
@@ -16,30 +27,15 @@ function safeUrl(raw, allowedHost) {
   }
   return parsed.href;
 }
-
-function number(value) {
-  return new Intl.NumberFormat("en-US").format(value);
-}
-
-function date(value) {
-  return new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric" }).format(new Date(value));
-}
-
-function duration(seconds) {
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  return `${minutes}:${String(rest).padStart(2, "0")}`;
-}
+const number = (v) => new Intl.NumberFormat("en-US").format(v);
+const date = (v) => new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric" }).format(new Date(v));
+const duration = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
 function addSummary(value, label) {
   const item = document.createElement("div");
   item.className = "summary-item";
-  const strong = document.createElement("span");
-  strong.className = "summary-value";
-  strong.textContent = value;
-  const text = document.createElement("span");
-  text.className = "summary-label";
-  text.textContent = label;
+  const strong = document.createElement("span"); strong.className = "summary-value"; strong.textContent = value;
+  const text = document.createElement("span"); text.className = "summary-label"; text.textContent = label;
   item.append(strong, text);
   document.querySelector("#source-summary").append(item);
 }
@@ -47,44 +43,128 @@ function addSummary(value, label) {
 function renderSummary(data) {
   const container = document.querySelector("#source-summary");
   container.replaceChildren();
-  const source = data.source_summary;
+  const s = data.source_summary || {};
   if (data.schema_version === 2) {
-    addSummary(number(source.advertisers), "Advertisers");
-    addSummary(number(source.unique_creative_pages), "Unique creative pages");
-    addSummary(number(source.recovered_unique_youtube_videos), "Recovered videos");
-    addSummary(number(source.youtube_metadata_failures), "Metadata failures");
+    addSummary(number(s.advertisers || (data.advertisers || []).length), "Advertisers");
+    addSummary(number(allVideos.length), "Videos");          // true count = what "All" shows
+    addSummary(number(suggestions.length), "Weekly picks");
+  }
+}
+
+// Per-tab filter presets. "New" is the filtered view; "All" starts with every
+// filter off so it shows the whole library until the user narrows it.
+const FILTER_DEFAULTS = {
+  new: { views: "1000000", minLen: "2", maxLen: "5", after: "any" },
+  all: { views: "0", minLen: "0", maxLen: "999", after: "any" },
+};
+
+function applyFilterState(tab) {
+  const d = FILTER_DEFAULTS[tab] || FILTER_DEFAULTS.new;
+  document.querySelectorAll("#views-chips .chip").forEach((c) => c.classList.toggle("is-active", c.dataset.views === d.views));
+  const custom = document.querySelector("#f-min-views");
+  custom.hidden = true; custom.value = d.views;
+  document.querySelector("#f-min-len").value = d.minLen;
+  document.querySelector("#f-max-len").value = d.maxLen;
+  document.querySelectorAll("#after-chips .chip").forEach((c) => c.classList.toggle("is-active", c.dataset.after === d.after));
+  document.querySelector("#f-after").value = "";
+}
+
+function matchesSearch(video, adv) {
+  const q = (document.querySelector("#f-search").value || "").trim().toLowerCase();
+  if (!q) return true;
+  return [video.title, adv, video.product].some((t) => (t || "").toLowerCase().includes(q));
+}
+
+// ----- state (server, with localStorage fallback) -----
+function loadLocalStates() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch { return {}; }
+}
+function saveLocalStates() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(states)); } catch { /* ignore */ }
+}
+async function loadStates() {
+  states = loadLocalStates();
+  try {
+    const r = await fetch("/api/item-states", { cache: "no-store", signal: AbortSignal.timeout(10000) });
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.states) { states = data.states; saveLocalStates(); }
+    }
+  } catch { /* offline: keep localStorage copy */ }
+}
+async function setState(videoId, state) {
+  if (state === "new") delete states[videoId]; else states[videoId] = state;
+  saveLocalStates();
+  render();
+  try {
+    await fetch("/api/item-state", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ video_id: videoId, state }), signal: AbortSignal.timeout(10000),
+    });
+  } catch { /* stays in localStorage; will reconcile next load */ }
+}
+
+// ----- data -----
+function flatten(data) {
+  const advertisers = data.schema_version === 2 ? (data.advertisers || []) : [data];
+  const out = [];
+  for (const a of advertisers) {
+    for (const v of a.videos || []) out.push({ video: v, advertiserName: a.advertiser.name });
+  }
+  return out;
+}
+
+function passesFilters(video) {
+  const minLen = Number(document.querySelector("#f-min-len").value) * 60 || 0;
+  const maxLen = Number(document.querySelector("#f-max-len").value) * 60 || Infinity;
+  const minViews = Number(document.querySelector("#f-min-views").value) || 0;
+  const afterVal = document.querySelector("#f-after").value;
+  if (video.length_seconds < minLen || video.length_seconds > maxLen) return false;
+  if (video.views < minViews) return false;
+  if (afterVal && new Date(video.upload_date) < new Date(afterVal)) return false;
+  if (advertiserName !== "all") return true; // advertiser filter applied in selection below
+  return true;
+}
+
+// A video is shown only when its English is CONFIRMED. lang_pending means we kept it
+// (our language re-check fetch was rate-limited by YouTube) but have NOT confirmed
+// English yet — not confirmed = not shown, on EVERY tab, until a later check clears
+// the flag. English-only is still a hard rule; this is the "unconfirmed" half of it.
+function isConfirmedEnglish(video) {
+  return video.english === true && video.lang_pending !== true;
+}
+function pendingVideoIds() {
+  return new Set(allVideos.filter((e) => e.video.lang_pending === true).map((e) => e.video.video_id));
+}
+
+function visibleEntries() {
+  if (activeTab === "suggestions") {
+    const pending = pendingVideoIds();
+    return suggestions
+      .filter((s) => !states[s.video_id] && !pending.has(s.video_id))  // drop Used/Not-relevant + unconfirmed
+      .map((s) => ({ video: { ...s, lifetime_views_per_day: s.views_per_day }, advertiserName: s.channel, reason: s.reason }));
+  }
+  let entries = allVideos.filter((e) => advertiserName === "all" || e.advertiserName === advertiserName);
+  if (activeTab === "used") {
+    entries = entries.filter((e) => states[e.video.video_id] === "used" && isConfirmedEnglish(e.video));
+  } else if (activeTab === "all") {
+    // Every ENGLISH video in the library (any length, any state), narrowed only by
+    // the filters/search the user sets — all filters start off. English-only is a
+    // hard rule on every tab: non-English videos never appear, even here.
+    entries = entries.filter((e) => isConfirmedEnglish(e.video) && passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
   } else {
-    addSummary(`~${number(source.reported_ads_approx)}`, "Reported ads");
-    addSummary(number(source.unique_creative_pages), "Unique creative pages");
-    addSummary(number(source.recovered_unique_youtube_videos), "Recovered videos");
-    addSummary(number(source.youtube_metadata_failures), "YouTube metadata failures");
+    // New = English swipe-worthy only, not yet triaged, matching the filters.
+    entries = entries.filter((e) => isConfirmedEnglish(e.video) && !states[e.video.video_id]);
+    entries = entries.filter((e) => passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
   }
+  return entries.sort((a, b) =>
+    b.video.lifetime_views_per_day - a.video.lifetime_views_per_day ||
+    b.video.views - a.video.views ||
+    a.video.video_id.localeCompare(b.video.video_id));
 }
 
-function populateAdvertisers(data) {
-  const advertisers = data.schema_version === 2 ? library.advertisers : [data];
-  advertiserSelect.replaceChildren();
-  if (advertisers.length > 1) {
-    const option = document.createElement("option");
-    option.value = "all";
-    option.textContent = `All brands — ${number(advertisers.reduce((total, item) => total + item.videos.length, 0))} videos`;
-    advertiserSelect.append(option);
-  }
-  advertisers.forEach((item, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = `${item.advertiser.name} — ${number(item.videos.length)} videos`;
-    advertiserSelect.append(option);
-  });
-  activeAdvertiser = advertisers.length > 1 ? null : advertisers[0];
-  advertiserSelect.closest(".advertiser-picker").hidden = advertisers.length === 1;
-  advertiserSelect.addEventListener("change", () => {
-    activeAdvertiser = advertiserSelect.value === "all" ? null : advertisers[Number(advertiserSelect.value)];
-    renderActiveAdvertiser();
-  });
-}
-
-function renderCard(video, rank, advertiserName) {
+function renderCard(entry) {
+  const { video, advertiserName: adv } = entry;
   const card = template.content.firstElementChild.cloneNode(true);
   const iframe = card.querySelector("iframe");
   iframe.title = `${video.title} — YouTube video player`;
@@ -98,74 +178,138 @@ function renderCard(video, rank, advertiserName) {
     card.querySelector(".embed").classList.add("playing");
     launch.remove();
   }, { once: true });
-  card.querySelector(".rank").textContent = `Rank ${rank}`;
+  card.querySelector(".product").textContent = video.product || "";
+  card.querySelector(".reason").textContent = entry.reason || "";
   card.querySelector(".title").textContent = video.title;
-  card.querySelector(".advertiser").textContent = advertiserName;
+  card.querySelector(".advertiser").textContent = adv;
+  card.querySelector(".views-day").textContent = `${number(Math.round(video.lifetime_views_per_day))}/day`;
   card.querySelector(".views").textContent = number(video.views);
   card.querySelector(".upload-date").textContent = date(video.upload_date);
-  card.querySelector(".age").textContent = `${number(video.age_days)} days`;
-  card.querySelector(".views-day").textContent = `${number(video.lifetime_views_per_day)}/day`;
   card.querySelector(".duration").textContent = duration(video.length_seconds);
   card.querySelector(".youtube-link").href = safeUrl(video.youtube_url, "www.youtube.com");
   card.querySelector(".transparency-link").href = safeUrl(video.transparency_url, "adstransparency.google.com");
+  const leave = (state) => {
+    card.classList.add("leaving");                 // fade/slide the card out, then persist + re-render
+    setTimeout(() => setState(video.video_id, state), 330);
+  };
+  card.querySelector(".act-used").addEventListener("click", () => leave("used"));
+  card.querySelector(".act-hide").addEventListener("click", () => leave("not_relevant"));
+  card.querySelector(".act-restore").addEventListener("click", () => leave("new"));
   return card;
 }
 
-function renderRanking() {
-  activeRanking = "most_viewed";
+function render() {
+  grid.dataset.tab = activeTab;
+  const headings = { new: "New", all: "All", used: "Used", suggestions: "Suggestions" };
+  const notes = {
+    new: "English-only, 2–5 min, 1M+ views, grouped by product. Ranked by lifetime views/day.",
+    all: "Every video in the library. Search and filter are off by default — narrow it however you like.",
+    used: "Videos you marked Used. Ranked by lifetime views/day.",
+    suggestions: "AI-picked swipes for Coolina, refreshed twice a week — each with a one-line reason.",
+  };
+  document.querySelector("#rank-heading").textContent = headings[activeTab] || "New";
+  note.textContent = notes[activeTab] || notes.new;
+  document.querySelector("#filters").style.display = (activeTab === "new" || activeTab === "all") ? "" : "none";
+  // counts
+  const pending = pendingVideoIds();
+  const newCount = allVideos.filter((e) => {
+    const v = e.video;                                       // New = English swipe pool
+    return isConfirmedEnglish(v) && v.views >= 1_000_000 && v.length_seconds >= 120 &&
+      v.length_seconds <= 300 && !states[v.video_id];
+  }).length;
+  const allCount = allVideos.filter((e) => isConfirmedEnglish(e.video)).length;  // confirmed-English only
+  const usedCount = allVideos.filter((e) => states[e.video.video_id] === "used" && isConfirmedEnglish(e.video)).length;
+  const sugCount = suggestions.filter((s) => !states[s.video_id] && !pending.has(s.video_id)).length;
+  document.querySelector('[data-count="new"]').textContent = newCount ? `(${newCount})` : "";
+  document.querySelector('[data-count="all"]').textContent = allCount ? `(${allCount})` : "";
+  document.querySelector('[data-count="used"]').textContent = usedCount ? `(${usedCount})` : "";
+  document.querySelector('[data-count="suggestions"]').textContent = sugCount ? `(${sugCount})` : "";
+  positionIndicator();
+  const entries = visibleEntries();
   grid.replaceChildren();
-  let entries;
-  if (activeAdvertiser === null) {
-    note.textContent = "Current lifetime YouTube views across all selected brand winners, descending.";
-    entries = library.advertisers
-      .flatMap((advertiser) => advertiser.videos.map((video) => ({ video, advertiser })))
-      .sort((a, b) => b.video.views - a.video.views || a.video.video_id.localeCompare(b.video.video_id));
-  } else {
-    note.textContent = activeAdvertiser.rankings.definitions.most_viewed;
-    const videos = new Map(activeAdvertiser.videos.map((video) => [video.video_id, video]));
-    entries = activeAdvertiser.rankings.most_viewed.map((id) => ({ video: videos.get(id), advertiser: activeAdvertiser }));
-  }
   if (!entries.length) {
-    const empty = document.createElement("p");
-    empty.className = "empty";
-    empty.textContent = "No verified YouTube videos are available in the current snapshot.";
+    const empty = document.createElement("p"); empty.className = "empty";
+    empty.textContent = activeTab === "used" ? "No videos marked Used yet." : "No videos match the current filters.";
     grid.append(empty);
     return;
   }
-  entries.forEach((entry, index) => grid.append(renderCard(entry.video, index + 1, entry.advertiser.advertiser.name)));
+  entries.forEach((e) => grid.append(renderCard(e)));
 }
 
-function renderActiveAdvertiser() {
-  if (activeAdvertiser === null) {
-    document.querySelector("#rank-heading").textContent = "All brands";
-    document.querySelector("#snapshot-label").textContent = `Snapshot ${date(library.snapshot_at)} · ${number(library.advertisers.reduce((total, item) => total + item.videos.length, 0))} videos`;
-    scopeLabel.textContent = "All selected videos ranked by current YouTube views";
-  } else {
-    document.querySelector("#rank-heading").textContent = activeAdvertiser.advertiser.name;
-    document.querySelector("#snapshot-label").textContent = `Snapshot ${date(activeAdvertiser.snapshot_at)} · top ${number(activeAdvertiser.videos.length)} videos`;
-    scopeLabel.textContent = "Top five by current YouTube views";
+function populateAdvertisers() {
+  advertiserSelect.replaceChildren();
+  const names = [...new Set(allVideos.map((e) => e.advertiserName))].sort();
+  const optAll = document.createElement("option"); optAll.value = "all"; optAll.textContent = `All brands — ${number(allVideos.length)} videos`;
+  advertiserSelect.append(optAll);
+  for (const name of names) {
+    const o = document.createElement("option"); o.value = name;
+    o.textContent = `${name} — ${number(allVideos.filter((e) => e.advertiserName === name).length)} videos`;
+    advertiserSelect.append(o);
   }
-  renderRanking();
+  advertiserSelect.closest(".advertiser-picker").hidden = names.length <= 1 && false;
+  advertiserSelect.addEventListener("change", () => { advertiserName = advertiserSelect.value; render(); });
 }
-fetch("data/library.json", { cache: "no-store" })
-  .then((response) => {
-    if (!response.ok) throw new Error(`Data request failed: ${response.status}`);
-    return response.json();
-  })
-  .then((data) => {
-    library = data;
-    renderSummary(data);
-    populateAdvertisers(data);
-    renderActiveAdvertiser();
-  })
-  .catch((error) => {
-    note.textContent = "Library data is unavailable.";
-    const empty = document.createElement("p");
-    empty.className = "empty";
-    empty.textContent = error.message;
-    grid.replaceChildren(empty);
-  });
 
+document.querySelectorAll(".tab").forEach((btn) => btn.addEventListener("click", () => {
+  activeTab = btn.dataset.tab;
+  document.querySelectorAll(".tab").forEach((b) => { b.classList.toggle("is-active", b === btn); b.setAttribute("aria-selected", b === btn ? "true" : "false"); });
+  document.querySelector(".segmented").dataset.active = activeTab;  // slide the pill indicator
+  if (activeTab === "new" || activeTab === "all") applyFilterState(activeTab);  // New = filtered, All = everything
+  render();
+}));
+
+// Search box (title / channel / product) — live filter on New and All
+document.querySelector("#f-search").addEventListener("input", render);
+
+// Min-views preset chips (+ Custom) write to the hidden #f-min-views
+document.querySelectorAll("#views-chips .chip").forEach((chip) => chip.addEventListener("click", () => {
+  document.querySelectorAll("#views-chips .chip").forEach((c) => c.classList.toggle("is-active", c === chip));
+  const custom = document.querySelector("#f-min-views");
+  if (chip.dataset.views === "custom") { custom.hidden = false; custom.focus(); }
+  else { custom.hidden = true; custom.value = chip.dataset.views; }
+  render();
+}));
+document.querySelector("#f-min-views").addEventListener("input", render);
+
+// Length preset dropdowns
+document.querySelector("#f-min-len").addEventListener("change", render);
+document.querySelector("#f-max-len").addEventListener("change", render);
+
+// Uploaded-after preset chips (+ explicit date picker) write to #f-after
+document.querySelectorAll("#after-chips .chip").forEach((chip) => chip.addEventListener("click", () => {
+  document.querySelectorAll("#after-chips .chip").forEach((c) => c.classList.toggle("is-active", c === chip));
+  const dateInput = document.querySelector("#f-after");
+  if (chip.dataset.after === "any") { dateInput.value = ""; }
+  else { const d = new Date(); d.setDate(d.getDate() - Number(chip.dataset.after)); dateInput.value = d.toISOString().slice(0, 10); }
+  render();
+}));
+document.querySelector("#f-after").addEventListener("change", () => {
+  document.querySelectorAll("#after-chips .chip").forEach((c) => c.classList.remove("is-active"));
+  render();
+});
+
+async function init() {
+  try {
+    const response = await fetch("data/library.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Data request failed: ${response.status}`);
+    library = await response.json();
+    allVideos = flatten(library);
+    await loadStates();
+    try { const sr = await fetch("data/suggestions.json", { cache: "no-store" }); if (sr.ok) suggestions = (await sr.json()).suggestions || []; } catch { /* none generated yet */ }
+    renderSummary(library);
+    populateAdvertisers();
+    document.querySelector("#snapshot-label").textContent = library.snapshot_at ? `Snapshot ${date(library.snapshot_at)}` : "";
+    render();
+  } catch (error) {
+    note.textContent = "Library data is unavailable.";
+    const empty = document.createElement("p"); empty.className = "empty"; empty.textContent = error.message;
+    grid.replaceChildren(empty);
+  }
+}
+init();
+window.addEventListener("resize", positionIndicator);
+
+// ----- add-brand panel (unchanged endpoints: /api/brands, /api/add-brand) -----
 const brandForm = document.querySelector('#add-brand-form');
 const brandStatus = document.querySelector('#brand-status');
 const brandQueue = document.querySelector('#brand-queue');

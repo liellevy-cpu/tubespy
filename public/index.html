@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <title>YouTube Competitor Library — Coolina</title>
-  <link rel="stylesheet" href="styles.css?v=20260929-add-brand-1">
+  <link rel="stylesheet" href="styles.css?v=20261110-grow-2">
 </head>
 <body>
   <header class="hero">
     <p class="eyebrow">Public-source research</p>
     <h1>YouTube Competitor Library</h1>
-    <p class="lede">A ranked view of publicly available competitor videos—embedded from YouTube, never rehosted.</p>
+    <p class="lede">English-only competitor videos (2–5 min, 1M+ views), grouped by product and ranked by views/day—embedded from YouTube, never rehosted.</p>
     <div id="source-summary" class="summary" aria-label="Source summary"></div>
   </header>
   <main>
@@ -27,30 +30,93 @@
             <ol><li>Open <a href="https://adstransparency.google.com/" target="_blank" rel="noopener noreferrer">Google Ads Transparency Center</a> and search for the brand or its website.</li>
             <li>Choose the advertiser’s name to open its advertiser page — not an individual ad.</li>
             <li>Copy the link from your browser’s address bar. It should look like <code>https://adstransparency.google.com/advertiser/AR12345678901234567890</code>. Search-result links and creative links won’t work.</li></ol>
-            <p>We automatically select United States, video format and YouTube, with no date restriction. You don’t need to choose these filters.</p>
+            <p>We automatically select United States, video format and YouTube, with no date restriction.</p>
           </details>
           <form id="add-brand-form">
             <label for="brand-name">Brand name</label><input id="brand-name" name="name" maxlength="80" required autocomplete="organization">
             <label for="brand-url">Google advertiser page link</label><input id="brand-url" name="url" type="url" maxlength="2048" placeholder="https://adstransparency.google.com/advertiser/AR…" required>
             <button type="submit">Add brand &amp; collect videos</button>
           </form>
-          <p>Submitting starts the first collection automatically. If another collection is running, yours waits in the queue. Every added brand is included in weekly refreshes. Collection can take up to 30 minutes per brand; Google or YouTube may block a run.</p>
+          <p>Submitting starts the first collection automatically. If another collection is running, yours waits in the queue. Every added brand is included in weekly refreshes.</p>
           <p id="brand-status" role="status" aria-live="polite"></p>
           <ul id="brand-queue" aria-label="Collection status"></ul>
         </details>
       </div>
+
+      <div class="segmented" role="tablist" data-active="new">
+        <span class="seg-indicator" aria-hidden="true"></span>
+        <button class="tab is-active" data-tab="new" role="tab" aria-selected="true">New <span class="count" data-count="new"></span></button>
+        <button class="tab" data-tab="all" role="tab" aria-selected="false">All <span class="count" data-count="all"></span></button>
+        <button class="tab" data-tab="used" role="tab" aria-selected="false">Used <span class="count" data-count="used"></span></button>
+        <button class="tab" data-tab="suggestions" role="tab" aria-selected="false">Suggestions <span class="count" data-count="suggestions"></span></button>
+      </div>
+
+      <div id="filters" class="filters" aria-label="Filters">
+        <div class="filter-group filter-search">
+          <span class="filter-label">Search</span>
+          <input type="search" id="f-search" class="search-input" placeholder="Title, channel, or product…" aria-label="Search title, channel, or product" autocomplete="off">
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Min views</span>
+          <div class="chips" id="views-chips">
+            <button type="button" class="chip" data-views="0">Any</button>
+            <button type="button" class="chip" data-views="10000">10K</button>
+            <button type="button" class="chip" data-views="100000">100K</button>
+            <button type="button" class="chip is-active" data-views="1000000">1M</button>
+            <button type="button" class="chip" data-views="10000000">10M</button>
+            <button type="button" class="chip" data-views="100000000">100M</button>
+            <button type="button" class="chip" data-views="custom">Custom</button>
+          </div>
+          <input type="number" id="f-min-views" class="custom-input" min="0" step="100000" value="1000000" hidden aria-label="Custom minimum views">
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Length</span>
+          <div class="selects">
+            <select id="f-min-len" class="picker" aria-label="Minimum length">
+              <option value="0">0:00</option><option value="1">1:00</option><option value="1.5">1:30</option>
+              <option value="2" selected>2:00</option><option value="2.5">2:30</option>
+              <option value="3">3:00</option><option value="3.5">3:30</option>
+              <option value="4">4:00</option><option value="4.5">4:30</option>
+              <option value="5">5:00</option><option value="10">10:00</option>
+            </select>
+            <span class="sep">to</span>
+            <select id="f-max-len" class="picker" aria-label="Maximum length">
+              <option value="1">1:00</option><option value="1.5">1:30</option>
+              <option value="2">2:00</option><option value="2.5">2:30</option>
+              <option value="3">3:00</option><option value="3.5">3:30</option>
+              <option value="4">4:00</option><option value="4.5">4:30</option>
+              <option value="5" selected>5:00</option><option value="10">10:00</option><option value="999">No limit</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Uploaded after</span>
+          <div class="chips" id="after-chips">
+            <button type="button" class="chip is-active" data-after="any">Any</button>
+            <button type="button" class="chip" data-after="30">Last 30 days</button>
+            <button type="button" class="chip" data-after="90">90 days</button>
+            <button type="button" class="chip" data-after="180">6 months</button>
+            <button type="button" class="chip" data-after="365">1 year</button>
+          </div>
+          <input type="date" id="f-after" class="date-input" aria-label="Uploaded after date">
+        </div>
+      </div>
+
       <div class="rank-heading-row">
         <div>
           <p class="eyebrow">Signal, not attribution</p>
-          <h2 id="rank-heading">Ranked creative views</h2>
+          <h2 id="rank-heading">New</h2>
         </div>
         <p id="snapshot-label" class="snapshot"></p>
       </div>
-      <p id="scope-label" class="eyebrow">Top five by current YouTube views</p>
-      <p id="ranking-note" class="ranking-note" role="status"></p>
+      <p id="ranking-note" class="ranking-note" role="status">Ranked by lifetime views/day.</p>
       <div id="video-grid" class="video-grid" aria-live="polite"></div>
     </section>
   </main>
+
   <template id="video-card-template">
     <article class="video-card">
       <div class="embed">
@@ -61,21 +127,33 @@
         <iframe title="YouTube video player" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
       <div class="card-body">
-        <p class="rank"></p>
+        <p class="product"></p>
+        <p class="reason"></p>
         <h3 class="title"></h3>
         <p class="advertiser"></p>
         <dl class="metrics">
+          <div><dt>Views/day</dt><dd class="views-day"></dd></div>
           <div><dt>Views</dt><dd class="views"></dd></div>
           <div><dt>Uploaded</dt><dd class="upload-date"></dd></div>
-          <div><dt>Age</dt><dd class="age"></dd></div>
-          <div><dt>Lifetime pace</dt><dd class="views-day"></dd></div>
           <div><dt>Duration</dt><dd class="duration"></dd></div>
         </dl>
         <div class="links"><a class="youtube-link" target="_blank" rel="noopener noreferrer">Watch on YouTube</a><a class="transparency-link" target="_blank" rel="noopener noreferrer">Transparency source</a></div>
+        <div class="actions">
+          <button type="button" class="act act-used" aria-label="Mark as used">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>Used</span>
+          </button>
+          <button type="button" class="act act-hide" aria-label="Mark as not relevant">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Not relevant</span>
+          </button>
+          <button type="button" class="act act-restore" aria-label="Move back to New">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg><span>Move to New</span>
+          </button>
+        </div>
       </div>
     </article>
   </template>
+
   <footer><p>Public-source research. Rankings describe the captured snapshot; they do not prove spend, ROAS, or current growth.</p></footer>
-  <script src="app.js?v=20260929-add-brand-1" defer></script>
+  <script src="app.js?v=20261110-grow-2" defer></script>
 </body>
 </html>
