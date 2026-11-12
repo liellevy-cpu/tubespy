@@ -93,6 +93,22 @@ def test_run_weekly_discovery_end_to_end():
     assert sunday["ran"] is False
 
 
+def test_junk_seed_domains_are_never_snowballed():
+    # A junk redirect domain shared across two unrelated advertisers must not seed.
+    store = _Store()
+    library = {"advertisers": [
+        {"advertiser": {"google_advertiser_id": "AR001"},
+         "videos": [{"video_id": "a", "landing_domain": "shared-junk.com"},
+                    {"video_id": "b", "landing_domain": "realbrand.com"}]},
+        {"advertiser": {"google_advertiser_id": "AR002"},
+         "videos": [{"video_id": "c", "landing_domain": "shared-junk.com"}]},
+    ]}
+    lookup = {"shared-junk.com": ["AR_junkfind"], "realbrand.com": ["AR_good"]}
+    result = run_weekly_discovery(store, library, lookup.get, when=datetime(2026, 11, 9))
+    assert result["queued"] == ["AR_good"]            # found via the real domain only
+    assert "AR_junkfind" not in result["queued"]       # junk domain was not a seed
+
+
 def test_snowball_sources_keeps_first_seen_domain():
     lookups = {"a.com": ["AR111", "AR222"], "b.com": ["AR222", "AR333"]}
     out = snowball_sources(["a.com", "b.com"], known_advertiser_ids=set(), lookup_fn=lookups.get)

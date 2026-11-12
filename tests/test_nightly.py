@@ -79,23 +79,40 @@ def _write_liel_raw(adv_dir):
          "creative_urls": [CREATIVE], "error": None}) + "\n", encoding="utf-8")
 
 
+EN = lambda vid: {"english": True, "lang": "en"}          # offline English stub
+
+
 def test_read_shared_advertisers_builds_from_raw_read_only(tmp_path):
     shared = tmp_path / "liel_raw"
     _write_liel_raw(shared / "liel-brand")
     before = {p: p.stat().st_mtime_ns for p in shared.rglob("*")}
 
-    advs = N.read_shared_advertisers(shared, SNAP)
+    advs = N.read_shared_advertisers(shared, SNAP, lang_fn=EN)
     assert len(advs) == 1
     adv = advs[0]
     assert adv["advertiser"]["google_advertiser_id"] == AID
     assert adv["schema_version"] == 1 and len(adv["videos"]) == 1
     assert adv["videos"][0]["landing_domain"] == "realsite.com"      # built from the raw ad list
+    assert adv["videos"][0]["english"] is True and adv["videos"][0]["language"] == "en"
 
     # nothing created or modified under the shared dir (READ-ONLY)
     after = {p: p.stat().st_mtime_ns for p in shared.rglob("*")}
     assert before == after
     assert N.read_shared_advertisers(None) == []
     assert N.read_shared_advertisers(tmp_path / "missing") == []
+
+
+def test_build_from_raw_drops_non_english(tmp_path):
+    shared = tmp_path / "liel_raw"
+    _write_liel_raw(shared / "liel-brand")
+    # detector says the only video is Spanish -> advertiser has nothing English -> None
+    adv = N.build_advertiser_from_raw(shared / "liel-brand", SNAP,
+                                      lang_fn=lambda vid: {"english": False, "lang": "es"})
+    assert adv is None
+    # unconfirmed (None) is also excluded
+    adv2 = N.build_advertiser_from_raw(shared / "liel-brand", SNAP,
+                                       lang_fn=lambda vid: {"english": None, "lang": None})
+    assert adv2 is None
 
 
 def test_merge_advertiser_inserts_then_replaces_by_id():

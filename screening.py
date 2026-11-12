@@ -28,6 +28,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+import junk_domains
 import own_brands
 
 ROOT = Path(__file__).resolve().parent
@@ -177,7 +178,8 @@ def _ordered(candidates: list[dict]) -> list[dict]:
 def screen_candidates(candidates: list[dict], probe_fn, classify_fn,
                       min_ads: int = MIN_US_VIDEO_ADS,
                       max_idle_days: int = MAX_IDLE_DAYS,
-                      min_english: int = MIN_ENGLISH_SAMPLES) -> dict:
+                      min_english: int = MIN_ENGLISH_SAMPLES,
+                      junk: set[str] | None = None) -> dict:
     """Screen candidate advertisers BEFORE any scrape. Pure: probe_fn(advertiser_id)
     -> {us_video_ads, days_since_active, samples:[{video_id,title,thumbnail_url}]} and
     classify_fn(name, samples) -> {english_count, languages, product_type, fit, reason}
@@ -186,10 +188,13 @@ def screen_candidates(candidates: list[dict], probe_fn, classify_fn,
     candidate dict: {advertiser_id, name, priority: bool, source_domain}.
 
     SKIP reasons (English-only, per the owner's rule -- product type is NEVER a skip):
-    own-brand, giant-brand, under-min-ads, inactive, too-few-english. Coolina fit is
+    junk-domain, own-brand, giant-brand, under-min-ads, inactive, too-few-english.
+    `junk` is the set of junk landing domains (junk_domains.find_junk_domains); a
+    candidate reached through one is a free reject before any probe. Coolina fit is
     advisory: it only orders the queue (good fit first), it never excludes. Cheapest
     checks run first, so we never probe or call Haiku for a free reject. The QUEUE order
     is Used/Suggested source first, then good fit first."""
+    junk = junk or set()
     passed: list[dict] = []
     skipped: list[dict] = []
 
@@ -203,6 +208,8 @@ def screen_candidates(candidates: list[dict], probe_fn, classify_fn,
     for cand in _ordered(candidates):
         name = cand.get("name") or cand.get("advertiser_id") or ""
         # (4) free rejects first -- never spend a probe or a Haiku call on these
+        if junk_domains.is_junk(cand.get("source_domain"), junk):
+            skip(cand, "junk-domain"); continue
         if own_brands.is_own_brand_name(name):
             skip(cand, "own-brand"); continue
         if is_giant_brand(name):

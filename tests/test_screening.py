@@ -115,6 +115,21 @@ def test_screen_skips_only_english_and_cheap_gates():
     assert out["considered"] == 7
 
 
+def test_junk_source_domain_is_a_free_reject():
+    candidates = [
+        {"advertiser_id": "ARjunk", "name": "Shell Co", "source_domain": "shared-junk.com"},
+        {"advertiser_id": "ARrandom", "name": "Shell Two", "source_domain": "qatteeey.com"},  # random label
+        {"advertiser_id": "ARgood", "name": "Good Gear", "source_domain": "realbrand.com"},
+    ]
+    probe = _probe(ARgood=OK)
+    out = S.screen_candidates(candidates, probe, _classify({"Good Gear": _v(9, fit=True)}),
+                              junk={"shared-junk.com"})
+    assert out["queued_order"] == ["ARgood"]
+    reasons = {r["advertiser_id"]: r["reason"] for r in out["skipped"]}
+    assert reasons == {"ARjunk": "junk-domain", "ARrandom": "junk-domain"}
+    assert "ARjunk" not in probe.calls and "ARrandom" not in probe.calls   # free reject, no probe
+
+
 def test_queue_order_is_source_priority_then_fit():
     candidates = [
         {"advertiser_id": "ARa", "name": "A", "priority": False},   # good fit, not sourced

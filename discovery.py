@@ -172,10 +172,13 @@ def run_weekly_discovery(store, library: dict, lookup_fn, when: datetime, name_f
     (every discovered advertiser is queued), preserving the original behaviour."""
     if not is_discovery_day(when):
         return {"ran": False, "reason": "Sunday is skipped", "queued": []}
+    import junk_domains   # lazy: junk_domains imports this module's helpers
     seeds: set[str] = set()
     for advertiser in library.get("advertisers", []):
         seeds.update(landing_domains(advertiser))
-    seeds = {d for d in seeds if not own_brands.is_own_domain(d)}  # don't snowball our own store
+    junk = junk_domains.find_junk_domains(library.get("advertisers", []))
+    # don't snowball our own store, and never seed from a junk redirect domain
+    seeds = {d for d in seeds if not own_brands.is_own_domain(d) and not junk_domains.is_junk(d, junk)}
     known = {a.get("advertiser", {}).get("google_advertiser_id") for a in library.get("advertisers", [])}
     known.discard(None)
     discovered = snowball_sources(sorted(seeds), known, lookup_fn)

@@ -91,6 +91,10 @@ def assert_safe_publish_target(slug: str | None, path: Path | None = None) -> No
 _CREATIVE_RE = re.compile(r"/advertiser/(AR\d+)/creative/CR\d+")
 
 
+def _lang_base(code) -> str | None:
+    return str(code).split(".")[0].split("-")[0].lower() if code else None
+
+
 def _read_jsonl(path: Path) -> list[dict]:
     rows = []
     try:
@@ -106,11 +110,16 @@ def _read_jsonl(path: Path) -> list[dict]:
     return rows
 
 
-def build_advertiser_from_raw(adv_raw_dir: Path, snapshot: datetime) -> dict | None:
+def build_advertiser_from_raw(adv_raw_dir: Path, snapshot: datetime, lang_fn=None) -> dict | None:
     """Build ONE advertiser's videos from Liel's raw scrape files (ad list + video
     stats), READ-ONLY -- Henry's option (a). Reuses library's own metric/ranking logic;
     leniently skips videos without clean stats instead of failing. Never writes under
-    adv_raw_dir. Returns a schema-1 advertiser dataset, or None if there's nothing usable."""
+    adv_raw_dir. Returns a schema-1 advertiser dataset, or None if there's nothing usable.
+
+    English-only: every surviving video is run through the language detector and kept
+    only if its spoken language is confirmed English; non-English videos never enter the
+    library. `lang_fn(video_id) -> {"english": bool|None, "lang": str}`; defaults to
+    language.detect_language, tests inject a stub to stay offline."""
     adv_raw_dir = Path(adv_raw_dir)
     results = _read_jsonl(adv_raw_dir / "creative_video_results.jsonl")
     stats_rows = _read_jsonl(adv_raw_dir / "youtube_stats.jsonl")
@@ -143,12 +152,20 @@ def build_advertiser_from_raw(adv_raw_dir: Path, snapshot: datetime) -> dict | N
     except (OSError, ValueError):
         pass
 
+    # Collect EVERY distinct landing domain each video was seen with. A legit ad has
+    # one landing page; a video pointing at two or more distinct domains is the junk
+    # redirect-network signature (junk_domains signal 3), so we keep them all.
     landing_by_video: dict[str, str] = {}
+    landing_set_by_video: dict[str, list[str]] = {}
     for row in results:
         domain = row.get("landing_domain")
+        if not domain:
+            continue
         for vid in row.get("video_ids") or []:
-            if domain and vid not in landing_by_video:
-                landing_by_video[vid] = domain
+            seen = landing_set_by_video.setdefault(vid, [])
+            if domain not in seen:
+                seen.append(domain)
+            landing_by_video.setdefault(vid, domain)      # first-seen stays the primary
 
     clean = [r for r in stats_rows if isinstance(r, dict) and r.get("error") is None and r.get("video_id") not in unavailable]
     try:
@@ -160,6 +177,23 @@ def build_advertiser_from_raw(adv_raw_dir: Path, snapshot: datetime) -> dict | N
         return None
     for v in videos:
         v["landing_domain"] = landing_by_video.get(v["video_id"])
+        domains = landing_set_by_video.get(v["video_id"]) or []
+        if len(domains) > 1:                               # record the multi-domain case
+            v["landing_domains"] = sorted(domains)
+
+    # English-only gate: confirm spoken language per video; drop anything not English.
+    if lang_fn is None:
+        from language import detect_language as lang_fn
+    english = []
+    for v in videos:
+        res = lang_fn(v["video_id"]) or {}
+        if res.get("english") is True:
+            v["english"] = True
+            v["language"] = _lang_base(res.get("lang")) or "en"
+            english.append(v)
+    if not english:
+        return None
+    videos = english
     videos.sort(key=lambda r: (-r["views"], r["video_id"]))
     return {
         "schema_version": 1, "snapshot_at": snapshot.isoformat(),
@@ -175,7 +209,7 @@ def build_advertiser_from_raw(adv_raw_dir: Path, snapshot: datetime) -> dict | N
     }
 
 
-def read_shared_advertisers(shared_raw_dir, snapshot: datetime | None = None) -> list[dict]:
+def read_shared_advertisers(shared_raw_dir, snapshot: datetime | None = None, lang_fn=None) -> list[dict]:
     """Build Liel's advertisers from his raw scrape files, READ-ONLY, so the All tab can
     show them without us re-scraping. Each advertiser is a directory holding
     youtube_stats.jsonl / creative_video_results.jsonl. We only READ under
@@ -189,7 +223,7 @@ def read_shared_advertisers(shared_raw_dir, snapshot: datetime | None = None) ->
     dirs = {p.parent for p in root.rglob("youtube_stats.jsonl")} | {p.parent for p in root.rglob("creative_video_results.jsonl")}
     out, seen = [], set()
     for d in sorted(dirs):
-        adv = build_advertiser_from_raw(d, snapshot)
+        adv = build_advertiser_from_raw(d, snapshot, lang_fn=lang_fn)
         if adv:
             aid = adv["advertiser"]["google_advertiser_id"]
             if aid not in seen:

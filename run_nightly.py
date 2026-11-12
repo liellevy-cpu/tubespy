@@ -217,10 +217,11 @@ def _priority_ids(store) -> set:
 async def _discover_and_screen(context, store, lib_path, prio, now_local) -> dict:
     """Snowball our landing-domain seeds -> screen candidates -> queue the survivors
     for a FUTURE night (we do not scrape them now). All Google requests self-lock."""
-    import discovery, screening, own_brands
+    import discovery, screening, own_brands, junk_domains
     library = json.loads(lib_path.read_text(encoding="utf-8"))
+    junk = junk_domains.find_junk_domains(library.get("advertisers", []))
     seeds = sorted({d for a in library.get("advertisers", []) for d in discovery.landing_domains(a)
-                    if not own_brands.is_own_domain(d)})
+                    if not own_brands.is_own_domain(d) and not junk_domains.is_junk(d, junk)})
     if not seeds:
         return {"seeds": 0, "queued": []}
     page = await context.new_page()
@@ -253,7 +254,8 @@ async def _discover_and_screen(context, store, lib_path, prio, now_local) -> dic
                 raise nightly.NightBlocked(f"Google block during discovery probe: {exc}")
         finally:
             await pg.close()
-    screened = screening.screen_candidates(candidates, lambda a: probes.get(a, {}), screening.classify_with_haiku)
+    screened = screening.screen_candidates(candidates, lambda a: probes.get(a, {}),
+                                           screening.classify_with_haiku, junk=junk)
     queued = discovery.queue_new_advertisers(store, [p["advertiser_id"] for p in screened["passed"]],
                                              name_fn=lambda a: next((p.get("name") for p in screened["passed"] if p["advertiser_id"] == a), a))
     return {"seeds": len(seeds), "found": found_total, "checked": len(candidates),

@@ -136,9 +136,10 @@ function visibleEntries() {
   if (activeTab === "used") {
     entries = entries.filter((e) => states[e.video.video_id] === "used");
   } else if (activeTab === "all") {
-    // Every video in the library (any language/length, any state), narrowed only by
-    // the filters/search the user sets — all filters start off.
-    entries = entries.filter((e) => passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
+    // Every ENGLISH video in the library (any length, any state), narrowed only by
+    // the filters/search the user sets — all filters start off. English-only is a
+    // hard rule on every tab: non-English videos never appear, even here.
+    entries = entries.filter((e) => e.video.english === true && passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
   } else {
     // New = English swipe-worthy only, not yet triaged, matching the filters.
     entries = entries.filter((e) => e.video.english === true && !states[e.video.video_id]);
