@@ -126,23 +126,35 @@ function passesFilters(video) {
   return true;
 }
 
+// A video is shown only when its English is CONFIRMED. lang_pending means we kept it
+// (our language re-check fetch was rate-limited by YouTube) but have NOT confirmed
+// English yet — not confirmed = not shown, on EVERY tab, until a later check clears
+// the flag. English-only is still a hard rule; this is the "unconfirmed" half of it.
+function isConfirmedEnglish(video) {
+  return video.english === true && video.lang_pending !== true;
+}
+function pendingVideoIds() {
+  return new Set(allVideos.filter((e) => e.video.lang_pending === true).map((e) => e.video.video_id));
+}
+
 function visibleEntries() {
   if (activeTab === "suggestions") {
+    const pending = pendingVideoIds();
     return suggestions
-      .filter((s) => !states[s.video_id])  // drop any that became Used / Not relevant
+      .filter((s) => !states[s.video_id] && !pending.has(s.video_id))  // drop Used/Not-relevant + unconfirmed
       .map((s) => ({ video: { ...s, lifetime_views_per_day: s.views_per_day }, advertiserName: s.channel, reason: s.reason }));
   }
   let entries = allVideos.filter((e) => advertiserName === "all" || e.advertiserName === advertiserName);
   if (activeTab === "used") {
-    entries = entries.filter((e) => states[e.video.video_id] === "used");
+    entries = entries.filter((e) => states[e.video.video_id] === "used" && isConfirmedEnglish(e.video));
   } else if (activeTab === "all") {
     // Every ENGLISH video in the library (any length, any state), narrowed only by
     // the filters/search the user sets — all filters start off. English-only is a
     // hard rule on every tab: non-English videos never appear, even here.
-    entries = entries.filter((e) => e.video.english === true && passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
+    entries = entries.filter((e) => isConfirmedEnglish(e.video) && passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
   } else {
     // New = English swipe-worthy only, not yet triaged, matching the filters.
-    entries = entries.filter((e) => e.video.english === true && !states[e.video.video_id]);
+    entries = entries.filter((e) => isConfirmedEnglish(e.video) && !states[e.video.video_id]);
     entries = entries.filter((e) => passesFilters(e.video) && matchesSearch(e.video, e.advertiserName));
   }
   return entries.sort((a, b) =>
@@ -199,15 +211,17 @@ function render() {
   note.textContent = notes[activeTab] || notes.new;
   document.querySelector("#filters").style.display = (activeTab === "new" || activeTab === "all") ? "" : "none";
   // counts
+  const pending = pendingVideoIds();
   const newCount = allVideos.filter((e) => {
     const v = e.video;                                       // New = English swipe pool
-    return v.english === true && v.views >= 1_000_000 && v.length_seconds >= 120 &&
+    return isConfirmedEnglish(v) && v.views >= 1_000_000 && v.length_seconds >= 120 &&
       v.length_seconds <= 300 && !states[v.video_id];
   }).length;
-  const usedCount = allVideos.filter((e) => states[e.video.video_id] === "used").length;
-  const sugCount = suggestions.filter((s) => !states[s.video_id]).length;
+  const allCount = allVideos.filter((e) => isConfirmedEnglish(e.video)).length;  // confirmed-English only
+  const usedCount = allVideos.filter((e) => states[e.video.video_id] === "used" && isConfirmedEnglish(e.video)).length;
+  const sugCount = suggestions.filter((s) => !states[s.video_id] && !pending.has(s.video_id)).length;
   document.querySelector('[data-count="new"]').textContent = newCount ? `(${newCount})` : "";
-  document.querySelector('[data-count="all"]').textContent = allVideos.length ? `(${allVideos.length})` : "";
+  document.querySelector('[data-count="all"]').textContent = allCount ? `(${allCount})` : "";
   document.querySelector('[data-count="used"]').textContent = usedCount ? `(${usedCount})` : "";
   document.querySelector('[data-count="suggestions"]').textContent = sugCount ? `(${sugCount})` : "";
   positionIndicator();
